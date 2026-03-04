@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>مواهب داري – شباب سطيف الذهبي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #0a5c3e;
+      --primary-light: #1b7a4e;
+      --accent: #f4b41b;
+      --accent-glow: #ffd966;
+      --bg-dark: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.85);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --success: #10b981;
+      --radius: 24px;
+      --shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      --glow: 0 0 20px rgba(244, 180, 27, 0.3);
+    }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: linear-gradient(145deg, #0b1120 0%, #1a2639 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* شاشة البداية */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.6s ease;
+    }
+
+    .splash-content {
+      text-align: center;
+      animation: pulse 2s infinite;
+    }
+
+    .splash-content i {
+      font-size: 80px;
+      color: var(--accent);
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 20px #f4b41b);
+    }
+
+    .splash-content h1 {
+      font-size: 40px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #f4b41b, #ffd966);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* شاشة اختيار الدور */
+    #role-screen {
+      position: fixed;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    .role-overlay {
+      background: rgba(10, 25, 47, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 60px 40px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(244, 180, 27, 0.2);
+    }
+
+    .role-btn {
+      width: 100%;
+      padding: 22px;
+      margin: 15px 0;
+      border: none;
+      border-radius: 18px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .role-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .role-btn.volunteer {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+    }
+
+    .role-btn.admin {
+      background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+      color: white;
+    }
+
+    /* شاشة تسجيل الدخول وإنشاء الحساب */
+    #auth-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    #auth-screen.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .auth-container {
+      background: rgba(10, 25, 47, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: var(--shadow);
+      border: 2px solid var(--accent);
+      animation: slideUp 0.5s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .auth-header i {
+      font-size: 60px;
+      color: var(--accent);
+      margin-bottom: 15px;
+    }
+
+    .auth-header h2 {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .auth-header p {
+      color: var(--text-muted);
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      background: rgba(255,255,255,0.05);
+      padding: 5px;
+      border-radius: 50px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .auth-tab.active {
+      background: var(--accent);
+      color: #0f172a;
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group i {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 18px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 15px 50px 15px 15px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(244,180,27,0.2);
+      border-radius: 16px;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .input-group input:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: var(--glow);
+    }
+
+    .input-group input::placeholder {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .toggle-password {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .remember-me input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    .forgot-password {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent), #ffd966);
+      border: none;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #0f172a;
+      margin-top: 10px;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
+
+    .social-login {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .social-login p {
+      color: var(--text-muted);
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .social-login p::before,
+    .social-login p::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 30%;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .social-login p::before {
+      right: 0;
+    }
+
+    .social-login p::after {
+      left: 0;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .social-icon {
+      width: 45px;
+      height: 45px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .social-icon:hover {
+      background: var(--accent);
+      color: #0f172a;
+      transform: translateY(-3px);
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      z-index: 9999;
+    }
+
+    .back-btn:hover {
+      background: var(--accent);
+      color: #0f172a;
+    }
+
+    /* التطبيق الرئيسي */
+    #app {
+      display: none;
+      max-width: 450px;
+      margin: 0 auto;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      min-height: 100vh;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    /* الهيدر */
+    .header {
+      position: sticky;
+      top: 0;
+      background: rgba(10, 25, 47, 0.95);
+      backdrop-filter: blur(12px);
+      padding: 20px;
+      z-index: 100;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .logo span {
+      background: linear-gradient(90deg, var(--accent), #ffd966);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-icons i {
+      font-size: 22px;
+      margin-left: 18px;
+      color: var(--accent);
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .header-icons i:hover {
+      transform: scale(1.1);
+    }
+
+    .location-bar {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px 18px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      font-size: 0.95rem;
+      border: 1px solid rgba(244, 180, 27, 0.3);
+      cursor: pointer;
+    }
+
+    .location-bar i:first-child {
+      color: var(--accent);
+      margin-left: 10px;
+    }
+
+    /* التبويب السفلي */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 450px;
+      margin: 0 auto;
+      background: rgba(10, 25, 47, 0.98);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      z-index: 1000;
+      border-top: 1px solid var(--accent);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 8px 15px;
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+
+    .nav-item i {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      background: rgba(244, 180, 27, 0.1);
+    }
+
+    /* المحتوى الرئيسي */
+    .main-content {
+      padding: 20px 20px 100px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius);
+      padding: 25px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(244, 180, 27, 0.1);
+      box-shadow: var(--shadow);
+    }
+
+    /* الصفحة الرئيسية */
+    .event-today {
+      background: linear-gradient(145deg, #059669, #10b981);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .event-date {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 5px 15px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+    }
+
+    .event-item {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 15px;
+      margin-bottom: 10px;
+    }
+
+    .event-item h4 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .event-location {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin: 8px 0;
+    }
+
+    .event-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 30px;
+      font-family: 'Tajawal', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0f172a;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
+
+    /* الملف الشخصي */
+    .profile-header {
+      text-align: center;
+    }
+
+    .profile-image-container {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 20px;
+    }
+
+    .profile-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid var(--accent);
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .edit-photo-icon {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background: var(--accent);
+      color: #0f172a;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid white;
+    }
+
+    .info-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .info-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(244, 180, 27, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 15px;
+      color: var(--accent);
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .info-value {
+      font-weight: 600;
+    }
+
+    .talent-tag {
+      display: inline-block;
+      background: rgba(244, 180, 27, 0.2);
+      color: var(--accent);
+      padding: 5px 15px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      margin-left: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* نموذج التعديل */
+    .edit-form {
+      background: rgba(10, 25, 47, 0.98);
+      border-radius: var(--radius);
+      padding: 25px;
+      margin-top: 20px;
+    }
+
+    .edit-field {
+      margin-bottom: 20px;
+    }
+
+    .edit-field label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .edit-field input,
+    .edit-field textarea,
+    .edit-field select {
+      width: 100%;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(244, 180, 27, 0.3);
+      border-radius: 16px;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent), #ffd966);
+      border: none;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    /* نظام النقاط */
+    .points-card {
+      background: linear-gradient(145deg, #7c3aed, #8b5cf6);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .points-value {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .progress-bar {
+      background: rgba(255, 255, 255, 0.2);
+      height: 10px;
+      border-radius: 10px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: var(--accent);
+      height: 100%;
+      width: 65%;
+      border-radius: 10px;
+    }
+
+    /* الإشعارات */
+    .notification-item {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 12px;
+      border-right: 4px solid var(--accent);
+    }
+
+    /* لوحة التنافس */
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      margin-bottom: 10px;
+    }
+
+    .rank {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #0f172a;
+      margin-left: 15px;
+    }
+
+    .rank.gold { background: #fbbf24; }
+    .rank.silver { background: #94a3b8; }
+    .rank.bronze { background: #b45309; }
+
+    /* معرض الصور */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .gallery-item {
+      aspect-ratio: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* تأثيرات إضافية */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 30px;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--success);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 50px;
+      z-index: 10001;
+      animation: slideUp 0.3s ease;
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+
+    @keyframes slideUp {
+      from { transform: translate(-50%, 100px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- شاشة البداية -->
+<div id="splash-screen">
+  <div class="splash-content">
+    <i class="fas fa-hands-helping"></i>
+    <h1>مواهب داري</h1>
+    <p style="color: white; margin-top: 20px;">منصة شباب سطيف الذهبي</p>
+  </div>
+</div>
+
+<!-- شاشة اختيار الدور -->
+<div id="role-screen">
+  <div class="role-overlay">
+    <h1 style="font-size: 32px; margin-bottom: 10px;">🌙 مرحباً بك</h1>
+    <p style="margin-bottom: 40px; color: var(--text-muted);">اختر نوع المستخدم</p>
+    
+    <button class="role-btn volunteer" onclick="selectRole('volunteer')">
+      <i class="fas fa-user-graduate"></i> متطوع - شاب موهوب
+    </button>
+    <button class="role-btn admin" onclick="selectRole('admin')">
+      <i class="fas fa-user-tie"></i> مدير - مسير دار شباب
+    </button>
+  </div>
+</div>
+
+<!-- شاشة تسجيل الدخول وإنشاء الحساب -->
+<div id="auth-screen">
+  <div class="back-btn" onclick="goBackToRole()">
+    <i class="fas fa-arrow-right"></i>
+  </div>
+  
+  <div class="auth-container" id="auth-container">
+    <div class="auth-header">
+      <i class="fas fa-user-circle" id="auth-icon"></i>
+      <h2 id="auth-title">تسجيل الدخول</h2>
+      <p id="auth-subtitle">أهلاً بك في منصة مواهب داري</p>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</div>
+      <div class="auth-tab" onclick="switchAuthTab('signup')">إنشاء حساب جديد</div>
+    </div>
+
+    <!-- نموذج تسجيل الدخول -->
+    <div id="login-form" class="auth-form active">
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="login-email" placeholder="أدخل بريدك الإلكتروني">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="login-password" placeholder="أدخل كلمة المرور">
+          <i class="fas fa-eye toggle-password" onclick="togglePassword('login-password', this)"></i>
+        </div>
+      </div>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" id="remember-me"> تذكرني
+        </label>
+        <a href="#" class="forgot-password" onclick="forgotPassword()">نسيت كلمة المرور؟</a>
+      </div>
+
+      <button class="auth-btn" onclick="login()">
+        <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+      </button>
+    </div>
+
+    <!-- نموذج إنشاء حساب جديد -->
+    <div id="signup-form" class="auth-form">
+      <div class="form-group">
+        <label>الاسم الكامل</label>
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="signup-name" placeholder="أدخل اسمك الكامل">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="signup-email" placeholder="أدخل بريدك الإلكتروني">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <div class="input-group">
+          <i class="fas fa-phone"></i>
+          <input type="tel" id="signup-phone" placeholder="أدخل رقم هاتفك">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="signup-password" placeholder="أدخل كلمة المرور">
+          <i class="fas fa-eye toggle-password" onclick="togglePassword('signup-password', this)"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>تأكيد كلمة المرور</label>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="signup-confirm" placeholder="أعد إدخال كلمة المرور">
+          <i class="fas fa-eye toggle-password" onclick="togglePassword('signup-confirm', this)"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>نوع المستخدم</label>
+        <div class="input-group">
+          <i class="fas fa-tag"></i>
+          <input type="text" id="signup-role" readonly value="متطوع - شاب موهوب" style="background: rgba(244,180,27,0.1);">
+        </div>
+      </div>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" id="agree-terms"> أوافق على <a href="#" style="color: var(--accent);">الشروط والأحكام</a>
+        </label>
+      </div>
+
+      <button class="auth-btn" onclick="signup()">
+        <i class="fas fa-user-plus"></i> إنشاء حساب
+      </button>
+    </div>
+
+    <!-- خيارات تسجيل الدخول الاجتماعي -->
+    <div class="social-login">
+      <p>أو سجل عبر</p>
+      <div class="social-icons">
+        <div class="social-icon" onclick="socialLogin('google')">
+          <i class="fab fa-google"></i>
+        </div>
+        <div class="social-icon" onclick="socialLogin('facebook')">
+          <i class="fab fa-facebook-f"></i>
+        </div>
+        <div class="social-icon" onclick="socialLogin('twitter')">
+          <i class="fab fa-twitter"></i>
+        </div>
+        <div class="social-icon" onclick="socialLogin('apple')">
+          <i class="fab fa-apple"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- التطبيق الرئيسي -->
+<div id="app">
+  <div class="header">
+    <div class="header-top">
+      <div class="logo"><span>مواهب</span> داري</div>
+      <div class="header-icons">
+        <i class="fas fa-bell" onclick="switchTab('notifications')"></i>
+        <i class="fas fa-cog" onclick="showSettings()"></i>
+      </div>
+    </div>
+    <div class="location-bar" onclick="changeLocation()">
+      <i class="fas fa-map-marker-alt"></i>
+      <span id="location-text">سطيف - العلمة، حي 5 جويلية</span>
+      <i class="fas fa-chevron-down" style="margin-right: auto;"></i>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <!-- واجهة المتطوع -->
+    <div id="volunteer-interface">
+      <!-- الصفحة الرئيسية -->
+      <section id="home" class="section active">
+        <!-- حدث اليوم -->
+        <div class="event-today">
+          <div class="event-header">
+            <h3><i class="fas fa-calendar-day"></i> حدث اليوم</h3>
+            <span class="event-date" id="current-date"></span>
+          </div>
+          
+          <div class="event-item" id="event1">
+            <h4><i class="fas fa-mosque"></i> موائد إفطار جماعي</h4>
+            <p class="event-location"><i class="fas fa-map-pin"></i> مسجد النور - على بعد 800 متر</p>
+            <p><i class="fas fa-users"></i> نحتاج <span id="volunteers-needed">10</span> متطوعين</p>
+            <div class="event-buttons">
+              <button class="btn btn-primary" onclick="volunteerForEvent(this)">تطوع الآن</button>
+              <button class="btn btn-outline" onclick="showEventDetails('موائد إفطار جماعي', 'مسجد النور', '16 فيفري 2025', '7:00 مساءً')">عرض التفاصيل</button>
+            </div>
+          </div>
+
+          <div class="event-item">
+            <h4><i class="fas fa-hand-holding-heart"></i> توزيع صدقات رمضان</h4>
+            <p class="event-location"><i class="fas fa-map-pin"></i> دار الشباب حي البدر - 1.2 كم</p>
+            <div class="event-buttons">
+              <button class="btn btn-primary" onclick="volunteerForEvent(this)">ساعد في التوزيع</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- فعاليات الأسبوع -->
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-calendar-week"></i> فعاليات الأسبوع</h3>
+          <div style="display: flex; gap: 8px; overflow-x: auto; padding: 5px;" id="week-events">
+            <div class="day-event" onclick="showDayEvents('السبت')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">السبت</div>
+            <div class="day-event" onclick="showDayEvents('الأحد')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">الأحد</div>
+            <div class="day-event" onclick="showDayEvents('الاثنين')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">الاثنين</div>
+            <div class="day-event" onclick="showDayEvents('الثلاثاء')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">الثلاثاء</div>
+            <div class="day-event" onclick="showDayEvents('الأربعاء')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">الأربعاء</div>
+          </div>
+        </div>
+
+        <!-- أماكن قريبة -->
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-map-marked-alt"></i> قريبة منك</h3>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <div class="place-item" onclick="showPlaceDetails('دار الشباب')" style="text-align: center; cursor: pointer;">
+              <i class="fas fa-home" style="font-size: 30px; color: var(--accent);"></i>
+              <p style="margin-top: 5px;">دار الشباب</p>
+              <small>0.5 كم</small>
+            </div>
+            <div class="place-item" onclick="showPlaceDetails('مسجد النور')" style="text-align: center; cursor: pointer;">
+              <i class="fas fa-mosque" style="font-size: 30px; color: var(--accent);"></i>
+              <p style="margin-top: 5px;">مسجد</p>
+              <small>0.8 كم</small>
+            </div>
+            <div class="place-item" onclick="showPlaceDetails('ملعب بلدي')" style="text-align: center; cursor: pointer;">
+              <i class="fas fa-futbol" style="font-size: 30px; color: var(--accent);"></i>
+              <p style="margin-top: 5px;">ملعب</p>
+              <small>1.1 كم</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- صفحة الإشعارات -->
+      <section id="notifications" class="section">
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-bell"></i> آخر الإشعارات</h3>
+          
+          <div class="notification-item" id="notif1">
+            <h4>🔔 دار شباب حي البدر</h4>
+            <p>نريد مساعدين في إعداد موائد الإفطار - غداً 4 مساء</p>
+            <small style="color: var(--text-muted);"><i class="fas fa-clock"></i> منذ ساعتين</small>
+            <button class="btn btn-primary" style="margin-top: 10px;" onclick="respondToNotification(this, 'قبول')">قبول</button>
+          </div>
+
+          <div class="notification-item" id="notif2">
+            <h4>⚡ مسجد النور</h4>
+            <p>نريد كهربائياً لإصلاح إنارة المسجد</p>
+            <small style="color: var(--text-muted);"><i class="fas fa-clock"></i> 5 ساعات مضت</small>
+            <button class="btn btn-primary" style="margin-top: 10px;" onclick="respondToNotification(this, 'قبول')">قبول</button>
+          </div>
+
+          <div class="notification-item" id="notif3">
+            <h4>🏆 بطولة كرة القدم</h4>
+            <p>تم تأكيد مشاركتك - الموعد غداً 3 مساء</p>
+            <small style="color: var(--text-muted);"><i class="fas fa-clock"></i> أمس</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- صفحة التنافس -->
+      <section id="leaderboard" class="section">
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-trophy"></i> لوحة الشرف</h3>
+          
+          <div class="leaderboard-item" id="rank1">
+            <div class="rank gold">1</div>
+            <div>
+              <h4>أحمد بن علي</h4>
+              <small>328 نقطة</small>
+            </div>
+            <span style="margin-right: auto; background: var(--accent); color: #0f172a; padding: 5px 15px; border-radius: 30px;">ذهبية</span>
+          </div>
+
+          <div class="leaderboard-item" id="rank2">
+            <div class="rank silver">2</div>
+            <div>
+              <h4>محمد كريم</h4>
+              <small>295 نقطة</small>
+            </div>
+          </div>
+
+          <div class="leaderboard-item" id="rank3">
+            <div class="rank bronze">3</div>
+            <div>
+              <h4>علي رضا</h4>
+              <small>280 نقطة</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- معرض الصور -->
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-images"></i> معرض الفعاليات</h3>
+          <div class="gallery-grid">
+            <div class="gallery-item" onclick="openGallery(0)"><img src="https://images.unsplash.com/photo-1593113598335-cd59a0c3c6c9?w=150&h=150&fit=crop" alt="حدث"></div>
+            <div class="gallery-item" onclick="openGallery(1)"><img src="https://images.unsplash.com/photo-1630476398813-2e3b7daa2b7d?w=150&h=150&fit=crop" alt="حدث"></div>
+            <div class="gallery-item" onclick="openGallery(2)"><img src="https://images.unsplash.com/photo-1593113598335-cd59a0c3c6c9?w=150&h=150&fit=crop" alt="حدث"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- صفحة الملف الشخصي -->
+      <section id="profile" class="section">
+        <div class="card profile-header">
+          <div class="profile-image-container">
+            <img id="profile-img" class="profile-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed" alt="صورة الملف">
+            <div class="edit-photo-icon" onclick="document.getElementById('photo-input').click()">
+              <i class="fas fa-camera"></i>
+            </div>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="changePhoto(event)">
+          
+          <h2 id="display-name">أحمد بن علي</h2>
+          <button onclick="toggleEditForm()" style="background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 12px 30px; border-radius: 30px; margin-top: 15px; cursor: pointer;">
+            <i class="fas fa-edit"></i> تعديل الملف
+          </button>
+        </div>
+
+        <!-- معلومات الملف -->
+        <div class="card" id="profile-info">
+          <div class="info-grid">
+            <div class="info-row">
+              <div class="info-icon"><i class="fas fa-phone"></i></div>
+              <div>
+                <div class="info-label">رقم الهاتف</div>
+                <div class="info-value" id="display-phone">0661 77 88 99</div>
+              </div>
+            </div>
+            
+            <div class="info-row">
+              <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+              <div>
+                <div class="info-label">مكان الإقامة</div>
+                <div class="info-value" id="display-location">حي صريدي - العلمة</div>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-icon"><i class="fas fa-star"></i></div>
+              <div>
+                <div class="info-label">المواهب</div>
+                <div id="display-talents">
+                  <span class="talent-tag">تصميم جرافيك</span>
+                  <span class="talent-tag">برمجة</span>
+                  <span class="talent-tag">تنظيم</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-icon"><i class="fas fa-building"></i></div>
+              <div>
+                <div class="info-label">دار الشباب</div>
+                <div class="info-value" id="display-dar">دار عناني عبد الحميد</div>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
+              <div>
+                <div class="info-label">عضو منذ</div>
+                <div class="info-value" id="display-member">15 جانفي 2025</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- نقاط التحدي -->
+        <div class="card points-card">
+          <i class="fas fa-trophy" style="font-size: 40px; color: var(--accent);"></i>
+          <h3 style="margin: 15px 0;">رصيد النقاط</h3>
+          <div class="points-value" id="points-display">328</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 65%;"></div>
+          </div>
+          <p style="margin-top: 10px;"><span id="points-percent">65</span>% إلى المستوى التالي</p>
+        </div>
+
+        <!-- نموذج التعديل -->
+        <div id="edit-form" class="edit-form" style="display: none;">
+          <h3 style="color: var(--accent); margin-bottom: 25px;">تعديل المعلومات</h3>
+          
+          <div class="edit-field">
+            <label>الاسم</label>
+            <input type="text" id="edit-first" value="أحمد">
+          </div>
+
+          <div class="edit-field">
+            <label>اللقب</label>
+            <input type="text" id="edit-last" value="بن علي">
+          </div>
+
+          <div class="edit-field">
+            <label>رقم الهاتف</label>
+            <input type="tel" id="edit-phone" value="0661 77 88 99">
+          </div>
+
+          <div class="edit-field">
+            <label>مكان الإقامة</label>
+            <input type="text" id="edit-location" value="حي صريدي - العلمة">
+          </div>
+
+          <div class="edit-field">
+            <label>المواهب (افصل بينها بفواصل)</label>
+            <textarea id="edit-talents" rows="3">تصميم جرافيك, برمجة, تنظيم</textarea>
+          </div>
+
+          <div class="edit-field">
+            <label>دار الشباب</label>
+            <input type="text" id="edit-dar" value="دار عناني عبد الحميد">
+          </div>
+
+          <button class="btn-save" onclick="saveProfile()">
+            <i class="fas fa-save"></i> حفظ التعديلات
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- واجهة المدير -->
+    <div id="admin-interface" style="display: none;">
+      <section id="admin-requests" class="section active">
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-clipboard-list"></i> طلبات التطوع</h3>
+          
+          <div class="notification-item" id="admin-request1">
+            <h4>أحمد بن علي</h4>
+            <p>يتطوع لمساعدة في موائد الإفطار</p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <button class="btn btn-primary" onclick="acceptRequest(this)">قبول</button>
+              <button class="btn" style="background: var(--danger);" onclick="rejectRequest(this)">رفض</button>
+            </div>
+          </div>
+
+          <div class="notification-item" id="admin-request2">
+            <h4>محمد كريم - كهربائي</h4>
+            <p>يتطوع لإصلاح إنارة المسجد</p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <button class="btn btn-primary" onclick="acceptRequest(this)">قبول</button>
+              <button class="btn" style="background: var(--danger);" onclick="rejectRequest(this)">رفض</button>
+            </div>
+          </div>
+
+          <div class="notification-item" id="admin-request3">
+            <h4>علي رضا - مصور</h4>
+            <p>يتطوع لتصوير فعاليات الإفطار</p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <button class="btn btn-primary" onclick="acceptRequest(this)">قبول</button>
+              <button class="btn" style="background: var(--danger);" onclick="rejectRequest(this)">رفض</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-plus-circle"></i> إنشاء طلب جديد</h3>
+          <div class="edit-field">
+            <label>نوع المساعدة</label>
+            <select id="help-type">
+              <option>موائد إفطار</option>
+              <option>كهربائي</option>
+              <option>سباك</option>
+              <option>تنظيف</option>
+              <option>تنظيم</option>
+              <option>تصوير</option>
+            </select>
+          </div>
+          <div class="edit-field">
+            <label>الموقع</label>
+            <input type="text" id="help-location" placeholder="مثال: دار الشباب القبة">
+          </div>
+          <div class="edit-field">
+            <label>الوصف</label>
+            <textarea id="help-description" rows="3" placeholder="... اكتب تفاصيل الطلب"></textarea>
+          </div>
+          <div class="edit-field">
+            <label>عدد المتطوعين المطلوب</label>
+            <input type="number" id="help-volunteers" value="5" min="1" max="50">
+          </div>
+          <button class="btn-save" onclick="createRequest()">نشر الطلب</button>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-line"></i> إحصائيات سريعة</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div style="background: rgba(244,180,27,0.1); padding: 15px; border-radius: 16px; text-align: center;">
+              <span style="font-size: 28px; font-weight: 900;" id="stats-volunteers">24</span>
+              <p>متطوع نشط</p>
+            </div>
+            <div style="background: rgba(244,180,27,0.1); padding: 15px; border-radius: 16px; text-align: center;">
+              <span style="font-size: 28px; font-weight: 900;" id="stats-requests">8</span>
+              <p>طلبات مفتوحة</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="admin-stats" class="section">
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-chart-pie"></i> إحصائيات متقدمة</h3>
+          <div style="height: 200px; background: rgba(255,255,255,0.05); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+            <p style="color: var(--text-muted);">الرسوم البيانية قريباً</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="admin-events" class="section">
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-calendar-plus"></i> إدارة الفعاليات</h3>
+          <button class="btn-save" style="margin-bottom: 20px;" onclick="addNewEvent()">+ إضافة فعالية جديدة</button>
+          
+          <div class="event-item" style="background: rgba(255,255,255,0.05);">
+            <h4>موائد إفطار رمضان</h4>
+            <p>16 فيفري 2025 - 7 مساء</p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <button class="btn btn-primary" onclick="editEvent(this)">تعديل</button>
+              <button class="btn" style="background: var(--danger);" onclick="deleteEvent(this)">حذف</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="admin-gallery" class="section">
+        <div class="card">
+          <h3 style="margin-bottom: 20px;"><i class="fas fa-images"></i> معرض الصور</h3>
+          <button class="btn-save" style="margin-bottom: 20px;" onclick="uploadPhotos()">+ رفع صور جديدة</button>
+          
+          <div class="gallery-grid">
+            <div class="gallery-item" onclick="deletePhoto(this)"><img src="https://images.unsplash.com/photo-1593113598335-cd59a0c3c6c9?w=150&h=150&fit=crop" alt="حدث"></div>
+            <div class="gallery-item" onclick="deletePhoto(this)"><img src="https://images.unsplash.com/photo-1630476398813-2e3b7daa2b7d?w=150&h=150&fit=crop" alt="حدث"></div>
+            <div class="gallery-item" onclick="deletePhoto(this)"><img src="https://images.unsplash.com/photo-1593113598335-cd59a0c3c6c9?w=150&h=150&fit=crop" alt="حدث"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- التبويب السفلي للمتطوع -->
+  <div class="bottom-nav" id="volunteer-nav">
+    <div class="nav-item active" onclick="switchTab('home')">
+      <i class="fas fa-home"></i>
+      <span>الرئيسية</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('notifications')">
+      <i class="fas fa-bell"></i>
+      <span>الإشعارات</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('leaderboard')">
+      <i class="fas fa-trophy"></i>
+      <span>التنافس</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('profile')">
+      <i class="fas fa-user"></i>
+      <span>ملفي</span>
+    </div>
+  </div>
+
+  <!-- التبويب السفلي للمدير -->
+  <div class="bottom-nav" id="admin-nav" style="display: none;">
+    <div class="nav-item active" onclick="switchTab('admin-requests')">
+      <i class="fas fa-clipboard-list"></i>
+      <span>الطلبات</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('admin-stats')">
+      <i class="fas fa-chart-bar"></i>
+      <span>الإحصائيات</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('admin-events')">
+      <i class="fas fa-calendar"></i>
+      <span>الفعاليات</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('admin-gallery')">
+      <i class="fas fa-images"></i>
+      <span>المعرض</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for details -->
+<div id="details-modal" class="modal">
+  <div class="modal-content">
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+    <button class="btn btn-primary" onclick="closeModal()" style="margin-top: 20px;">إغلاق</button>
+  </div>
+</div>
+
+<script>
+// شاشة البداية
+setTimeout(() => {
+  document.getElementById('splash-screen').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('splash-screen').style.display = 'none';
+  }, 600);
+}, 2000);
+
+// المتغيرات العامة
+let selectedRole = '';
+
+// تحديث التاريخ الحالي
+function updateCurrentDate() {
+  const date = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('current-date').textContent = date.toLocaleDateString('ar-SA', options);
+}
+updateCurrentDate();
+
+// اختيار الدور
+function selectRole(role) {
+  selectedRole = role;
+  document.getElementById('role-screen').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('role-screen').style.display = 'none';
+    showAuthScreen(role);
+  }, 500);
+}
+
+// العودة لشاشة اختيار الدور
+function goBackToRole() {
+  document.getElementById('auth-screen').classList.remove('active');
+  setTimeout(() => {
+    document.getElementById('role-screen').style.display = 'flex';
+    document.getElementById('role-screen').style.opacity = '1';
+  }, 500);
+}
+
+// إظهار شاشة المصادقة
+function showAuthScreen(role) {
+  const authScreen = document.getElementById('auth-screen');
+  const authIcon = document.getElementById('auth-icon');
+  const authTitle = document.getElementById('auth-title');
+  const authSubtitle = document.getElementById('auth-subtitle');
+  const roleInput = document.getElementById('signup-role');
+  
+  if (role === 'volunteer') {
+    authIcon.className = 'fas fa-user-graduate';
+    authTitle.textContent = 'تسجيل دخول المتطوعين';
+    authSubtitle.textContent = 'أهلاً بالشاب الموهوب';
+    if (roleInput) roleInput.value = 'متطوع - شاب موهوب';
+  } else {
+    authIcon.className = 'fas fa-user-tie';
+    authTitle.textContent = 'تسجيل دخول المدراء';
+    authSubtitle.textContent = 'أهلاً بمسيري دور الشباب';
+    if (roleInput) roleInput.value = 'مدير - مسير دار شباب';
+  }
+  
+  authScreen.classList.add('active');
+}
+
+// تبديل التبويبات في شاشة المصادقة
+function switchAuthTab(tab) {
+  const tabs = document.querySelectorAll('.auth-tab');
+  const forms = document.querySelectorAll('.auth-form');
+  
+  tabs.forEach(t => t.classList.remove('active'));
+  forms.forEach(f => f.classList.remove('active'));
+  
+  if (tab === 'login') {
+    tabs[0].classList.add('active');
+    document.getElementById('login-form').classList.add('active');
+  } else {
+    tabs[1].classList.add('active');
+    document.getElementById('signup-form').classList.add('active');
+  }
+}
+
+// إظهار/إخفاء كلمة المرور
+function togglePassword(inputId, icon) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fas fa-eye-slash toggle-password';
+  } else {
+    input.type = 'password';
+    icon.className = 'fas fa-eye toggle-password';
+  }
+}
+
+// التحقق من صحة البريد الإلكتروني
+function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
+// التحقق من صحة رقم الهاتف
+function validatePhone(phone) {
+  const re = /^[0-9+\s-]{10,}$/;
+  return re.test(phone);
+}
+
+// تسجيل الدخول
+function login() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const remember = document.getElementById('remember-me').checked;
+
+  if (!email || !password) {
+    showToast('❌ الرجاء إدخال البريد الإلكتروني وكلمة المرور', 'error');
+    return;
+  }
+
+  if (!validateEmail(email)) {
+    showToast('❌ البريد الإلكتروني غير صالح', 'error');
+    return;
+  }
+
+  if (password.length < 6) {
+    showToast('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+    return;
+  }
+
+  showToast('✅ جاري تسجيل الدخول...');
+  
+  setTimeout(() => {
+    document.getElementById('auth-screen').classList.remove('active');
+    document.getElementById('app').style.display = 'block';
+    
+    if (selectedRole === 'volunteer') {
+      document.getElementById('volunteer-interface').style.display = 'block';
+      document.getElementById('admin-interface').style.display = 'none';
+      document.getElementById('volunteer-nav').style.display = 'flex';
+      document.getElementById('admin-nav').style.display = 'none';
+      showToast('🎉 مرحباً بك أيها المتطوع!');
+    } else {
+      document.getElementById('volunteer-interface').style.display = 'none';
+      document.getElementById('admin-interface').style.display = 'block';
+      document.getElementById('volunteer-nav').style.display = 'none';
+      document.getElementById('admin-nav').style.display = 'flex';
+      showToast('🎉 مرحباً بك أيها المدير!');
+    }
+    
+    if (remember) {
+      localStorage.setItem('rememberedEmail', email);
+    }
+  }, 2000);
+}
+
+// إنشاء حساب جديد
+function signup() {
+  const name = document.getElementById('signup-name').value;
+  const email = document.getElementById('signup-email').value;
+  const phone = document.getElementById('signup-phone').value;
+  const password = document.getElementById('signup-password').value;
+  const confirm = document.getElementById('signup-confirm').value;
+  const agree = document.getElementById('agree-terms').checked;
+
+  if (!name || !email || !phone || !password || !confirm) {
+    showToast('❌ الرجاء ملء جميع الحقول', 'error');
+    return;
+  }
+
+  if (name.length < 3) {
+    showToast('❌ الاسم يجب أن يكون 3 أحرف على الأقل', 'error');
+    return;
+  }
+
+  if (!validateEmail(email)) {
+    showToast('❌ البريد الإلكتروني غير صالح', 'error');
+    return;
+  }
+
+  if (!validatePhone(phone)) {
+    showToast('❌ رقم الهاتف غير صالح', 'error');
+    return;
+  }
+
+  if (password.length < 6) {
+    showToast('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+    return;
+  }
+
+  if (password !== confirm) {
+    showToast('❌ كلمة المرور غير متطابقة', 'error');
+    return;
+  }
+
+  if (!agree) {
+    showToast('❌ يجب الموافقة على الشروط والأحكام', 'error');
+    return;
+  }
+
+  showToast('✅ جاري إنشاء الحساب...');
+  
+  setTimeout(() => {
+    showToast('🎉 تم إنشاء الحساب بنجاح! جاري تسجيل الدخول...');
+    
+    setTimeout(() => {
+      document.getElementById('auth-screen').classList.remove('active');
+      document.getElementById('app').style.display = 'block';
+      
+      if (selectedRole === 'volunteer') {
+        document.getElementById('volunteer-interface').style.display = 'block';
+        document.getElementById('admin-interface').style.display = 'none';
+        document.getElementById('volunteer-nav').style.display = 'flex';
+        document.getElementById('admin-nav').style.display = 'none';
+        
+        document.getElementById('display-name').textContent = name;
+        document.getElementById('display-phone').textContent = phone;
+        
+        showToast('🎉 مرحباً بك في منصة مواهب داري!');
+      } else {
+        document.getElementById('volunteer-interface').style.display = 'none';
+        document.getElementById('admin-interface').style.display = 'block';
+        document.getElementById('volunteer-nav').style.display = 'none';
+        document.getElementById('admin-nav').style.display = 'flex';
+        showToast('🎉 مرحباً بك أيها المدير الجديد!');
+      }
+    }, 2000);
+  }, 2000);
+}
+
+// نسيان كلمة المرور
+function forgotPassword() {
+  showToast('📧 تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني');
+}
+
+// تسجيل الدخول عبر وسائل التواصل
+function socialLogin(provider) {
+  showToast(`🔑 جاري تسجيل الدخول عبر ${provider}...`);
+  
+  setTimeout(() => {
+    showToast('✅ تم تسجيل الدخول بنجاح');
+    
+    document.getElementById('auth-screen').classList.remove('active');
+    document.getElementById('app').style.display = 'block';
+    
+    if (selectedRole === 'volunteer') {
+      document.getElementById('volunteer-interface').style.display = 'block';
+      document.getElementById('admin-interface').style.display = 'none';
+      document.getElementById('volunteer-nav').style.display = 'flex';
+      document.getElementById('admin-nav').style.display = 'none';
+    } else {
+      document.getElementById('volunteer-interface').style.display = 'none';
+      document.getElementById('admin-interface').style.display = 'block';
+      document.getElementById('volunteer-nav').style.display = 'none';
+      document.getElementById('admin-nav').style.display = 'flex';
+    }
+  }, 2000);
+}
+
+// تبديل التبويبات في التطبيق الرئيسي
+function switchTab(tabId) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// تغيير الصورة
+function changePhoto(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      document.getElementById('profile-img').src = ev.target.result;
+      showToast('تم تغيير الصورة بنجاح! 📸');
+    }
+    reader.readAsDataURL(file);
+  }
+}
+
+// إظهار/إخفاء نموذج التعديل
+function toggleEditForm() {
+  const form = document.getElementById('edit-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+// حفظ التعديلات
+function saveProfile() {
+  const firstName = document.getElementById('edit-first').value;
+  const lastName = document.getElementById('edit-last').value;
+  const phone = document.getElementById('edit-phone').value;
+  const location = document.getElementById('edit-location').value;
+  const talents = document.getElementById('edit-talents').value;
+  const dar = document.getElementById('edit-dar').value;
+
+  document.getElementById('display-name').textContent = firstName + ' ' + lastName;
+  document.getElementById('display-phone').textContent = phone;
+  document.getElementById('display-location').textContent = location;
+  
+  const talentsArray = talents.split(',').map(t => t.trim());
+  let talentsHtml = '';
+  talentsArray.forEach(talent => {
+    if (talent) {
+      talentsHtml += `<span class="talent-tag">${talent}</span>`;
+    }
+  });
+  document.getElementById('display-talents').innerHTML = talentsHtml;
+  
+  document.getElementById('display-dar').textContent = dar;
+
+  document.getElementById('edit-form').style.display = 'none';
+  showToast('✅ تم حفظ التعديلات بنجاح');
+}
+
+// تغيير الموقع
+function changeLocation() {
+  const newLocation = prompt('أدخل موقعك الجديد:');
+  if (newLocation) {
+    document.getElementById('location-text').textContent = newLocation;
+    showToast('تم تحديث الموقع! 📍');
+  }
+}
+
+// عرض تفاصيل الحدث
+function showEventDetails(title, location, date, time) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = `
+    <p><strong>الموقع:</strong> ${location}</p>
+    <p><strong>التاريخ:</strong> ${date}</p>
+    <p><strong>الوقت:</strong> ${time}</p>
+  `;
+  document.getElementById('details-modal').classList.add('active');
+}
+
+// إغلاق المودال
+function closeModal() {
+  document.getElementById('details-modal').classList.remove('active');
+}
+
+// التطوع لحدث
+function volunteerForEvent(button) {
+  button.textContent = 'تم التطوع ✅';
+  button.disabled = true;
+  showToast('شكراً لتطوعك! سنتواصل معك قريباً 🤝');
+  
+  const volunteersSpan = document.getElementById('volunteers-needed');
+  if (volunteersSpan) {
+    let current = parseInt(volunteersSpan.textContent);
+    volunteersSpan.textContent = current - 1;
+  }
+}
+
+// عرض أحداث اليوم
+function showDayEvents(day) {
+  showToast(`فعاليات يوم ${day}: سيتم عرضها قريباً 📅`);
+}
+
+// عرض تفاصيل المكان
+function showPlaceDetails(place) {
+  showToast(`معلومات عن ${place}: قريباً إن شاء الله 🗺️`);
+}
+
+// الرد على الإشعار
+function respondToNotification(button, response) {
+  button.parentElement.innerHTML = `<span style="color: var(--success);">✅ تم ${response}</span>`;
+  showToast(`تم ${response} بنجاح`);
+}
+
+// قبول الطلب (للمدير)
+function acceptRequest(button) {
+  const requestDiv = button.closest('.notification-item');
+  requestDiv.style.opacity = '0.5';
+  button.parentElement.innerHTML = '<span style="color: var(--success);">✅ تم القبول</span>';
+  setTimeout(() => {
+    requestDiv.remove();
+    updateStats();
+  }, 1000);
+  showToast('تم قبول الطلب بنجاح');
+}
+
+// رفض الطلب (للمدير)
+function rejectRequest(button) {
+  const requestDiv = button.closest('.notification-item');
+  requestDiv.style.opacity = '0.5';
+  button.parentElement.innerHTML = '<span style="color: var(--danger);">❌ تم الرفض</span>';
+  setTimeout(() => {
+    requestDiv.remove();
+    updateStats();
+  }, 1000);
+  showToast('تم رفض الطلب');
+}
+
+// إنشاء طلب جديد (للمدير)
+function createRequest() {
+  const type = document.getElementById('help-type').value;
+  const location = document.getElementById('help-location').value;
+  const description = document.getElementById('help-description').value;
+  const volunteers = document.getElementById('help-volunteers').value;
+  
+  if (!location || !description) {
+    showToast('❌ الرجاء ملء جميع الحقول', 'error');
+    return;
+  }
+  
+  showToast(`✅ تم نشر طلب: ${type} في ${location}`);
+  
+  document.getElementById('help-location').value = '';
+  document.getElementById('help-description').value = '';
+  
+  updateStats();
+}
+
+// تحديث الإحصائيات
+function updateStats() {
+  const requests = document.querySelectorAll('#admin-requests .notification-item').length;
+  document.getElementById('stats-requests').textContent = requests;
+}
+
+// إضافة فعالية جديدة
+function addNewEvent() {
+  showToast('نافذة إضافة فعالية جديدة ستظهر قريباً 📅');
+}
+
+// تعديل فعالية
+function editEvent(button) {
+  showToast('تعديل الفعالية قريباً ✏️');
+}
+
+// حذف فعالية
+function deleteEvent(button) {
+  if (confirm('هل أنت متأكد من حذف هذه الفعالية؟')) {
+    button.closest('.event-item').remove();
+    showToast('تم حذف الفعالية بنجاح');
+  }
+}
+
+// رفع صور
+function uploadPhotos() {
+  showToast('نافذة رفع الصور ستظهر قريباً 📸');
+}
+
+// حذف صورة
+function deletePhoto(element) {
+  if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
+    element.remove();
+    showToast('تم حذف الصورة بنجاح');
+  }
+}
+
+// فتح معرض الصور
+function openGallery(index) {
+  showToast('معرض الصور: قريباً إن شاء الله 🖼️');
+}
+
+// عرض الإعدادات
+function showSettings() {
+  showToast('الإعدادات: قريباً ⚙️');
+}
+
+// إظهار رسالة toast
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  if (type === 'error') toast.classList.add('error');
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// تأثيرات إضافية
+document.querySelectorAll('.btn-primary').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      this.style.transform = 'scale(1)';
+    }, 200);
+  });
+});
+
+// التحقق من الجلسة المحفوظة
+window.onload = function() {
+  const rememberedEmail = localStorage.getItem('rememberedEmail');
+  if (rememberedEmail) {
+    document.getElementById('login-email').value = rememberedEmail;
+    document.getElementById('remember-me').checked = true;
+  }
+};
+</script>
+
+</body>
+</html>
