@@ -1498,7 +1498,27 @@
   </div>
 </div>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
+
 <script>
+// تهيئة Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCrdJjVtPpI2SrwDUkXxbASFYpkGpC9w",
+  authDomain: "mawaheb-dari.firebaseapp.com",
+  projectId: "mawaheb-dari",
+  storageBucket: "mawaheb-dari.firebasestorage.app",
+  messagingSenderId: "366330802478",
+  appId: "1:366330802478:web:edlaa9746da0e44d784abf"
+};
+
+// تهيئة Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
 // شاشة البداية
 setTimeout(() => {
   document.getElementById('splash-screen').style.opacity = '0';
@@ -1517,6 +1537,42 @@ function updateCurrentDate() {
   document.getElementById('current-date').textContent = date.toLocaleDateString('ar-SA', options);
 }
 updateCurrentDate();
+
+// التحقق من حالة تسجيل الدخول
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    // المستخدم مسجل دخوله بالفعل
+    console.log('المستخدم مسجل:', user.email);
+    
+    // إخفاء شاشات البداية
+    document.getElementById('role-screen').style.display = 'none';
+    document.getElementById('auth-screen').classList.remove('active');
+    document.getElementById('app').style.display = 'block';
+    
+    // جلب بيانات المستخدم
+    database.ref('users/' + user.uid).once('value')
+      .then((snapshot) => {
+        const userData = snapshot.val();
+        if (userData) {
+          if (userData.role === 'volunteer') {
+            document.getElementById('volunteer-interface').style.display = 'block';
+            document.getElementById('admin-interface').style.display = 'none';
+            document.getElementById('volunteer-nav').style.display = 'flex';
+            document.getElementById('admin-nav').style.display = 'none';
+            
+            // تحديث بيانات الملف الشخصي
+            document.getElementById('display-name').textContent = userData.name || user.displayName;
+            document.getElementById('display-phone').textContent = userData.phone || '';
+          } else {
+            document.getElementById('volunteer-interface').style.display = 'none';
+            document.getElementById('admin-interface').style.display = 'block';
+            document.getElementById('volunteer-nav').style.display = 'none';
+            document.getElementById('admin-nav').style.display = 'flex';
+          }
+        }
+      });
+  }
+});
 
 // اختيار الدور
 function selectRole(role) {
@@ -1617,35 +1673,56 @@ function login() {
     return;
   }
 
-  if (password.length < 6) {
-    showToast('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
-    return;
-  }
-
   showToast('✅ جاري تسجيل الدخول...');
-  
-  setTimeout(() => {
-    document.getElementById('auth-screen').classList.remove('active');
-    document.getElementById('app').style.display = 'block';
-    
-    if (selectedRole === 'volunteer') {
-      document.getElementById('volunteer-interface').style.display = 'block';
-      document.getElementById('admin-interface').style.display = 'none';
-      document.getElementById('volunteer-nav').style.display = 'flex';
-      document.getElementById('admin-nav').style.display = 'none';
-      showToast('🎉 مرحباً بك أيها المتطوع!');
-    } else {
-      document.getElementById('volunteer-interface').style.display = 'none';
-      document.getElementById('admin-interface').style.display = 'block';
-      document.getElementById('volunteer-nav').style.display = 'none';
-      document.getElementById('admin-nav').style.display = 'flex';
-      showToast('🎉 مرحباً بك أيها المدير!');
-    }
-    
-    if (remember) {
-      localStorage.setItem('rememberedEmail', email);
-    }
-  }, 2000);
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      
+      // جلب بيانات المستخدم
+      return database.ref('users/' + user.uid).once('value')
+        .then((snapshot) => {
+          const userData = snapshot.val();
+          
+          document.getElementById('auth-screen').classList.remove('active');
+          document.getElementById('app').style.display = 'block';
+          
+          if (userData && userData.role === 'volunteer') {
+            document.getElementById('volunteer-interface').style.display = 'block';
+            document.getElementById('admin-interface').style.display = 'none';
+            document.getElementById('volunteer-nav').style.display = 'flex';
+            document.getElementById('admin-nav').style.display = 'none';
+            
+            // تحديث بيانات الملف الشخصي
+            document.getElementById('display-name').textContent = userData.name || user.displayName;
+            document.getElementById('display-phone').textContent = userData.phone || '';
+            
+            showToast('🎉 مرحباً بعودتك أيها المتطوع!');
+          } else if (userData && userData.role === 'admin') {
+            document.getElementById('volunteer-interface').style.display = 'none';
+            document.getElementById('admin-interface').style.display = 'block';
+            document.getElementById('volunteer-nav').style.display = 'none';
+            document.getElementById('admin-nav').style.display = 'flex';
+            showToast('🎉 مرحباً بعودتك أيها المدير!');
+          }
+          
+          // حفظ البريد إذا اختار "تذكرني"
+          if (remember) {
+            localStorage.setItem('rememberedEmail', email);
+          }
+        });
+    })
+    .catch((error) => {
+      let errorMessage = '❌ خطأ في تسجيل الدخول';
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = '❌ لا يوجد حساب بهذا البريد';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = '❌ كلمة المرور غير صحيحة';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = '❌ تم حظر الحساب مؤقتاً - حاول لاحقاً';
+      }
+      showToast(errorMessage, 'error');
+    });
 }
 
 // إنشاء حساب جديد
@@ -1657,6 +1734,7 @@ function signup() {
   const confirm = document.getElementById('signup-confirm').value;
   const agree = document.getElementById('agree-terms').checked;
 
+  // التحقق من المدخلات
   if (!name || !email || !phone || !password || !confirm) {
     showToast('❌ الرجاء ملء جميع الحقول', 'error');
     return;
@@ -1693,61 +1771,87 @@ function signup() {
   }
 
   showToast('✅ جاري إنشاء الحساب...');
-  
-  setTimeout(() => {
-    showToast('🎉 تم إنشاء الحساب بنجاح! جاري تسجيل الدخول...');
-    
-    setTimeout(() => {
-      document.getElementById('auth-screen').classList.remove('active');
-      document.getElementById('app').style.display = 'block';
+
+  // إنشاء المستخدم في Firebase
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
       
-      if (selectedRole === 'volunteer') {
-        document.getElementById('volunteer-interface').style.display = 'block';
-        document.getElementById('admin-interface').style.display = 'none';
-        document.getElementById('volunteer-nav').style.display = 'flex';
-        document.getElementById('admin-nav').style.display = 'none';
+      // تحديث اسم المستخدم
+      return user.updateProfile({
+        displayName: name
+      }).then(() => {
+        // حفظ بيانات إضافية في Realtime Database
+        return database.ref('users/' + user.uid).set({
+          name: name,
+          email: email,
+          phone: phone,
+          role: selectedRole,
+          points: 0,
+          createdAt: new Date().toISOString()
+        });
+      }).then(() => {
+        showToast('🎉 تم إنشاء الحساب بنجاح!');
         
-        document.getElementById('display-name').textContent = name;
-        document.getElementById('display-phone').textContent = phone;
+        document.getElementById('auth-screen').classList.remove('active');
+        document.getElementById('app').style.display = 'block';
         
-        showToast('🎉 مرحباً بك في منصة مواهب داري!');
-      } else {
-        document.getElementById('volunteer-interface').style.display = 'none';
-        document.getElementById('admin-interface').style.display = 'block';
-        document.getElementById('volunteer-nav').style.display = 'none';
-        document.getElementById('admin-nav').style.display = 'flex';
-        showToast('🎉 مرحباً بك أيها المدير الجديد!');
+        if (selectedRole === 'volunteer') {
+          document.getElementById('volunteer-interface').style.display = 'block';
+          document.getElementById('admin-interface').style.display = 'none';
+          document.getElementById('volunteer-nav').style.display = 'flex';
+          document.getElementById('admin-nav').style.display = 'none';
+          
+          document.getElementById('display-name').textContent = name;
+          document.getElementById('display-phone').textContent = phone;
+          
+          showToast('🎉 مرحباً بك في منصة مواهب داري!');
+        } else {
+          document.getElementById('volunteer-interface').style.display = 'none';
+          document.getElementById('admin-interface').style.display = 'block';
+          document.getElementById('volunteer-nav').style.display = 'none';
+          document.getElementById('admin-nav').style.display = 'flex';
+          showToast('🎉 مرحباً بك أيها المدير الجديد!');
+        }
+      });
+    })
+    .catch((error) => {
+      let errorMessage = '❌ خطأ في إنشاء الحساب';
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = '❌ هذا البريد مستخدم بالفعل';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = '❌ البريد الإلكتروني غير صالح';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = '❌ كلمة المرور ضعيفة - استخدم كلمة أقوى';
       }
-    }, 2000);
-  }, 2000);
+      showToast(errorMessage, 'error');
+    });
 }
 
 // نسيان كلمة المرور
 function forgotPassword() {
-  showToast('📧 تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني');
+  const email = document.getElementById('login-email').value;
+  if (!email) {
+    showToast('❌ الرجاء إدخال البريد الإلكتروني أولاً', 'error');
+    return;
+  }
+  
+  auth.sendPasswordResetEmail(email)
+    .then(() => {
+      showToast('📧 تم إرسال رابط استعادة كلمة المرور إلى بريدك');
+    })
+    .catch((error) => {
+      showToast('❌ خطأ في إرسال رابط الاستعادة', 'error');
+    });
 }
 
-// تسجيل الدخول عبر وسائل التواصل
+// تسجيل الدخول عبر وسائل التواصل (للتطبيق المستقبلي)
 function socialLogin(provider) {
   showToast(`🔑 جاري تسجيل الدخول عبر ${provider}...`);
   
+  // هذه الميزة ستضاف لاحقاً
   setTimeout(() => {
-    showToast('✅ تم تسجيل الدخول بنجاح');
-    
-    document.getElementById('auth-screen').classList.remove('active');
-    document.getElementById('app').style.display = 'block';
-    
-    if (selectedRole === 'volunteer') {
-      document.getElementById('volunteer-interface').style.display = 'block';
-      document.getElementById('admin-interface').style.display = 'none';
-      document.getElementById('volunteer-nav').style.display = 'flex';
-      document.getElementById('admin-nav').style.display = 'none';
-    } else {
-      document.getElementById('volunteer-interface').style.display = 'none';
-      document.getElementById('admin-interface').style.display = 'block';
-      document.getElementById('volunteer-nav').style.display = 'none';
-      document.getElementById('admin-nav').style.display = 'flex';
-    }
+    showToast('❌ هذه الخاصية قيد التطوير', 'error');
   }, 2000);
 }
 
@@ -1805,6 +1909,18 @@ function saveProfile() {
 
   document.getElementById('edit-form').style.display = 'none';
   showToast('✅ تم حفظ التعديلات بنجاح');
+  
+  // تحديث البيانات في Firebase إذا كان المستخدم مسجل دخوله
+  const user = auth.currentUser;
+  if (user) {
+    database.ref('users/' + user.uid).update({
+      name: firstName + ' ' + lastName,
+      phone: phone,
+      location: location,
+      talents: talents,
+      dar: dar
+    });
+  }
 }
 
 // تغيير الموقع
