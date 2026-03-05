@@ -1498,33 +1498,45 @@
   </div>
 </div>
 
-<!-- Firebase SDKs -->
+<!-- Firebase SDKs - النسخة الصحيحة للمتصفح -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
 
 <script>
-// تهيئة Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyCrdJjVtPpI2SrwDUkXxbASFYpkGpC9w",
-  authDomain: "mawaheb-dari.firebaseapp.com",
-  projectId: "mawaheb-dari",
-  storageBucket: "mawaheb-dari.firebasestorage.app",
-  messagingSenderId: "366330802478",
-  appId: "1:366330802478:web:edlaa9746da0e44d784abf"
-};
+// تهيئة Firebase - استخدم هذا الكود بالضبط
+try {
+  const firebaseConfig = {
+    apiKey: "AIzaSyCrdJiVtP9I2SRwdUIKwixdbA5YPkgPc9w",
+    authDomain: "mawaheb-dari.firebaseapp.com",
+    projectId: "mawaheb-dari",
+    storageBucket: "mawaheb-dari.firebasestorage.app",
+    messagingSenderId: "366330802478",
+    appId: "1:366330802478:web:ed1aa9746da0e44d784abf",
+    measurementId: "G-H237LPDX3T"
+  };
 
-// تهيئة Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
+  // تهيئة Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const database = firebase.database();
+  
+  console.log('✅ Firebase connected successfully');
+} catch (error) {
+  console.error('❌ Firebase initialization error:', error);
+}
 
 // شاشة البداية
 setTimeout(() => {
-  document.getElementById('splash-screen').style.opacity = '0';
-  setTimeout(() => {
-    document.getElementById('splash-screen').style.display = 'none';
-  }, 600);
+  const splashScreen = document.getElementById('splash-screen');
+  if (splashScreen) {
+    splashScreen.style.opacity = '0';
+    setTimeout(() => {
+      splashScreen.style.display = 'none';
+      // إظهار شاشة اختيار الدور
+      document.getElementById('role-screen').style.display = 'flex';
+    }, 600);
+  }
 }, 2000);
 
 // المتغيرات العامة
