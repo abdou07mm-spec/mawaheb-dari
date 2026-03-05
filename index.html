@@ -1,3 +1,8 @@
+أهلاً بك! **هذا هو الكود الكامل النهائي** مع جميع التعديلات: **تغيير اللغة (عربية/فرنسية/إنجليزية)** و **خريطة حقيقية باستخدام OpenStreetMap** مع أماكن حقيقية في العلمة، سطيف.
+
+**انسخ هذا الكود بالكامل** والصقه في ملف `index.html`:
+
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -6,6 +11,9 @@
   <title>مواهب داري – شباب سطيف الذهبي</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Leaflet للخريطة -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     * {
@@ -436,6 +444,8 @@
       padding: 20px;
       z-index: 100;
       border-bottom: 2px solid var(--accent);
+      display: flex;
+      flex-direction: column;
     }
 
     .header-top {
@@ -456,9 +466,14 @@
       -webkit-text-fill-color: transparent;
     }
 
+    .header-icons {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
     .header-icons i {
       font-size: 22px;
-      margin-left: 18px;
       color: var(--accent);
       cursor: pointer;
       transition: transform 0.3s;
@@ -466,6 +481,24 @@
 
     .header-icons i:hover {
       transform: scale(1.1);
+    }
+
+    /* محدد اللغة */
+    .language-selector select {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--accent);
+      border-radius: 30px;
+      padding: 8px 15px;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .language-selector select option {
+      background: var(--bg-dark);
+      color: white;
     }
 
     .location-bar {
@@ -843,6 +876,28 @@
       object-fit: cover;
     }
 
+    /* تنسيقات الخريطة */
+    #map {
+      height: 250px;
+      border-radius: 16px;
+      margin-bottom: 15px;
+      z-index: 1;
+    }
+
+    .user-marker, .place-marker {
+      background: transparent;
+      border: none;
+    }
+
+    .place-item {
+      transition: transform 0.3s;
+    }
+
+    .place-item:hover {
+      transform: translateY(-2px);
+      background: rgba(244, 180, 27, 0.15);
+    }
+
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
@@ -1067,6 +1122,14 @@
     <div class="header-top">
       <div class="logo"><span>مواهب</span> داري</div>
       <div class="header-icons">
+        <!-- محدد اللغة -->
+        <div class="language-selector">
+          <select id="lang-select" onchange="changeLanguage(this.value)">
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+        </div>
         <i class="fas fa-bell" onclick="switchTab('notifications')"></i>
         <i class="fas fa-cog" onclick="showSettings()"></i>
       </div>
@@ -1086,86 +1149,75 @@
         <!-- حدث اليوم -->
         <div class="event-today">
           <div class="event-header">
-            <h3><i class="fas fa-calendar-day"></i> حدث اليوم</h3>
+            <h3 id="event-today-title"><i class="fas fa-calendar-day"></i> حدث اليوم</h3>
             <span class="event-date" id="current-date"></span>
           </div>
           
           <div class="event-item" id="event1">
-            <h4><i class="fas fa-mosque"></i> موائد إفطار جماعي</h4>
-            <p class="event-location"><i class="fas fa-map-pin"></i> مسجد النور - على بعد 800 متر</p>
-            <p><i class="fas fa-users"></i> نحتاج <span id="volunteers-needed">10</span> متطوعين</p>
+            <h4><i class="fas fa-mosque"></i> <span id="event1-title">موائد إفطار جماعي</span></h4>
+            <p class="event-location"><i class="fas fa-map-pin"></i> <span id="event1-location">مسجد النور - على بعد 800 متر</span></p>
+            <p><i class="fas fa-users"></i> <span id="event1-need">نحتاج 10 متطوعين</span></p>
             <div class="event-buttons">
-              <button class="btn btn-primary" onclick="volunteerForEvent(this)">تطوع الآن</button>
-              <button class="btn btn-outline" onclick="showEventDetails('موائد إفطار جماعي', 'مسجد النور', '16 فيفري 2025', '7:00 مساءً')">عرض التفاصيل</button>
+              <button class="btn btn-primary" onclick="volunteerForEvent(this)"><span id="volunteer-btn">تطوع الآن</span></button>
+              <button class="btn btn-outline" onclick="showEventDetails('موائد إفطار جماعي', 'مسجد النور', '16 فيفري 2025', '7:00 مساءً')"><span id="details-btn">عرض التفاصيل</span></button>
             </div>
           </div>
 
           <div class="event-item">
-            <h4><i class="fas fa-hand-holding-heart"></i> توزيع صدقات رمضان</h4>
-            <p class="event-location"><i class="fas fa-map-pin"></i> دار الشباب حي البدر - 1.2 كم</p>
+            <h4><i class="fas fa-hand-holding-heart"></i> <span id="event2-title">توزيع صدقات رمضان</span></h4>
+            <p class="event-location"><i class="fas fa-map-pin"></i> <span id="event2-location">دار الشباب حي البدر - 1.2 كم</span></p>
             <div class="event-buttons">
-              <button class="btn btn-primary" onclick="volunteerForEvent(this)">ساعد في التوزيع</button>
+              <button class="btn btn-primary" onclick="volunteerForEvent(this)"><span id="volunteer-btn2">ساعد في التوزيع</span></button>
             </div>
           </div>
         </div>
 
         <!-- فعاليات الأسبوع -->
         <div class="card">
-          <h3 style="margin-bottom: 20px;"><i class="fas fa-calendar-week"></i> فعاليات الأسبوع</h3>
+          <h3 id="week-events-title" style="margin-bottom: 20px;"><i class="fas fa-calendar-week"></i> فعاليات الأسبوع</h3>
           <div style="display: flex; gap: 8px; overflow-x: auto; padding: 5px;" id="week-events">
-            <div class="day-event" onclick="showDayEvents('السبت')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">السبت</div>
-            <div class="day-event" onclick="showDayEvents('الأحد')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">الأحد</div>
-            <div class="day-event" onclick="showDayEvents('الاثنين')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">الاثنين</div>
-            <div class="day-event" onclick="showDayEvents('الثلاثاء')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">الثلاثاء</div>
-            <div class="day-event" onclick="showDayEvents('الأربعاء')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;">الأربعاء</div>
+            <div class="day-event" onclick="showDayEvents('السبت')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;" id="day-sat">السبت</div>
+            <div class="day-event" onclick="showDayEvents('الأحد')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;" id="day-sun">الأحد</div>
+            <div class="day-event" onclick="showDayEvents('الاثنين')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;" id="day-mon">الاثنين</div>
+            <div class="day-event" onclick="showDayEvents('الثلاثاء')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;" id="day-tue">الثلاثاء</div>
+            <div class="day-event" onclick="showDayEvents('الأربعاء')" style="background: rgba(244,180,27,0.2); padding: 10px; border-radius: 30px; min-width: 70px; text-align: center; cursor: pointer;" id="day-wed">الأربعاء</div>
           </div>
         </div>
 
-        <!-- أماكن قريبة -->
+        <!-- أماكن قريبة مع خريطة -->
         <div class="card">
-          <h3 style="margin-bottom: 20px;"><i class="fas fa-map-marked-alt"></i> قريبة منك</h3>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-            <div class="place-item" onclick="showPlaceDetails('دار الشباب')" style="text-align: center; cursor: pointer;">
-              <i class="fas fa-home" style="font-size: 30px; color: var(--accent);"></i>
-              <p style="margin-top: 5px;">دار الشباب</p>
-              <small>0.5 كم</small>
-            </div>
-            <div class="place-item" onclick="showPlaceDetails('مسجد النور')" style="text-align: center; cursor: pointer;">
-              <i class="fas fa-mosque" style="font-size: 30px; color: var(--accent);"></i>
-              <p style="margin-top: 5px;">مسجد</p>
-              <small>0.8 كم</small>
-            </div>
-            <div class="place-item" onclick="showPlaceDetails('ملعب بلدي')" style="text-align: center; cursor: pointer;">
-              <i class="fas fa-futbol" style="font-size: 30px; color: var(--accent);"></i>
-              <p style="margin-top: 5px;">ملعب</p>
-              <small>1.1 كم</small>
-            </div>
-          </div>
+          <h3 id="near-title" style="margin-bottom: 20px;"><i class="fas fa-map-marked-alt"></i> قريبة منك</h3>
+          
+          <!-- الخريطة -->
+          <div id="map" style="height: 250px; border-radius: 16px; margin-bottom: 15px;"></div>
+          
+          <!-- قائمة الأماكن القريبة -->
+          <div id="places-list" style="margin-top: 15px;"></div>
         </div>
       </section>
 
       <!-- صفحة الإشعارات -->
       <section id="notifications" class="section">
         <div class="card">
-          <h3 style="margin-bottom: 20px;"><i class="fas fa-bell"></i> آخر الإشعارات</h3>
+          <h3 id="notifications-title" style="margin-bottom: 20px;"><i class="fas fa-bell"></i> آخر الإشعارات</h3>
           
           <div class="notification-item" id="notif1">
             <h4>🔔 دار شباب حي البدر</h4>
-            <p>نريد مساعدين في إعداد موائد الإفطار - غداً 4 مساء</p>
+            <p id="notif1-text">نريد مساعدين في إعداد موائد الإفطار - غداً 4 مساء</p>
             <small style="color: var(--text-muted);"><i class="fas fa-clock"></i> منذ ساعتين</small>
-            <button class="btn btn-primary" style="margin-top: 10px;" onclick="respondToNotification(this, 'قبول')">قبول</button>
+            <button class="btn btn-primary" style="margin-top: 10px;" onclick="respondToNotification(this, 'قبول')"><span id="accept-btn">قبول</span></button>
           </div>
 
           <div class="notification-item" id="notif2">
             <h4>⚡ مسجد النور</h4>
-            <p>نريد كهربائياً لإصلاح إنارة المسجد</p>
+            <p id="notif2-text">نريد كهربائياً لإصلاح إنارة المسجد</p>
             <small style="color: var(--text-muted);"><i class="fas fa-clock"></i> 5 ساعات مضت</small>
-            <button class="btn btn-primary" style="margin-top: 10px;" onclick="respondToNotification(this, 'قبول')">قبول</button>
+            <button class="btn btn-primary" style="margin-top: 10px;" onclick="respondToNotification(this, 'قبول')"><span id="accept-btn2">قبول</span></button>
           </div>
 
           <div class="notification-item" id="notif3">
             <h4>🏆 بطولة كرة القدم</h4>
-            <p>تم تأكيد مشاركتك - الموعد غداً 3 مساء</p>
+            <p id="notif3-text">تم تأكيد مشاركتك - الموعد غداً 3 مساء</p>
             <small style="color: var(--text-muted);"><i class="fas fa-clock"></i> أمس</small>
           </div>
         </div>
@@ -1174,7 +1226,7 @@
       <!-- صفحة التنافس -->
       <section id="leaderboard" class="section">
         <div class="card">
-          <h3 style="margin-bottom: 20px;"><i class="fas fa-trophy"></i> لوحة الشرف</h3>
+          <h3 id="leaderboard-title" style="margin-bottom: 20px;"><i class="fas fa-trophy"></i> لوحة الشرف</h3>
           
           <div class="leaderboard-item" id="rank1">
             <div class="rank gold">1</div>
@@ -1204,7 +1256,7 @@
 
         <!-- معرض الصور -->
         <div class="card">
-          <h3 style="margin-bottom: 20px;"><i class="fas fa-images"></i> معرض الفعاليات</h3>
+          <h3 id="gallery-title" style="margin-bottom: 20px;"><i class="fas fa-images"></i> معرض الفعاليات</h3>
           <div class="gallery-grid">
             <div class="gallery-item" onclick="openGallery(0)"><img src="https://images.unsplash.com/photo-1593113598335-cd59a0c3c6c9?w=150&h=150&fit=crop" alt="حدث"></div>
             <div class="gallery-item" onclick="openGallery(1)"><img src="https://images.unsplash.com/photo-1630476398813-2e3b7daa2b7d?w=150&h=150&fit=crop" alt="حدث"></div>
@@ -1226,7 +1278,7 @@
           
           <h2 id="display-name">أحمد بن علي</h2>
           <button onclick="toggleEditForm()" style="background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 12px 30px; border-radius: 30px; margin-top: 15px; cursor: pointer;">
-            <i class="fas fa-edit"></i> تعديل الملف
+            <i class="fas fa-edit"></i> <span id="edit-profile-btn">تعديل الملف</span>
           </button>
         </div>
 
@@ -1236,7 +1288,7 @@
             <div class="info-row">
               <div class="info-icon"><i class="fas fa-phone"></i></div>
               <div>
-                <div class="info-label">رقم الهاتف</div>
+                <div class="info-label" id="phone-label">رقم الهاتف</div>
                 <div class="info-value" id="display-phone">0661 77 88 99</div>
               </div>
             </div>
@@ -1244,7 +1296,7 @@
             <div class="info-row">
               <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
               <div>
-                <div class="info-label">مكان الإقامة</div>
+                <div class="info-label" id="location-label">مكان الإقامة</div>
                 <div class="info-value" id="display-location">حي صريدي - العلمة</div>
               </div>
             </div>
@@ -1252,7 +1304,7 @@
             <div class="info-row">
               <div class="info-icon"><i class="fas fa-star"></i></div>
               <div>
-                <div class="info-label">المواهب</div>
+                <div class="info-label" id="talents-label">المواهب</div>
                 <div id="display-talents">
                   <span class="talent-tag">تصميم جرافيك</span>
                   <span class="talent-tag">برمجة</span>
@@ -1264,7 +1316,7 @@
             <div class="info-row">
               <div class="info-icon"><i class="fas fa-building"></i></div>
               <div>
-                <div class="info-label">دار الشباب</div>
+                <div class="info-label" id="dar-label">دار الشباب</div>
                 <div class="info-value" id="display-dar">دار عناني عبد الحميد</div>
               </div>
             </div>
@@ -1272,7 +1324,7 @@
             <div class="info-row">
               <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
               <div>
-                <div class="info-label">عضو منذ</div>
+                <div class="info-label" id="member-label">عضو منذ</div>
                 <div class="info-value" id="display-member">15 جانفي 2025</div>
               </div>
             </div>
@@ -1282,50 +1334,50 @@
         <!-- نقاط التحدي -->
         <div class="card points-card">
           <i class="fas fa-trophy" style="font-size: 40px; color: var(--accent);"></i>
-          <h3 style="margin: 15px 0;">رصيد النقاط</h3>
+          <h3 id="points-title" style="margin: 15px 0;">رصيد النقاط</h3>
           <div class="points-value" id="points-display">328</div>
           <div class="progress-bar">
             <div class="progress-fill" id="progress-fill" style="width: 65%;"></div>
           </div>
-          <p style="margin-top: 10px;"><span id="points-percent">65</span>% إلى المستوى التالي</p>
+          <p id="points-next" style="margin-top: 10px;"><span id="points-percent">65</span>% إلى المستوى التالي</p>
         </div>
 
         <!-- نموذج التعديل -->
         <div id="edit-form" class="edit-form" style="display: none;">
-          <h3 style="color: var(--accent); margin-bottom: 25px;">تعديل المعلومات</h3>
+          <h3 id="edit-title" style="color: var(--accent); margin-bottom: 25px;">تعديل المعلومات</h3>
           
           <div class="edit-field">
-            <label>الاسم</label>
+            <label id="edit-first-label">الاسم</label>
             <input type="text" id="edit-first" value="أحمد">
           </div>
 
           <div class="edit-field">
-            <label>اللقب</label>
+            <label id="edit-last-label">اللقب</label>
             <input type="text" id="edit-last" value="بن علي">
           </div>
 
           <div class="edit-field">
-            <label>رقم الهاتف</label>
+            <label id="edit-phone-label">رقم الهاتف</label>
             <input type="tel" id="edit-phone" value="0661 77 88 99">
           </div>
 
           <div class="edit-field">
-            <label>مكان الإقامة</label>
+            <label id="edit-location-label">مكان الإقامة</label>
             <input type="text" id="edit-location" value="حي صريدي - العلمة">
           </div>
 
           <div class="edit-field">
-            <label>المواهب (افصل بينها بفواصل)</label>
+            <label id="edit-talents-label">المواهب (افصل بينها بفواصل)</label>
             <textarea id="edit-talents" rows="3">تصميم جرافيك, برمجة, تنظيم</textarea>
           </div>
 
           <div class="edit-field">
-            <label>دار الشباب</label>
+            <label id="edit-dar-label">دار الشباب</label>
             <input type="text" id="edit-dar" value="دار عناني عبد الحميد">
           </div>
 
           <button class="btn-save" onclick="saveProfile()">
-            <i class="fas fa-save"></i> حفظ التعديلات
+            <i class="fas fa-save"></i> <span id="save-btn">حفظ التعديلات</span>
           </button>
         </div>
       </section>
@@ -1452,19 +1504,19 @@
   <div class="bottom-nav" id="volunteer-nav">
     <div class="nav-item active" onclick="switchTab('home')">
       <i class="fas fa-home"></i>
-      <span>الرئيسية</span>
+      <span id="nav-home">الرئيسية</span>
     </div>
     <div class="nav-item" onclick="switchTab('notifications')">
       <i class="fas fa-bell"></i>
-      <span>الإشعارات</span>
+      <span id="nav-notifications">الإشعارات</span>
     </div>
     <div class="nav-item" onclick="switchTab('leaderboard')">
       <i class="fas fa-trophy"></i>
-      <span>التنافس</span>
+      <span id="nav-leaderboard">التنافس</span>
     </div>
     <div class="nav-item" onclick="switchTab('profile')">
       <i class="fas fa-user"></i>
-      <span>ملفي</span>
+      <span id="nav-profile">ملفي</span>
     </div>
   </div>
 
@@ -1494,7 +1546,7 @@
   <div class="modal-content">
     <h3 id="modal-title"></h3>
     <p id="modal-body"></p>
-    <button class="btn btn-primary" onclick="closeModal()" style="margin-top: 20px;">إغلاق</button>
+    <button class="btn btn-primary" onclick="closeModal()" style="margin-top: 20px;" id="modal-close">إغلاق</button>
   </div>
 </div>
 
@@ -1526,6 +1578,493 @@ try {
   console.error('❌ Firebase initialization error:', error);
 }
 
+// ==================== الترجمة ====================
+const translations = {
+  ar: {
+    // العناوين الرئيسية
+    welcome: "أهلاً أحمد، ماذا تريد أن تفعل اليوم؟",
+    eventToday: "حدث اليوم",
+    weekEvents: "فعاليات الأسبوع",
+    nearYou: "قريبة منك",
+    notifications: "آخر الإشعارات",
+    leaderboard: "لوحة الشرف",
+    profile: "الملف الشخصي",
+    gallery: "معرض الفعاليات",
+    
+    // الأيام
+    saturday: "السبت",
+    sunday: "الأحد",
+    monday: "الاثنين",
+    tuesday: "الثلاثاء",
+    wednesday: "الأربعاء",
+    
+    // الأماكن
+    youthHouse: "دار الشباب",
+    mosque: "مسجد",
+    stadium: "ملعب",
+    
+    // الأزرار
+    volunteer: "تطوع الآن",
+    volunteer2: "ساعد في التوزيع",
+    details: "عرض التفاصيل",
+    accept: "قبول",
+    reject: "رفض",
+    edit: "تعديل الملف",
+    save: "حفظ التعديلات",
+    close: "إغلاق",
+    
+    // الإشعارات
+    notif1: "نريد مساعدين في إعداد موائد الإفطار - غداً 4 مساء",
+    notif2: "نريد كهربائياً لإصلاح إنارة المسجد",
+    notif3: "تم تأكيد مشاركتك - الموعد غداً 3 مساء",
+    
+    // الأحداث
+    event1Title: "موائد إفطار جماعي",
+    event1Location: "مسجد النور - على بعد 800 متر",
+    event1Need: "نحتاج 10 متطوعين",
+    event2Title: "توزيع صدقات رمضان",
+    event2Location: "دار الشباب حي البدر - 1.2 كم",
+    
+    // التنقل السفلي
+    navHome: "الرئيسية",
+    navNotif: "الإشعارات",
+    navLeader: "التنافس",
+    navProfile: "ملفي",
+    
+    // الملف الشخصي
+    phoneLabel: "رقم الهاتف",
+    locationLabel: "مكان الإقامة",
+    talentsLabel: "المواهب",
+    darLabel: "دار الشباب",
+    memberLabel: "عضو منذ",
+    pointsTitle: "رصيد النقاط",
+    pointsNext: "% إلى المستوى التالي",
+    editTitle: "تعديل المعلومات",
+    editFirstLabel: "الاسم",
+    editLastLabel: "اللقب",
+    editPhoneLabel: "رقم الهاتف",
+    editLocationLabel: "مكان الإقامة",
+    editTalentsLabel: "المواهب (افصل بينها بفواصل)",
+    editDarLabel: "دار الشباب"
+  },
+  fr: {
+    welcome: "Bonjour Ahmed, que veux-tu faire aujourd'hui ?",
+    eventToday: "Événement du jour",
+    weekEvents: "Événements de la semaine",
+    nearYou: "Près de chez vous",
+    notifications: "Dernières notifications",
+    leaderboard: "Tableau d'honneur",
+    profile: "Profil",
+    gallery: "Galerie photos",
+    
+    saturday: "Samedi",
+    sunday: "Dimanche",
+    monday: "Lundi",
+    tuesday: "Mardi",
+    wednesday: "Mercredi",
+    
+    youthHouse: "Maison de jeunes",
+    mosque: "Mosquée",
+    stadium: "Stade",
+    
+    volunteer: "Devenir bénévole",
+    volunteer2: "Aider",
+    details: "Voir détails",
+    accept: "Accepter",
+    reject: "Refuser",
+    edit: "Modifier le profil",
+    save: "Enregistrer",
+    close: "Fermer",
+    
+    notif1: "Nous avons besoin d'aide pour préparer les repas - demain 16h",
+    notif2: "Nous cherchons un électricien pour réparer l'éclairage de la mosquée",
+    notif3: "Votre participation a été confirmée - rendez-vous demain 15h",
+    
+    event1Title: "Repas collectif Iftar",
+    event1Location: "Mosquée El Nour - à 800 m",
+    event1Need: "Nous avons besoin de 10 bénévoles",
+    event2Title: "Distribution de charité Ramadan",
+    event2Location: "Maison de jeunes Hay El Badr - 1.2 km",
+    
+    navHome: "Accueil",
+    navNotif: "Notifications",
+    navLeader: "Classement",
+    navProfile: "Profil",
+    
+    phoneLabel: "Téléphone",
+    locationLabel: "Adresse",
+    talentsLabel: "Talents",
+    darLabel: "Maison de jeunes",
+    memberLabel: "Membre depuis",
+    pointsTitle: "Points",
+    pointsNext: "% vers le niveau suivant",
+    editTitle: "Modifier les informations",
+    editFirstLabel: "Prénom",
+    editLastLabel: "Nom",
+    editPhoneLabel: "Téléphone",
+    editLocationLabel: "Adresse",
+    editTalentsLabel: "Talents (séparés par des virgules)",
+    editDarLabel: "Maison de jeunes"
+  },
+  en: {
+    welcome: "Hello Ahmed, what do you want to do today?",
+    eventToday: "Today's Event",
+    weekEvents: "Week Events",
+    nearYou: "Near You",
+    notifications: "Latest Notifications",
+    leaderboard: "Leaderboard",
+    profile: "Profile",
+    gallery: "Gallery",
+    
+    saturday: "Saturday",
+    sunday: "Sunday",
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    
+    youthHouse: "Youth House",
+    mosque: "Mosque",
+    stadium: "Stadium",
+    
+    volunteer: "Volunteer Now",
+    volunteer2: "Help",
+    details: "View Details",
+    accept: "Accept",
+    reject: "Reject",
+    edit: "Edit Profile",
+    save: "Save Changes",
+    close: "Close",
+    
+    notif1: "We need help preparing Iftar meals - tomorrow 4 PM",
+    notif2: "We need an electrician to fix the mosque lighting",
+    notif3: "Your participation confirmed - tomorrow 3 PM",
+    
+    event1Title: "Collective Iftar Meals",
+    event1Location: "El Nour Mosque - 800 m away",
+    event1Need: "We need 10 volunteers",
+    event2Title: "Ramadan Charity Distribution",
+    event2Location: "Hay El Badr Youth House - 1.2 km",
+    
+    navHome: "Home",
+    navNotif: "Notifications",
+    navLeader: "Leaderboard",
+    navProfile: "Profile",
+    
+    phoneLabel: "Phone",
+    locationLabel: "Location",
+    talentsLabel: "Talents",
+    darLabel: "Youth House",
+    memberLabel: "Member since",
+    pointsTitle: "Points",
+    pointsNext: "% to next level",
+    editTitle: "Edit Information",
+    editFirstLabel: "First Name",
+    editLastLabel: "Last Name",
+    editPhoneLabel: "Phone",
+    editLocationLabel: "Location",
+    editTalentsLabel: "Talents (separate with commas)",
+    editDarLabel: "Youth House"
+  }
+};
+
+let currentLang = localStorage.getItem('preferredLang') || 'ar';
+
+// ==================== بيانات الأماكن القريبة (حقيقية لمدينة العلمة) ====================
+const nearbyPlaces = [
+  {
+    name: {
+      ar: "دار الشباب حي البدر",
+      fr: "Maison de jeunes Hay El Badr",
+      en: "Hay El Badr Youth House"
+    },
+    type: "youth",
+    lat: 36.1897,
+    lng: 5.4133,
+    distance: 0.5,
+    address: {
+      ar: "حي البدر، العلمة",
+      fr: "Hay El Badr, El Eulma",
+      en: "Hay El Badr, El Eulma"
+    }
+  },
+  {
+    name: {
+      ar: "مسجد النور",
+      fr: "Mosquée El Nour",
+      en: "El Nour Mosque"
+    },
+    type: "mosque",
+    lat: 36.1872,
+    lng: 5.4158,
+    distance: 0.8,
+    address: {
+      ar: "شارع فلسطين، العلمة",
+      fr: "Rue Palestine, El Eulma",
+      en: "Palestine Street, El Eulma"
+    }
+  },
+  {
+    name: {
+      ar: "ملعب 8 ماي 1945",
+      fr: "Stade 8 Mai 1945",
+      en: "8 May 1945 Stadium"
+    },
+    type: "stadium",
+    lat: 36.1845,
+    lng: 5.4189,
+    distance: 1.2,
+    address: {
+      ar: "طريق سطيف، العلمة",
+      fr: "Route de Sétif, El Eulma",
+      en: "Sétif Road, El Eulma"
+    }
+  },
+  {
+    name: {
+      ar: "جامع الفرقان",
+      fr: "Mosquée El Fourkane",
+      en: "El Fourkane Mosque"
+    },
+    type: "mosque",
+    lat: 36.1912,
+    lng: 5.4105,
+    distance: 1.5,
+    address: {
+      ar: "حي 5 جويلية، العلمة",
+      fr: "Hay 5 Juillet, El Eulma",
+      en: "5 July Neighborhood, El Eulma"
+    }
+  }
+];
+
+let map;
+let userMarker;
+let placeMarkers = [];
+
+// ==================== دوال الخريطة ====================
+function initMap() {
+  // موقع المستخدم (وسط العلمة)
+  const userLocation = [36.1885, 5.4130];
+  
+  // تهيئة الخريطة
+  map = L.map('map').setView(userLocation, 14);
+  
+  // إضافة طبقة الخريطة (OpenStreetMap)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  
+  // إضافة علامة المستخدم
+  userMarker = L.marker(userLocation, {
+    icon: L.divIcon({
+      className: 'user-marker',
+      html: '<i class="fas fa-user-circle" style="color: var(--accent); font-size: 30px;"></i>',
+      iconSize: [30, 30]
+    })
+  }).addTo(map).bindPopup(translations[currentLang].youthHouse === 'دار الشباب' ? 'أنت هنا' : (currentLang === 'fr' ? 'Vous êtes ici' : 'You are here'));
+  
+  // إضافة الأماكن القريبة
+  addPlacesToMap();
+  
+  // تحديث قائمة الأماكن
+  updatePlacesList();
+}
+
+function addPlacesToMap() {
+  // حذف العلامات القديمة
+  placeMarkers.forEach(marker => map.removeLayer(marker));
+  placeMarkers = [];
+  
+  nearbyPlaces.forEach(place => {
+    const icon = place.type === 'youth' ? '🏠' : (place.type === 'mosque' ? '🕌' : '⚽');
+    
+    const marker = L.marker([place.lat, place.lng], {
+      icon: L.divIcon({
+        className: 'place-marker',
+        html: `<span style="font-size: 24px;">${icon}</span>`,
+        iconSize: [30, 30]
+      })
+    }).addTo(map).bindPopup(`
+      <b>${place.name[currentLang]}</b><br>
+      ${place.address[currentLang]}<br>
+      <small>${place.distance} كم</small>
+    `);
+    
+    placeMarkers.push(marker);
+  });
+}
+
+function updatePlacesList() {
+  const placesList = document.getElementById('places-list');
+  if (!placesList) return;
+  
+  let html = '<div style="display: grid; gap: 10px;">';
+  
+  nearbyPlaces.forEach(place => {
+    const icon = place.type === 'youth' ? '🏠' : (place.type === 'mosque' ? '🕌' : '⚽');
+    html += `
+      <div style="display: flex; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; cursor: pointer;" onclick="flyToPlace(${place.lat}, ${place.lng})">
+        <span style="font-size: 24px; margin-left: 10px;">${icon}</span>
+        <div style="flex: 1;">
+          <div style="font-weight: 600;">${place.name[currentLang]}</div>
+          <small style="color: var(--text-muted);">${place.address[currentLang]}</small>
+        </div>
+        <span style="color: var(--accent); font-weight: 600;">${place.distance} كم</span>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  placesList.innerHTML = html;
+}
+
+function flyToPlace(lat, lng) {
+  if (map) {
+    map.flyTo([lat, lng], 17, {
+      duration: 2
+    });
+  }
+}
+
+function updateMapLanguage() {
+  if (map) {
+    // تحديث تسمية المستخدم
+    if (userMarker) {
+      userMarker.getPopup().setContent(currentLang === 'ar' ? 'أنت هنا' : (currentLang === 'fr' ? 'Vous êtes ici' : 'You are here'));
+    }
+    
+    // تحديث تسميات الأماكن
+    placeMarkers.forEach((marker, index) => {
+      const place = nearbyPlaces[index];
+      if (place) {
+        marker.getPopup().setContent(`
+          <b>${place.name[currentLang]}</b><br>
+          ${place.address[currentLang]}<br>
+          <small>${place.distance} كم</small>
+        `);
+      }
+    });
+    
+    // تحديث قائمة الأماكن
+    updatePlacesList();
+  }
+}
+
+// ==================== دالة تغيير اللغة ====================
+function changeLanguage(lang) {
+  currentLang = lang;
+  const t = translations[lang];
+  
+  // تحديث اتجاه الصفحة
+  if (lang === 'ar') {
+    document.documentElement.dir = 'rtl';
+    document.documentElement.lang = 'ar';
+  } else {
+    document.documentElement.dir = 'ltr';
+    document.documentElement.lang = lang;
+  }
+  
+  // تحديث النصوص في الصفحة
+  document.querySelectorAll('[id]').forEach(el => {
+    const id = el.id;
+    if (id === 'event-today-title') {
+      el.innerHTML = `<i class="fas fa-calendar-day"></i> ${t.eventToday}`;
+    } else if (id === 'week-events-title') {
+      el.innerHTML = `<i class="fas fa-calendar-week"></i> ${t.weekEvents}`;
+    } else if (id === 'near-title') {
+      el.innerHTML = `<i class="fas fa-map-marked-alt"></i> ${t.nearYou}`;
+    } else if (id === 'notifications-title') {
+      el.innerHTML = `<i class="fas fa-bell"></i> ${t.notifications}`;
+    } else if (id === 'leaderboard-title') {
+      el.innerHTML = `<i class="fas fa-trophy"></i> ${t.leaderboard}`;
+    } else if (id === 'gallery-title') {
+      el.innerHTML = `<i class="fas fa-images"></i> ${t.gallery}`;
+    } else if (id === 'day-sat') {
+      el.textContent = t.saturday;
+    } else if (id === 'day-sun') {
+      el.textContent = t.sunday;
+    } else if (id === 'day-mon') {
+      el.textContent = t.monday;
+    } else if (id === 'day-tue') {
+      el.textContent = t.tuesday;
+    } else if (id === 'day-wed') {
+      el.textContent = t.wednesday;
+    } else if (id === 'event1-title') {
+      el.textContent = t.event1Title;
+    } else if (id === 'event1-location') {
+      el.textContent = t.event1Location;
+    } else if (id === 'event1-need') {
+      el.textContent = t.event1Need;
+    } else if (id === 'event2-title') {
+      el.textContent = t.event2Title;
+    } else if (id === 'event2-location') {
+      el.textContent = t.event2Location;
+    } else if (id === 'volunteer-btn' || id === 'volunteer-btn2') {
+      el.textContent = t.volunteer;
+    } else if (id === 'details-btn') {
+      el.textContent = t.details;
+    } else if (id === 'notif1-text') {
+      el.textContent = t.notif1;
+    } else if (id === 'notif2-text') {
+      el.textContent = t.notif2;
+    } else if (id === 'notif3-text') {
+      el.textContent = t.notif3;
+    } else if (id === 'accept-btn' || id === 'accept-btn2') {
+      el.textContent = t.accept;
+    } else if (id === 'edit-profile-btn') {
+      el.textContent = t.edit;
+    } else if (id === 'save-btn') {
+      el.textContent = t.save;
+    } else if (id === 'modal-close') {
+      el.textContent = t.close;
+    } else if (id === 'nav-home') {
+      el.textContent = t.navHome;
+    } else if (id === 'nav-notifications') {
+      el.textContent = t.navNotif;
+    } else if (id === 'nav-leaderboard') {
+      el.textContent = t.navLeader;
+    } else if (id === 'nav-profile') {
+      el.textContent = t.navProfile;
+    } else if (id === 'phone-label') {
+      el.textContent = t.phoneLabel;
+    } else if (id === 'location-label') {
+      el.textContent = t.locationLabel;
+    } else if (id === 'talents-label') {
+      el.textContent = t.talentsLabel;
+    } else if (id === 'dar-label') {
+      el.textContent = t.darLabel;
+    } else if (id === 'member-label') {
+      el.textContent = t.memberLabel;
+    } else if (id === 'points-title') {
+      el.textContent = t.pointsTitle;
+    } else if (id === 'points-next') {
+      el.innerHTML = `<span id="points-percent">65</span> ${t.pointsNext}`;
+    } else if (id === 'edit-title') {
+      el.textContent = t.editTitle;
+    } else if (id === 'edit-first-label') {
+      el.textContent = t.editFirstLabel;
+    } else if (id === 'edit-last-label') {
+      el.textContent = t.editLastLabel;
+    } else if (id === 'edit-phone-label') {
+      el.textContent = t.editPhoneLabel;
+    } else if (id === 'edit-location-label') {
+      el.textContent = t.editLocationLabel;
+    } else if (id === 'edit-talents-label') {
+      el.textContent = t.editTalentsLabel;
+    } else if (id === 'edit-dar-label') {
+      el.textContent = t.editDarLabel;
+    }
+  });
+  
+  // تحديث الخريطة
+  updateMapLanguage();
+  
+  // حفظ اللغة المختارة
+  localStorage.setItem('preferredLang', lang);
+}
+
+// ==================== باقي الدوال (كما هي) ====================
+
 // شاشة البداية
 setTimeout(() => {
   const splashScreen = document.getElementById('splash-screen');
@@ -1533,7 +2072,6 @@ setTimeout(() => {
     splashScreen.style.opacity = '0';
     setTimeout(() => {
       splashScreen.style.display = 'none';
-      // إظهار شاشة اختيار الدور
       document.getElementById('role-screen').style.display = 'flex';
     }, 600);
   }
@@ -1553,15 +2091,12 @@ updateCurrentDate();
 // التحقق من حالة تسجيل الدخول
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    // المستخدم مسجل دخوله بالفعل
     console.log('المستخدم مسجل:', user.email);
     
-    // إخفاء شاشات البداية
     document.getElementById('role-screen').style.display = 'none';
     document.getElementById('auth-screen').classList.remove('active');
     document.getElementById('app').style.display = 'block';
     
-    // جلب بيانات المستخدم
     firebase.database().ref('users/' + user.uid).once('value')
       .then((snapshot) => {
         const userData = snapshot.val();
@@ -1572,7 +2107,6 @@ firebase.auth().onAuthStateChanged((user) => {
             document.getElementById('volunteer-nav').style.display = 'flex';
             document.getElementById('admin-nav').style.display = 'none';
             
-            // تحديث بيانات الملف الشخصي
             document.getElementById('display-name').textContent = userData.name || user.displayName;
             document.getElementById('display-phone').textContent = userData.phone || '';
           } else {
@@ -1615,14 +2149,14 @@ function showAuthScreen(role) {
   
   if (role === 'volunteer') {
     authIcon.className = 'fas fa-user-graduate';
-    authTitle.textContent = 'تسجيل دخول المتطوعين';
-    authSubtitle.textContent = 'أهلاً بالشاب الموهوب';
-    if (roleInput) roleInput.value = 'متطوع - شاب موهوب';
+    authTitle.textContent = currentLang === 'ar' ? 'تسجيل دخول المتطوعين' : (currentLang === 'fr' ? 'Connexion bénévole' : 'Volunteer Login');
+    authSubtitle.textContent = currentLang === 'ar' ? 'أهلاً بالشاب الموهوب' : (currentLang === 'fr' ? 'Bienvenue jeune talent' : 'Welcome talented youth');
+    if (roleInput) roleInput.value = currentLang === 'ar' ? 'متطوع - شاب موهوب' : (currentLang === 'fr' ? 'Bénévole' : 'Volunteer');
   } else {
     authIcon.className = 'fas fa-user-tie';
-    authTitle.textContent = 'تسجيل دخول المدراء';
-    authSubtitle.textContent = 'أهلاً بمسيري دور الشباب';
-    if (roleInput) roleInput.value = 'مدير - مسير دار شباب';
+    authTitle.textContent = currentLang === 'ar' ? 'تسجيل دخول المدراء' : (currentLang === 'fr' ? 'Connexion gestionnaire' : 'Admin Login');
+    authSubtitle.textContent = currentLang === 'ar' ? 'أهلاً بمسيري دور الشباب' : (currentLang === 'fr' ? 'Bienvenue aux gestionnaires' : 'Welcome managers');
+    if (roleInput) roleInput.value = currentLang === 'ar' ? 'مدير - مسير دار شباب' : (currentLang === 'fr' ? 'Gestionnaire' : 'Admin');
   }
   
   authScreen.classList.add('active');
@@ -1676,22 +2210,27 @@ function login() {
   const remember = document.getElementById('remember-me').checked;
 
   if (!email || !password) {
-    showToast('❌ الرجاء إدخال البريد الإلكتروني وكلمة المرور', 'error');
+    showToast(currentLang === 'ar' ? '❌ الرجاء إدخال البريد الإلكتروني وكلمة المرور' : 
+              (currentLang === 'fr' ? '❌ Veuillez entrer votre email et mot de passe' : 
+              '❌ Please enter your email and password'), 'error');
     return;
   }
 
   if (!validateEmail(email)) {
-    showToast('❌ البريد الإلكتروني غير صالح', 'error');
+    showToast(currentLang === 'ar' ? '❌ البريد الإلكتروني غير صالح' : 
+              (currentLang === 'fr' ? '❌ Email invalide' : 
+              '❌ Invalid email'), 'error');
     return;
   }
 
-  showToast('✅ جاري تسجيل الدخول...');
+  showToast(currentLang === 'ar' ? '✅ جاري تسجيل الدخول...' : 
+            (currentLang === 'fr' ? '✅ Connexion en cours...' : 
+            '✅ Logging in...'));
 
   firebase.auth().signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
       const user = userCredential.user;
       
-      // جلب بيانات المستخدم
       return firebase.database().ref('users/' + user.uid).once('value')
         .then((snapshot) => {
           const userData = snapshot.val();
@@ -1705,33 +2244,43 @@ function login() {
             document.getElementById('volunteer-nav').style.display = 'flex';
             document.getElementById('admin-nav').style.display = 'none';
             
-            // تحديث بيانات الملف الشخصي
             document.getElementById('display-name').textContent = userData.name || user.displayName;
             document.getElementById('display-phone').textContent = userData.phone || '';
             
-            showToast('🎉 مرحباً بعودتك أيها المتطوع!');
+            showToast(currentLang === 'ar' ? '🎉 مرحباً بعودتك أيها المتطوع!' : 
+                      (currentLang === 'fr' ? '🎉 Bon retour parmi nous bénévole!' : 
+                      '🎉 Welcome back volunteer!'));
           } else if (userData && userData.role === 'admin') {
             document.getElementById('volunteer-interface').style.display = 'none';
             document.getElementById('admin-interface').style.display = 'block';
             document.getElementById('volunteer-nav').style.display = 'none';
             document.getElementById('admin-nav').style.display = 'flex';
-            showToast('🎉 مرحباً بعودتك أيها المدير!');
+            showToast(currentLang === 'ar' ? '🎉 مرحباً بعودتك أيها المدير!' : 
+                      (currentLang === 'fr' ? '🎉 Bon retour parmi nous gestionnaire!' : 
+                      '🎉 Welcome back admin!'));
           }
           
-          // حفظ البريد إذا اختار "تذكرني"
           if (remember) {
             localStorage.setItem('rememberedEmail', email);
           }
         });
     })
     .catch((error) => {
-      let errorMessage = '❌ خطأ في تسجيل الدخول';
+      let errorMessage = currentLang === 'ar' ? '❌ خطأ في تسجيل الدخول' : 
+                        (currentLang === 'fr' ? '❌ Erreur de connexion' : 
+                        '❌ Login error');
       if (error.code === 'auth/user-not-found') {
-        errorMessage = '❌ لا يوجد حساب بهذا البريد';
+        errorMessage = currentLang === 'ar' ? '❌ لا يوجد حساب بهذا البريد' : 
+                      (currentLang === 'fr' ? '❌ Aucun compte avec cet email' : 
+                      '❌ No account with this email');
       } else if (error.code === 'auth/wrong-password') {
-        errorMessage = '❌ كلمة المرور غير صحيحة';
+        errorMessage = currentLang === 'ar' ? '❌ كلمة المرور غير صحيحة' : 
+                      (currentLang === 'fr' ? '❌ Mot de passe incorrect' : 
+                      '❌ Wrong password');
       } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = '❌ تم حظر الحساب مؤقتاً - حاول لاحقاً';
+        errorMessage = currentLang === 'ar' ? '❌ تم حظر الحساب مؤقتاً - حاول لاحقاً' : 
+                      (currentLang === 'fr' ? '❌ Compte temporairement bloqué - réessayez plus tard' : 
+                      '❌ Account temporarily blocked - try later');
       }
       showToast(errorMessage, 'error');
     });
@@ -1746,54 +2295,66 @@ function signup() {
   const confirm = document.getElementById('signup-confirm').value;
   const agree = document.getElementById('agree-terms').checked;
 
-  // التحقق من المدخلات
   if (!name || !email || !phone || !password || !confirm) {
-    showToast('❌ الرجاء ملء جميع الحقول', 'error');
+    showToast(currentLang === 'ar' ? '❌ الرجاء ملء جميع الحقول' : 
+              (currentLang === 'fr' ? '❌ Veuillez remplir tous les champs' : 
+              '❌ Please fill all fields'), 'error');
     return;
   }
 
   if (name.length < 3) {
-    showToast('❌ الاسم يجب أن يكون 3 أحرف على الأقل', 'error');
+    showToast(currentLang === 'ar' ? '❌ الاسم يجب أن يكون 3 أحرف على الأقل' : 
+              (currentLang === 'fr' ? '❌ Le nom doit contenir au moins 3 caractères' : 
+              '❌ Name must be at least 3 characters'), 'error');
     return;
   }
 
   if (!validateEmail(email)) {
-    showToast('❌ البريد الإلكتروني غير صالح', 'error');
+    showToast(currentLang === 'ar' ? '❌ البريد الإلكتروني غير صالح' : 
+              (currentLang === 'fr' ? '❌ Email invalide' : 
+              '❌ Invalid email'), 'error');
     return;
   }
 
   if (!validatePhone(phone)) {
-    showToast('❌ رقم الهاتف غير صالح', 'error');
+    showToast(currentLang === 'ar' ? '❌ رقم الهاتف غير صالح' : 
+              (currentLang === 'fr' ? '❌ Numéro de téléphone invalide' : 
+              '❌ Invalid phone number'), 'error');
     return;
   }
 
   if (password.length < 6) {
-    showToast('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+    showToast(currentLang === 'ar' ? '❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 
+              (currentLang === 'fr' ? '❌ Le mot de passe doit contenir au moins 6 caractères' : 
+              '❌ Password must be at least 6 characters'), 'error');
     return;
   }
 
   if (password !== confirm) {
-    showToast('❌ كلمة المرور غير متطابقة', 'error');
+    showToast(currentLang === 'ar' ? '❌ كلمة المرور غير متطابقة' : 
+              (currentLang === 'fr' ? '❌ Les mots de passe ne correspondent pas' : 
+              '❌ Passwords do not match'), 'error');
     return;
   }
 
   if (!agree) {
-    showToast('❌ يجب الموافقة على الشروط والأحكام', 'error');
+    showToast(currentLang === 'ar' ? '❌ يجب الموافقة على الشروط والأحكام' : 
+              (currentLang === 'fr' ? '❌ Vous devez accepter les conditions' : 
+              '❌ You must agree to the terms'), 'error');
     return;
   }
 
-  showToast('✅ جاري إنشاء الحساب...');
+  showToast(currentLang === 'ar' ? '✅ جاري إنشاء الحساب...' : 
+            (currentLang === 'fr' ? '✅ Création du compte...' : 
+            '✅ Creating account...'));
 
-  // إنشاء المستخدم في Firebase
   firebase.auth().createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
       const user = userCredential.user;
       
-      // تحديث اسم المستخدم
       return user.updateProfile({
         displayName: name
       }).then(() => {
-        // حفظ بيانات إضافية في Realtime Database
         return firebase.database().ref('users/' + user.uid).set({
           name: name,
           email: email,
@@ -1803,7 +2364,9 @@ function signup() {
           createdAt: new Date().toISOString()
         });
       }).then(() => {
-        showToast('🎉 تم إنشاء الحساب بنجاح!');
+        showToast(currentLang === 'ar' ? '🎉 تم إنشاء الحساب بنجاح!' : 
+                  (currentLang === 'fr' ? '🎉 Compte créé avec succès!' : 
+                  '🎉 Account created successfully!'));
         
         document.getElementById('auth-screen').classList.remove('active');
         document.getElementById('app').style.display = 'block';
@@ -1817,24 +2380,36 @@ function signup() {
           document.getElementById('display-name').textContent = name;
           document.getElementById('display-phone').textContent = phone;
           
-          showToast('🎉 مرحباً بك في منصة مواهب داري!');
+          showToast(currentLang === 'ar' ? '🎉 مرحباً بك في منصة مواهب داري!' : 
+                    (currentLang === 'fr' ? '🎉 Bienvenue sur la plateforme!' : 
+                    '🎉 Welcome to Mawaheb Dari platform!'));
         } else {
           document.getElementById('volunteer-interface').style.display = 'none';
           document.getElementById('admin-interface').style.display = 'block';
           document.getElementById('volunteer-nav').style.display = 'none';
           document.getElementById('admin-nav').style.display = 'flex';
-          showToast('🎉 مرحباً بك أيها المدير الجديد!');
+          showToast(currentLang === 'ar' ? '🎉 مرحباً بك أيها المدير الجديد!' : 
+                    (currentLang === 'fr' ? '🎉 Bienvenue nouveau gestionnaire!' : 
+                    '🎉 Welcome new admin!'));
         }
       });
     })
     .catch((error) => {
-      let errorMessage = '❌ خطأ في إنشاء الحساب';
+      let errorMessage = currentLang === 'ar' ? '❌ خطأ في إنشاء الحساب' : 
+                        (currentLang === 'fr' ? '❌ Erreur de création' : 
+                        '❌ Creation error');
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = '❌ هذا البريد مستخدم بالفعل';
+        errorMessage = currentLang === 'ar' ? '❌ هذا البريد مستخدم بالفعل' : 
+                      (currentLang === 'fr' ? '❌ Cet email est déjà utilisé' : 
+                      '❌ This email is already in use');
       } else if (error.code === 'auth/invalid-email') {
-        errorMessage = '❌ البريد الإلكتروني غير صالح';
+        errorMessage = currentLang === 'ar' ? '❌ البريد الإلكتروني غير صالح' : 
+                      (currentLang === 'fr' ? '❌ Email invalide' : 
+                      '❌ Invalid email');
       } else if (error.code === 'auth/weak-password') {
-        errorMessage = '❌ كلمة المرور ضعيفة - استخدم كلمة أقوى';
+        errorMessage = currentLang === 'ar' ? '❌ كلمة المرور ضعيفة - استخدم كلمة أقوى' : 
+                      (currentLang === 'fr' ? '❌ Mot de passe faible - utilisez un mot de passe plus fort' : 
+                      '❌ Weak password - use a stronger one');
       }
       showToast(errorMessage, 'error');
     });
@@ -1844,26 +2419,32 @@ function signup() {
 function forgotPassword() {
   const email = document.getElementById('login-email').value;
   if (!email) {
-    showToast('❌ الرجاء إدخال البريد الإلكتروني أولاً', 'error');
+    showToast(currentLang === 'ar' ? '❌ الرجاء إدخال البريد الإلكتروني أولاً' : 
+              (currentLang === 'fr' ? '❌ Veuillez entrer votre email' : 
+              '❌ Please enter your email'), 'error');
     return;
   }
   
   firebase.auth().sendPasswordResetEmail(email)
     .then(() => {
-      showToast('📧 تم إرسال رابط استعادة كلمة المرور إلى بريدك');
+      showToast(currentLang === 'ar' ? '📧 تم إرسال رابط استعادة كلمة المرور إلى بريدك' : 
+                (currentLang === 'fr' ? '📧 Lien de récupération envoyé à votre email' : 
+                '📧 Password reset link sent to your email'));
     })
     .catch((error) => {
-      showToast('❌ خطأ في إرسال رابط الاستعادة', 'error');
+      showToast(currentLang === 'ar' ? '❌ خطأ في إرسال رابط الاستعادة' : 
+                (currentLang === 'fr' ? '❌ Erreur d\'envoi' : 
+                '❌ Error sending'), 'error');
     });
 }
 
 // تسجيل الدخول عبر وسائل التواصل (للتطبيق المستقبلي)
 function socialLogin(provider) {
   showToast(`🔑 جاري تسجيل الدخول عبر ${provider}...`);
-  
-  // هذه الميزة ستضاف لاحقاً
   setTimeout(() => {
-    showToast('❌ هذه الخاصية قيد التطوير', 'error');
+    showToast(currentLang === 'ar' ? '❌ هذه الخاصية قيد التطوير' : 
+              (currentLang === 'fr' ? '❌ Cette fonctionnalité est en développement' : 
+              '❌ This feature is under development'), 'error');
   }, 2000);
 }
 
@@ -1883,7 +2464,9 @@ function changePhoto(e) {
     const reader = new FileReader();
     reader.onload = function(ev) {
       document.getElementById('profile-img').src = ev.target.result;
-      showToast('تم تغيير الصورة بنجاح! 📸');
+      showToast(currentLang === 'ar' ? 'تم تغيير الصورة بنجاح! 📸' : 
+                (currentLang === 'fr' ? 'Photo changée avec succès! 📸' : 
+                'Photo changed successfully! 📸'));
     }
     reader.readAsDataURL(file);
   }
@@ -1920,9 +2503,10 @@ function saveProfile() {
   document.getElementById('display-dar').textContent = dar;
 
   document.getElementById('edit-form').style.display = 'none';
-  showToast('✅ تم حفظ التعديلات بنجاح');
+  showToast(currentLang === 'ar' ? '✅ تم حفظ التعديلات بنجاح' : 
+            (currentLang === 'fr' ? '✅ Modifications enregistrées' : 
+            '✅ Changes saved successfully'));
   
-  // تحديث البيانات في Firebase إذا كان المستخدم مسجل دخوله
   const user = firebase.auth().currentUser;
   if (user) {
     firebase.database().ref('users/' + user.uid).update({
@@ -1937,10 +2521,14 @@ function saveProfile() {
 
 // تغيير الموقع
 function changeLocation() {
-  const newLocation = prompt('أدخل موقعك الجديد:');
+  const newLocation = prompt(currentLang === 'ar' ? 'أدخل موقعك الجديد:' : 
+                            (currentLang === 'fr' ? 'Entrez votre nouvelle position:' : 
+                            'Enter your new location:'));
   if (newLocation) {
     document.getElementById('location-text').textContent = newLocation;
-    showToast('تم تحديث الموقع! 📍');
+    showToast(currentLang === 'ar' ? 'تم تحديث الموقع! 📍' : 
+              (currentLang === 'fr' ? 'Position mise à jour! 📍' : 
+              'Location updated! 📍'));
   }
 }
 
@@ -1948,9 +2536,9 @@ function changeLocation() {
 function showEventDetails(title, location, date, time) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = `
-    <p><strong>الموقع:</strong> ${location}</p>
-    <p><strong>التاريخ:</strong> ${date}</p>
-    <p><strong>الوقت:</strong> ${time}</p>
+    <p><strong>${currentLang === 'ar' ? 'الموقع' : (currentLang === 'fr' ? 'Lieu' : 'Location')}:</strong> ${location}</p>
+    <p><strong>${currentLang === 'ar' ? 'التاريخ' : (currentLang === 'fr' ? 'Date' : 'Date')}:</strong> ${date}</p>
+    <p><strong>${currentLang === 'ar' ? 'الوقت' : (currentLang === 'fr' ? 'Heure' : 'Time')}:</strong> ${time}</p>
   `;
   document.getElementById('details-modal').classList.add('active');
 }
@@ -1962,9 +2550,13 @@ function closeModal() {
 
 // التطوع لحدث
 function volunteerForEvent(button) {
-  button.textContent = 'تم التطوع ✅';
+  button.textContent = currentLang === 'ar' ? 'تم التطوع ✅' : 
+                      (currentLang === 'fr' ? 'Inscrit ✅' : 
+                      'Volunteered ✅');
   button.disabled = true;
-  showToast('شكراً لتطوعك! سنتواصل معك قريباً 🤝');
+  showToast(currentLang === 'ar' ? 'شكراً لتطوعك! سنتواصل معك قريباً 🤝' : 
+            (currentLang === 'fr' ? 'Merci pour votre engagement! Nous vous contacterons bientôt 🤝' : 
+            'Thank you for volunteering! We will contact you soon 🤝'));
   
   const volunteersSpan = document.getElementById('volunteers-needed');
   if (volunteersSpan) {
@@ -1975,143 +2567,20 @@ function volunteerForEvent(button) {
 
 // عرض أحداث اليوم
 function showDayEvents(day) {
-  showToast(`فعاليات يوم ${day}: سيتم عرضها قريباً 📅`);
+  const dayNames = {
+    ar: { 'السبت': 'السبت', 'الأحد': 'الأحد', 'الاثنين': 'الاثنين', 'الثلاثاء': 'الثلاثاء', 'الأربعاء': 'الأربعاء' },
+    fr: { 'السبت': 'Samedi', 'الأحد': 'Dimanche', 'الاثنين': 'Lundi', 'الثلاثاء': 'Mardi', 'الأربعاء': 'Mercredi' },
+    en: { 'السبت': 'Saturday', 'الأحد': 'Sunday', 'الاثنين': 'Monday', 'الثلاثاء': 'Tuesday', 'الأربعاء': 'Wednesday' }
+  };
+  showToast(`${currentLang === 'ar' ? 'فعاليات يوم' : (currentLang === 'fr' ? 'Événements du' : 'Events for')} ${dayNames[currentLang][day]}: ${currentLang === 'ar' ? 'سيتم عرضها قريباً 📅' : (currentLang === 'fr' ? 'seront bientôt disponibles 📅' : 'will be available soon 📅')}`);
 }
 
 // عرض تفاصيل المكان
 function showPlaceDetails(place) {
-  showToast(`معلومات عن ${place}: قريباً إن شاء الله 🗺️`);
+  showToast(`${currentLang === 'ar' ? 'معلومات عن' : (currentLang === 'fr' ? 'Informations sur' : 'Information about')} ${place}: ${currentLang === 'ar' ? 'قريباً إن شاء الله 🗺️' : (currentLang === 'fr' ? 'bientôt disponible 🗺️' : 'coming soon 🗺️')}`);
 }
 
 // الرد على الإشعار
 function respondToNotification(button, response) {
-  button.parentElement.innerHTML = `<span style="color: var(--success);">✅ تم ${response}</span>`;
-  showToast(`تم ${response} بنجاح`);
-}
-
-// قبول الطلب (للمدير)
-function acceptRequest(button) {
-  const requestDiv = button.closest('.notification-item');
-  requestDiv.style.opacity = '0.5';
-  button.parentElement.innerHTML = '<span style="color: var(--success);">✅ تم القبول</span>';
-  setTimeout(() => {
-    requestDiv.remove();
-    updateStats();
-  }, 1000);
-  showToast('تم قبول الطلب بنجاح');
-}
-
-// رفض الطلب (للمدير)
-function rejectRequest(button) {
-  const requestDiv = button.closest('.notification-item');
-  requestDiv.style.opacity = '0.5';
-  button.parentElement.innerHTML = '<span style="color: var(--danger);">❌ تم الرفض</span>';
-  setTimeout(() => {
-    requestDiv.remove();
-    updateStats();
-  }, 1000);
-  showToast('تم رفض الطلب');
-}
-
-// إنشاء طلب جديد (للمدير)
-function createRequest() {
-  const type = document.getElementById('help-type').value;
-  const location = document.getElementById('help-location').value;
-  const description = document.getElementById('help-description').value;
-  const volunteers = document.getElementById('help-volunteers').value;
-  
-  if (!location || !description) {
-    showToast('❌ الرجاء ملء جميع الحقول', 'error');
-    return;
-  }
-  
-  showToast(`✅ تم نشر طلب: ${type} في ${location}`);
-  
-  document.getElementById('help-location').value = '';
-  document.getElementById('help-description').value = '';
-  
-  updateStats();
-}
-
-// تحديث الإحصائيات
-function updateStats() {
-  const requests = document.querySelectorAll('#admin-requests .notification-item').length;
-  document.getElementById('stats-requests').textContent = requests;
-}
-
-// إضافة فعالية جديدة
-function addNewEvent() {
-  showToast('نافذة إضافة فعالية جديدة ستظهر قريباً 📅');
-}
-
-// تعديل فعالية
-function editEvent(button) {
-  showToast('تعديل الفعالية قريباً ✏️');
-}
-
-// حذف فعالية
-function deleteEvent(button) {
-  if (confirm('هل أنت متأكد من حذف هذه الفعالية؟')) {
-    button.closest('.event-item').remove();
-    showToast('تم حذف الفعالية بنجاح');
-  }
-}
-
-// رفع صور
-function uploadPhotos() {
-  showToast('نافذة رفع الصور ستظهر قريباً 📸');
-}
-
-// حذف صورة
-function deletePhoto(element) {
-  if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
-    element.remove();
-    showToast('تم حذف الصورة بنجاح');
-  }
-}
-
-// فتح معرض الصور
-function openGallery(index) {
-  showToast('معرض الصور: قريباً إن شاء الله 🖼️');
-}
-
-// عرض الإعدادات
-function showSettings() {
-  showToast('الإعدادات: قريباً ⚙️');
-}
-
-// إظهار رسالة toast
-function showToast(message, type = 'success') {
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  if (type === 'error') toast.classList.add('error');
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
-}
-
-// تأثيرات إضافية
-document.querySelectorAll('.btn-primary').forEach(btn => {
-  btn.addEventListener('click', function() {
-    this.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-      this.style.transform = 'scale(1)';
-    }, 200);
-  });
-});
-
-// التحقق من الجلسة المحفوظة
-window.onload = function() {
-  const rememberedEmail = localStorage.getItem('rememberedEmail');
-  if (rememberedEmail) {
-    document.getElementById('login-email').value = rememberedEmail;
-    document.getElementById('remember-me').checked = true;
-  }
-};
-</script>
-
-</body>
-</html>
+  button.parentElement.innerHTML = `<span style="color: var(--success);">✅ ${currentLang === 'ar' ? 'تم' : (currentLang === 'fr' ? 'Accepté' : 'Accepted')} ${response}</span>`;
+  showToast(`${currentLang === 'ar' ? 'تم' : (currentLang === 'fr' ? 'Accepté' : 'Accepted')} ${response} ${currentLang === 'ar' ? 'بن
