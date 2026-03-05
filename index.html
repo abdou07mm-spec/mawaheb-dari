@@ -1,8 +1,3 @@
-أهلاً بك! **هذا هو الكود الكامل النهائي** مع جميع التعديلات: **تغيير اللغة (عربية/فرنسية/إنجليزية)** و **خريطة حقيقية باستخدام OpenStreetMap** مع أماكن حقيقية في العلمة، سطيف.
-
-**انسخ هذا الكود بالكامل** والصقه في ملف `index.html`:
-
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1582,7 +1577,6 @@ try {
 const translations = {
   ar: {
     // العناوين الرئيسية
-    welcome: "أهلاً أحمد، ماذا تريد أن تفعل اليوم؟",
     eventToday: "حدث اليوم",
     weekEvents: "فعاليات الأسبوع",
     nearYou: "قريبة منك",
@@ -1648,7 +1642,6 @@ const translations = {
     editDarLabel: "دار الشباب"
   },
   fr: {
-    welcome: "Bonjour Ahmed, que veux-tu faire aujourd'hui ?",
     eventToday: "Événement du jour",
     weekEvents: "Événements de la semaine",
     nearYou: "Près de chez vous",
@@ -1707,7 +1700,6 @@ const translations = {
     editDarLabel: "Maison de jeunes"
   },
   en: {
-    welcome: "Hello Ahmed, what do you want to do today?",
     eventToday: "Today's Event",
     weekEvents: "Week Events",
     nearYou: "Near You",
@@ -1861,7 +1853,7 @@ function initMap() {
       html: '<i class="fas fa-user-circle" style="color: var(--accent); font-size: 30px;"></i>',
       iconSize: [30, 30]
     })
-  }).addTo(map).bindPopup(translations[currentLang].youthHouse === 'دار الشباب' ? 'أنت هنا' : (currentLang === 'fr' ? 'Vous êtes ici' : 'You are here'));
+  }).addTo(map).bindPopup(currentLang === 'ar' ? 'أنت هنا' : (currentLang === 'fr' ? 'Vous êtes ici' : 'You are here'));
   
   // إضافة الأماكن القريبة
   addPlacesToMap();
@@ -1965,96 +1957,61 @@ function changeLanguage(lang) {
   }
   
   // تحديث النصوص في الصفحة
-  document.querySelectorAll('[id]').forEach(el => {
-    const id = el.id;
-    if (id === 'event-today-title') {
-      el.innerHTML = `<i class="fas fa-calendar-day"></i> ${t.eventToday}`;
-    } else if (id === 'week-events-title') {
-      el.innerHTML = `<i class="fas fa-calendar-week"></i> ${t.weekEvents}`;
-    } else if (id === 'near-title') {
-      el.innerHTML = `<i class="fas fa-map-marked-alt"></i> ${t.nearYou}`;
-    } else if (id === 'notifications-title') {
-      el.innerHTML = `<i class="fas fa-bell"></i> ${t.notifications}`;
-    } else if (id === 'leaderboard-title') {
-      el.innerHTML = `<i class="fas fa-trophy"></i> ${t.leaderboard}`;
-    } else if (id === 'gallery-title') {
-      el.innerHTML = `<i class="fas fa-images"></i> ${t.gallery}`;
-    } else if (id === 'day-sat') {
-      el.textContent = t.saturday;
-    } else if (id === 'day-sun') {
-      el.textContent = t.sunday;
-    } else if (id === 'day-mon') {
-      el.textContent = t.monday;
-    } else if (id === 'day-tue') {
-      el.textContent = t.tuesday;
-    } else if (id === 'day-wed') {
-      el.textContent = t.wednesday;
-    } else if (id === 'event1-title') {
-      el.textContent = t.event1Title;
-    } else if (id === 'event1-location') {
-      el.textContent = t.event1Location;
-    } else if (id === 'event1-need') {
-      el.textContent = t.event1Need;
-    } else if (id === 'event2-title') {
-      el.textContent = t.event2Title;
-    } else if (id === 'event2-location') {
-      el.textContent = t.event2Location;
-    } else if (id === 'volunteer-btn' || id === 'volunteer-btn2') {
-      el.textContent = t.volunteer;
-    } else if (id === 'details-btn') {
-      el.textContent = t.details;
-    } else if (id === 'notif1-text') {
-      el.textContent = t.notif1;
-    } else if (id === 'notif2-text') {
-      el.textContent = t.notif2;
-    } else if (id === 'notif3-text') {
-      el.textContent = t.notif3;
-    } else if (id === 'accept-btn' || id === 'accept-btn2') {
-      el.textContent = t.accept;
-    } else if (id === 'edit-profile-btn') {
-      el.textContent = t.edit;
-    } else if (id === 'save-btn') {
-      el.textContent = t.save;
-    } else if (id === 'modal-close') {
-      el.textContent = t.close;
-    } else if (id === 'nav-home') {
-      el.textContent = t.navHome;
-    } else if (id === 'nav-notifications') {
-      el.textContent = t.navNotif;
-    } else if (id === 'nav-leaderboard') {
-      el.textContent = t.navLeader;
-    } else if (id === 'nav-profile') {
-      el.textContent = t.navProfile;
-    } else if (id === 'phone-label') {
-      el.textContent = t.phoneLabel;
-    } else if (id === 'location-label') {
-      el.textContent = t.locationLabel;
-    } else if (id === 'talents-label') {
-      el.textContent = t.talentsLabel;
-    } else if (id === 'dar-label') {
-      el.textContent = t.darLabel;
-    } else if (id === 'member-label') {
-      el.textContent = t.memberLabel;
-    } else if (id === 'points-title') {
-      el.textContent = t.pointsTitle;
-    } else if (id === 'points-next') {
-      el.innerHTML = `<span id="points-percent">65</span> ${t.pointsNext}`;
-    } else if (id === 'edit-title') {
-      el.textContent = t.editTitle;
-    } else if (id === 'edit-first-label') {
-      el.textContent = t.editFirstLabel;
-    } else if (id === 'edit-last-label') {
-      el.textContent = t.editLastLabel;
-    } else if (id === 'edit-phone-label') {
-      el.textContent = t.editPhoneLabel;
-    } else if (id === 'edit-location-label') {
-      el.textContent = t.editLocationLabel;
-    } else if (id === 'edit-talents-label') {
-      el.textContent = t.editTalentsLabel;
-    } else if (id === 'edit-dar-label') {
-      el.textContent = t.editDarLabel;
-    }
-  });
+  document.getElementById('event-today-title').innerHTML = `<i class="fas fa-calendar-day"></i> ${t.eventToday}`;
+  document.getElementById('week-events-title').innerHTML = `<i class="fas fa-calendar-week"></i> ${t.weekEvents}`;
+  document.getElementById('near-title').innerHTML = `<i class="fas fa-map-marked-alt"></i> ${t.nearYou}`;
+  document.getElementById('notifications-title').innerHTML = `<i class="fas fa-bell"></i> ${t.notifications}`;
+  document.getElementById('leaderboard-title').innerHTML = `<i class="fas fa-trophy"></i> ${t.leaderboard}`;
+  document.getElementById('gallery-title').innerHTML = `<i class="fas fa-images"></i> ${t.gallery}`;
+  
+  document.getElementById('day-sat').textContent = t.saturday;
+  document.getElementById('day-sun').textContent = t.sunday;
+  document.getElementById('day-mon').textContent = t.monday;
+  document.getElementById('day-tue').textContent = t.tuesday;
+  document.getElementById('day-wed').textContent = t.wednesday;
+  
+  document.getElementById('event1-title').textContent = t.event1Title;
+  document.getElementById('event1-location').textContent = t.event1Location;
+  document.getElementById('event1-need').textContent = t.event1Need;
+  document.getElementById('event2-title').textContent = t.event2Title;
+  document.getElementById('event2-location').textContent = t.event2Location;
+  
+  document.getElementById('volunteer-btn').textContent = t.volunteer;
+  document.getElementById('volunteer-btn2').textContent = t.volunteer2;
+  document.getElementById('details-btn').textContent = t.details;
+  
+  document.getElementById('notif1-text').textContent = t.notif1;
+  document.getElementById('notif2-text').textContent = t.notif2;
+  document.getElementById('notif3-text').textContent = t.notif3;
+  
+  document.getElementById('accept-btn').textContent = t.accept;
+  document.getElementById('accept-btn2').textContent = t.accept;
+  
+  document.getElementById('edit-profile-btn').textContent = t.edit;
+  document.getElementById('save-btn').textContent = t.save;
+  document.getElementById('modal-close').textContent = t.close;
+  
+  document.getElementById('nav-home').textContent = t.navHome;
+  document.getElementById('nav-notifications').textContent = t.navNotif;
+  document.getElementById('nav-leaderboard').textContent = t.navLeader;
+  document.getElementById('nav-profile').textContent = t.navProfile;
+  
+  document.getElementById('phone-label').textContent = t.phoneLabel;
+  document.getElementById('location-label').textContent = t.locationLabel;
+  document.getElementById('talents-label').textContent = t.talentsLabel;
+  document.getElementById('dar-label').textContent = t.darLabel;
+  document.getElementById('member-label').textContent = t.memberLabel;
+  
+  document.getElementById('points-title').textContent = t.pointsTitle;
+  document.getElementById('points-next').innerHTML = `<span id="points-percent">65</span>${t.pointsNext}`;
+  
+  document.getElementById('edit-title').textContent = t.editTitle;
+  document.getElementById('edit-first-label').textContent = t.editFirstLabel;
+  document.getElementById('edit-last-label').textContent = t.editLastLabel;
+  document.getElementById('edit-phone-label').textContent = t.editPhoneLabel;
+  document.getElementById('edit-location-label').textContent = t.editLocationLabel;
+  document.getElementById('edit-talents-label').textContent = t.editTalentsLabel;
+  document.getElementById('edit-dar-label').textContent = t.editDarLabel;
   
   // تحديث الخريطة
   updateMapLanguage();
@@ -2062,8 +2019,6 @@ function changeLanguage(lang) {
   // حفظ اللغة المختارة
   localStorage.setItem('preferredLang', lang);
 }
-
-// ==================== باقي الدوال (كما هي) ====================
 
 // شاشة البداية
 setTimeout(() => {
@@ -2583,4 +2538,143 @@ function showPlaceDetails(place) {
 // الرد على الإشعار
 function respondToNotification(button, response) {
   button.parentElement.innerHTML = `<span style="color: var(--success);">✅ ${currentLang === 'ar' ? 'تم' : (currentLang === 'fr' ? 'Accepté' : 'Accepted')} ${response}</span>`;
-  showToast(`${currentLang === 'ar' ? 'تم' : (currentLang === 'fr' ? 'Accepté' : 'Accepted')} ${response} ${currentLang === 'ar' ? 'بن
+  showToast(`${currentLang === 'ar' ? 'تم' : (currentLang === 'fr' ? 'Accepté' : 'Accepted')} ${response} ${currentLang === 'ar' ? 'بنحاح' : (currentLang === 'fr' ? 'avec succès' : 'successfully')}`);
+}
+
+// قبول الطلب (للمدير)
+function acceptRequest(button) {
+  const requestDiv = button.closest('.notification-item');
+  requestDiv.style.opacity = '0.5';
+  button.parentElement.innerHTML = '<span style="color: var(--success);">✅ تم القبول</span>';
+  setTimeout(() => {
+    requestDiv.remove();
+    updateStats();
+  }, 1000);
+  showToast('تم قبول الطلب بنجاح');
+}
+
+// رفض الطلب (للمدير)
+function rejectRequest(button) {
+  const requestDiv = button.closest('.notification-item');
+  requestDiv.style.opacity = '0.5';
+  button.parentElement.innerHTML = '<span style="color: var(--danger);">❌ تم الرفض</span>';
+  setTimeout(() => {
+    requestDiv.remove();
+    updateStats();
+  }, 1000);
+  showToast('تم رفض الطلب');
+}
+
+// إنشاء طلب جديد (للمدير)
+function createRequest() {
+  const type = document.getElementById('help-type').value;
+  const location = document.getElementById('help-location').value;
+  const description = document.getElementById('help-description').value;
+  const volunteers = document.getElementById('help-volunteers').value;
+  
+  if (!location || !description) {
+    showToast('❌ الرجاء ملء جميع الحقول', 'error');
+    return;
+  }
+  
+  showToast(`✅ تم نشر طلب: ${type} في ${location}`);
+  
+  document.getElementById('help-location').value = '';
+  document.getElementById('help-description').value = '';
+  
+  updateStats();
+}
+
+// تحديث الإحصائيات
+function updateStats() {
+  const requests = document.querySelectorAll('#admin-requests .notification-item').length;
+  document.getElementById('stats-requests').textContent = requests;
+}
+
+// إضافة فعالية جديدة
+function addNewEvent() {
+  showToast('نافذة إضافة فعالية جديدة ستظهر قريباً 📅');
+}
+
+// تعديل فعالية
+function editEvent(button) {
+  showToast('تعديل الفعالية قريباً ✏️');
+}
+
+// حذف فعالية
+function deleteEvent(button) {
+  if (confirm('هل أنت متأكد من حذف هذه الفعالية؟')) {
+    button.closest('.event-item').remove();
+    showToast('تم حذف الفعالية بنجاح');
+  }
+}
+
+// رفع صور
+function uploadPhotos() {
+  showToast('نافذة رفع الصور ستظهر قريباً 📸');
+}
+
+// حذف صورة
+function deletePhoto(element) {
+  if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
+    element.remove();
+    showToast('تم حذف الصورة بنجاح');
+  }
+}
+
+// فتح معرض الصور
+function openGallery(index) {
+  showToast('معرض الصور: قريباً إن شاء الله 🖼️');
+}
+
+// عرض الإعدادات
+function showSettings() {
+  showToast('الإعدادات: قريباً ⚙️');
+}
+
+// إظهار رسالة toast
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  if (type === 'error') toast.classList.add('error');
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// تأثيرات إضافية
+document.querySelectorAll('.btn-primary').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      this.style.transform = 'scale(1)';
+    }, 200);
+  });
+});
+
+// التحقق من الجلسة المحفوظة
+window.onload = function() {
+  const rememberedEmail = localStorage.getItem('rememberedEmail');
+  if (rememberedEmail) {
+    document.getElementById('login-email').value = rememberedEmail;
+    document.getElementById('remember-me').checked = true;
+  }
+  
+  // تهيئة الخريطة بعد تحميل الصفحة
+  setTimeout(initMap, 1000);
+};
+
+// تعيين اللغة المحفوظة
+const savedLang = localStorage.getItem('preferredLang');
+if (savedLang) {
+  currentLang = savedLang;
+  document.getElementById('lang-select').value = savedLang;
+  changeLanguage(savedLang);
+}
+</script>
+
+</body>
+</html>
