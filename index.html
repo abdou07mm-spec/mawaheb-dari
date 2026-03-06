@@ -1448,7 +1448,12 @@
 
         <!-- أماكن قريبة مع خريطة -->
         <div class="card">
-          <h3 id="near-title" style="margin-bottom: 20px;"><i class="fas fa-map-marked-alt"></i> قريبة منك</h3>
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3><i class="fas fa-map-marked-alt"></i> قريبة منك</h3>
+            <button class="btn-add-place" id="addPlaceButton" onclick="showAddPlaceModal()" style="background: var(--accent); color: #0f172a; border: none; border-radius: 30px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-plus"></i> إضافة مكان جديد
+            </button>
+          </div>
           
           <!-- الخريطة -->
           <div id="map" style="height: 250px; border-radius: 16px; margin-bottom: 15px;"></div>
@@ -1860,6 +1865,65 @@
     <div class="nav-item" onclick="switchTab('admin-gallery')">
       <i class="fas fa-images"></i>
       <span>المعرض</span>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة إضافة مكان (تظهر فقط للمدير) -->
+<div id="addPlaceModal" class="modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <h3 style="color: var(--accent); margin-bottom: 20px;">
+      <i class="fas fa-map-pin"></i> إضافة مكان جديد
+    </h3>
+    
+    <div class="form-group">
+      <label>🏷️ اسم المكان</label>
+      <input type="text" id="placeName" placeholder="مثال: مسجد النور" required>
+    </div>
+    
+    <div class="form-group">
+      <label>📍 نوع المكان</label>
+      <select id="placeType" required>
+        <option value="">اختر النوع...</option>
+        <option value="mosque">🕌 مسجد</option>
+        <option value="youth">🏠 دار شباب</option>
+        <option value="restaurant">🍽️ مائدة إفطار</option>
+        <option value="charity">🤝 جمعية خيرية</option>
+        <option value="school">🏫 مدرسة / جامعة</option>
+        <option value="hospital">🏥 مستشفى / عيادة</option>
+        <option value="other">📍 أخرى</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label>📌 العنوان بالتفصيل</label>
+      <input type="text" id="placeAddress" placeholder="مثال: حي البدر، العلمة، سطيف" required>
+    </div>
+    
+    <div class="form-group">
+      <label>🗺️ الإحداثيات (اختر من الخريطة)</label>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="placeLat" placeholder="خط العرض" readonly style="flex: 1; background: rgba(255,255,255,0.05);">
+        <input type="text" id="placeLng" placeholder="خط الطول" readonly style="flex: 1; background: rgba(255,255,255,0.05);">
+        <button class="btn-map-picker" onclick="pickLocationFromMap()" style="background: var(--info); color: white; border: none; border-radius: 8px; padding: 10px 15px; cursor: pointer; white-space: nowrap;">
+          <i class="fas fa-map-marker-alt"></i> اختر
+        </button>
+      </div>
+      <small style="color: var(--text-muted);">انقر على الخريطة لاختيار الموقع</small>
+    </div>
+    
+    <div class="form-group">
+      <label>📝 وصف إضافي (اختياري)</label>
+      <textarea id="placeDescription" rows="2" placeholder="أضف معلومات إضافية عن المكان..."></textarea>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="btn-save" onclick="savePlaceToFirebase()" style="flex: 2;">
+        <i class="fas fa-save"></i> حفظ المكان
+      </button>
+      <button class="btn-cancel" onclick="closeAddPlaceModal()" style="flex: 1; background: var(--danger); color: white; border: none; border-radius: 8px; padding: 10px;">
+        <i class="fas fa-times"></i> إلغاء
+      </button>
     </div>
   </div>
 </div>
@@ -2414,77 +2478,77 @@ const translations = {
 
 let currentLang = localStorage.getItem('preferredLang') || 'ar';
 
-// ==================== بيانات الأماكن القريبة ====================
-const nearbyPlaces = [
+// ==================== بيانات الأماكن القريبة الافتراضية ====================
+const defaultPlaces = [
   {
-    name: {
-      ar: "دار الشباب حي البدر",
-      fr: "Maison de jeunes Hay El Badr",
-      en: "Hay El Badr Youth House"
-    },
+    id: 'default-1',
+    name: "دار الشباب حي البدر",
     type: "youth",
     lat: 36.1897,
     lng: 5.4133,
     distance: 0.5,
-    address: {
-      ar: "حي البدر، العلمة",
-      fr: "Hay El Badr, El Eulma",
-      en: "Hay El Badr, El Eulma"
-    }
+    address: "حي البدر، العلمة",
+    addedBy: 'system',
+    addedByName: 'النظام'
   },
   {
-    name: {
-      ar: "مسجد النور",
-      fr: "Mosquée El Nour",
-      en: "El Nour Mosque"
-    },
+    id: 'default-2',
+    name: "مسجد النور",
     type: "mosque",
     lat: 36.1872,
     lng: 5.4158,
     distance: 0.8,
-    address: {
-      ar: "شارع فلسطين، العلمة",
-      fr: "Rue Palestine, El Eulma",
-      en: "Palestine Street, El Eulma"
-    }
+    address: "شارع فلسطين، العلمة",
+    addedBy: 'system',
+    addedByName: 'النظام'
   },
   {
-    name: {
-      ar: "ملعب 8 ماي 1945",
-      fr: "Stade 8 Mai 1945",
-      en: "8 May 1945 Stadium"
-    },
+    id: 'default-3',
+    name: "ملعب 8 ماي 1945",
     type: "stadium",
     lat: 36.1845,
     lng: 5.4189,
     distance: 1.2,
-    address: {
-      ar: "طريق سطيف، العلمة",
-      fr: "Route de Sétif, El Eulma",
-      en: "Sétif Road, El Eulma"
-    }
+    address: "طريق سطيف، العلمة",
+    addedBy: 'system',
+    addedByName: 'النظام'
   },
   {
-    name: {
-      ar: "جامع الفرقان",
-      fr: "Mosquée El Fourkane",
-      en: "El Fourkane Mosque"
-    },
+    id: 'default-4',
+    name: "جامع الفرقان",
     type: "mosque",
     lat: 36.1912,
     lng: 5.4105,
     distance: 1.5,
-    address: {
-      ar: "حي 5 جويلية، العلمة",
-      fr: "Hay 5 Juillet, El Eulma",
-      en: "5 July Neighborhood, El Eulma"
-    }
+    address: "حي 5 جويلية، العلمة",
+    addedBy: 'system',
+    addedByName: 'النظام'
   }
 ];
 
 let map;
 let userMarker;
 let placeMarkers = [];
+let allPlaces = [...defaultPlaces];
+let tempMarker = null;
+let selectedLocation = null;
+
+// ==================== التحقق من صلاحية المدير ====================
+function isAdmin() {
+  return selectedRole === 'admin';
+}
+
+// إظهار/إخفاء زر إضافة مكان حسب الدور
+function toggleAddPlaceButton() {
+  const addButton = document.getElementById('addPlaceButton');
+  if (addButton) {
+    if (isAdmin()) {
+      addButton.style.display = 'flex';
+    } else {
+      addButton.style.display = 'none';
+    }
+  }
+}
 
 // ==================== دوال الخريطة ====================
 function initMap() {
@@ -2504,49 +2568,115 @@ function initMap() {
     })
   }).addTo(map).bindPopup(currentLang === 'ar' ? 'أنت هنا' : (currentLang === 'fr' ? 'Vous êtes ici' : 'You are here'));
   
-  addPlacesToMap();
-  updatePlacesList();
+  loadPlacesFromFirebase();
 }
 
-function addPlacesToMap() {
-  placeMarkers.forEach(marker => map.removeLayer(marker));
-  placeMarkers = [];
+// تحميل الأماكن من Firebase
+function loadPlacesFromFirebase() {
+  const placesRef = firebase.database().ref('places');
   
-  nearbyPlaces.forEach(place => {
-    const icon = place.type === 'youth' ? '🏠' : (place.type === 'mosque' ? '🕌' : '⚽');
+  placesRef.on('value', (snapshot) => {
+    const places = snapshot.val();
+    const firebasePlaces = [];
     
-    const marker = L.marker([place.lat, place.lng], {
-      icon: L.divIcon({
-        className: 'place-marker',
-        html: `<span style="font-size: 24px;">${icon}</span>`,
-        iconSize: [30, 30]
-      })
-    }).addTo(map).bindPopup(`
-      <b>${place.name[currentLang]}</b><br>
-      ${place.address[currentLang]}<br>
-      <small>${place.distance} كم</small>
-    `);
+    if (places) {
+      Object.keys(places).forEach(key => {
+        firebasePlaces.push({
+          id: key,
+          ...places[key]
+        });
+      });
+    }
     
-    placeMarkers.push(marker);
+    // دمج الأماكن الافتراضية مع أماكن Firebase
+    allPlaces = [...defaultPlaces, ...firebasePlaces];
+    
+    // تحديث الخريطة والقائمة
+    updateMapWithPlaces();
+    updatePlacesList();
   });
 }
 
+// تحديث الخريطة بكل الأماكن
+function updateMapWithPlaces() {
+  // حذف العلامات القديمة (باستثناء علامة المستخدم)
+  if (placeMarkers.length > 0) {
+    placeMarkers.forEach(marker => map.removeLayer(marker));
+    placeMarkers = [];
+  }
+  
+  // إضافة كل الأماكن
+  allPlaces.forEach(place => {
+    addPlaceMarkerToMap(place);
+  });
+}
+
+// إضافة علامة مكان على الخريطة
+function addPlaceMarkerToMap(place) {
+  let icon = '📍';
+  switch(place.type) {
+    case 'mosque': icon = '🕌'; break;
+    case 'youth': icon = '🏠'; break;
+    case 'restaurant': icon = '🍽️'; break;
+    case 'charity': icon = '🤝'; break;
+    case 'school': icon = '🏫'; break;
+    case 'hospital': icon = '🏥'; break;
+    case 'stadium': icon = '⚽'; break;
+    default: icon = '📍';
+  }
+  
+  const marker = L.marker([place.lat, place.lng], {
+    icon: L.divIcon({
+      className: 'place-marker',
+      html: `<span style="font-size: 24px;">${icon}</span>`,
+      iconSize: [30, 30]
+    })
+  }).addTo(map);
+  
+  // محتوى النافذة المنبثقة
+  let popupContent = `
+    <div style="text-align: center; min-width: 200px;">
+      <h4 style="color: var(--accent); margin-bottom: 5px;">${place.name}</h4>
+      <p style="margin: 5px 0;"><i class="fas fa-map-pin"></i> ${place.address}</p>
+  `;
+  
+  if (place.addedByName && place.addedByName !== 'النظام') {
+    popupContent += `<p style="margin: 5px 0;"><small>👤 أضيف بواسطة: ${place.addedByName}</small></p>`;
+  }
+  
+  popupContent += `</div>`;
+  
+  marker.bindPopup(popupContent);
+  placeMarkers.push(marker);
+}
+
+// تحديث قائمة الأماكن
 function updatePlacesList() {
   const placesList = document.getElementById('places-list');
   if (!placesList) return;
   
   let html = '<div style="display: grid; gap: 10px;">';
   
-  nearbyPlaces.forEach(place => {
-    const icon = place.type === 'youth' ? '🏠' : (place.type === 'mosque' ? '🕌' : '⚽');
+  allPlaces.forEach(place => {
+    let icon = '📍';
+    switch(place.type) {
+      case 'mosque': icon = '🕌'; break;
+      case 'youth': icon = '🏠'; break;
+      case 'restaurant': icon = '🍽️'; break;
+      case 'charity': icon = '🤝'; break;
+      case 'school': icon = '🏫'; break;
+      case 'hospital': icon = '🏥'; break;
+      case 'stadium': icon = '⚽'; break;
+    }
+    
     html += `
       <div style="display: flex; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; cursor: pointer;" onclick="flyToPlace(${place.lat}, ${place.lng})">
         <span style="font-size: 24px; margin-left: 10px;">${icon}</span>
         <div style="flex: 1;">
-          <div style="font-weight: 600;">${place.name[currentLang]}</div>
-          <small style="color: var(--text-muted);">${place.address[currentLang]}</small>
+          <div style="font-weight: 600;">${place.name}</div>
+          <small style="color: var(--text-muted);">${place.address}</small>
         </div>
-        <span style="color: var(--accent); font-weight: 600;">${place.distance} كم</span>
+        <span style="color: var(--accent); font-weight: 600;">${place.distance || '1.0'} كم</span>
       </div>
     `;
   });
@@ -2563,24 +2693,160 @@ function flyToPlace(lat, lng) {
   }
 }
 
+// ==================== دوال إضافة الأماكن (للمدير فقط) ====================
+
+// إظهار نافذة إضافة مكان
+function showAddPlaceModal() {
+  if (!isAdmin()) {
+    showToast('❌ فقط المدير يمكنه إضافة أماكن جديدة', 'error');
+    return;
+  }
+  
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+    document.getElementById('auth-screen').classList.add('active');
+    return;
+  }
+  
+  document.getElementById('addPlaceModal').classList.add('active');
+  
+  // تفعيل اختيار الموقع من الخريطة
+  map.once('click', function(e) {
+    selectedLocation = e.latlng;
+    document.getElementById('placeLat').value = e.latlng.lat.toFixed(6);
+    document.getElementById('placeLng').value = e.latlng.lng.toFixed(6);
+    
+    if (tempMarker) map.removeLayer(tempMarker);
+    tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {
+      icon: L.divIcon({
+        className: 'temp-marker',
+        html: '<i class="fas fa-map-marker-alt" style="color: var(--accent); font-size: 30px;"></i>',
+        iconSize: [30, 30]
+      })
+    }).addTo(map).bindPopup('الموقع المختار').openPopup();
+  });
+}
+
+// اختيار موقع من الخريطة
+function pickLocationFromMap() {
+  if (!isAdmin()) {
+    showToast('❌ فقط المدير يمكنه إضافة أماكن', 'error');
+    return;
+  }
+  
+  showToast('📍 انقر على الخريطة لاختيار الموقع', 'info');
+  map.once('click', function(e) {
+    selectedLocation = e.latlng;
+    document.getElementById('placeLat').value = e.latlng.lat.toFixed(6);
+    document.getElementById('placeLng').value = e.latlng.lng.toFixed(6);
+    
+    if (tempMarker) map.removeLayer(tempMarker);
+    tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {
+      icon: L.divIcon({
+        className: 'temp-marker',
+        html: '<i class="fas fa-map-marker-alt" style="color: var(--accent); font-size: 30px;"></i>',
+        iconSize: [30, 30]
+      })
+    }).addTo(map).bindPopup('الموقع المختار').openPopup();
+  });
+}
+
+// إغلاق نافذة الإضافة
+function closeAddPlaceModal() {
+  document.getElementById('addPlaceModal').classList.remove('active');
+  if (tempMarker) {
+    map.removeLayer(tempMarker);
+    tempMarker = null;
+  }
+  // تفريغ الحقول
+  document.getElementById('placeName').value = '';
+  document.getElementById('placeType').value = '';
+  document.getElementById('placeAddress').value = '';
+  document.getElementById('placeLat').value = '';
+  document.getElementById('placeLng').value = '';
+  document.getElementById('placeDescription').value = '';
+}
+
+// حساب المسافة
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// حفظ المكان في Firebase
+function savePlaceToFirebase() {
+  if (!isAdmin()) {
+    showToast('❌ فقط المدير يمكنه إضافة أماكن', 'error');
+    closeAddPlaceModal();
+    return;
+  }
+  
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+    return;
+  }
+  
+  const name = document.getElementById('placeName').value;
+  const type = document.getElementById('placeType').value;
+  const address = document.getElementById('placeAddress').value;
+  const lat = document.getElementById('placeLat').value;
+  const lng = document.getElementById('placeLng').value;
+  const description = document.getElementById('placeDescription').value;
+  
+  if (!name || !type || !address || !lat || !lng) {
+    showToast('❌ الرجاء ملء جميع الحقول المطلوبة', 'error');
+    return;
+  }
+  
+  showToast('⏳ جاري حفظ المكان...', 'info');
+  
+  // حساب المسافة التقريبية
+  const userLat = 36.1885;
+  const userLng = 5.4130;
+  const distance = calculateDistance(parseFloat(lat), parseFloat(lng), userLat, userLng);
+  
+  const placeData = {
+    name: name,
+    type: type,
+    lat: parseFloat(lat),
+    lng: parseFloat(lng),
+    address: address,
+    description: description,
+    distance: distance.toFixed(1),
+    addedBy: user.uid,
+    addedByName: user.displayName || 'المدير',
+    addedByEmail: user.email,
+    date: new Date().toISOString(),
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  };
+  
+  // حفظ في Firebase
+  const newPlaceRef = firebase.database().ref('places').push();
+  newPlaceRef.set(placeData)
+    .then(() => {
+      showToast('✅ تم إضافة المكان بنجاح');
+      closeAddPlaceModal();
+    })
+    .catch((error) => {
+      showToast('❌ خطأ في حفظ المكان: ' + error.message, 'error');
+    });
+}
+
 function updateMapLanguage() {
   if (map) {
     if (userMarker) {
       userMarker.getPopup().setContent(currentLang === 'ar' ? 'أنت هنا' : (currentLang === 'fr' ? 'Vous êtes ici' : 'You are here'));
     }
     
-    placeMarkers.forEach((marker, index) => {
-      const place = nearbyPlaces[index];
-      if (place) {
-        marker.getPopup().setContent(`
-          <b>${place.name[currentLang]}</b><br>
-          ${place.address[currentLang]}<br>
-          <small>${place.distance} كم</small>
-        `);
-      }
-    });
-    
-    updatePlacesList();
+    // تحديث تسميات الأماكن (يمكن إضافته لاحقاً)
   }
 }
 
@@ -2707,6 +2973,9 @@ firebase.auth().onAuthStateChanged((user) => {
             document.getElementById('admin-nav').style.display = 'flex';
             initAdminChart();
           }
+          
+          selectedRole = userData.role;
+          toggleAddPlaceButton();
         }
       });
       
@@ -2717,6 +2986,7 @@ firebase.auth().onAuthStateChanged((user) => {
 // اختيار الدور
 function selectRole(role) {
   selectedRole = role;
+  toggleAddPlaceButton();
   document.getElementById('role-screen').style.opacity = '0';
   setTimeout(() => {
     document.getElementById('role-screen').style.display = 'none';
@@ -2855,6 +3125,9 @@ function login() {
             initAdminChart();
           }
           
+          selectedRole = userData.role;
+          toggleAddPlaceButton();
+          
           if (remember) {
             localStorage.setItem('rememberedEmail', email);
           }
@@ -2991,6 +3264,7 @@ function signup() {
           initAdminChart();
         }
         
+        toggleAddPlaceButton();
         loadGallery();
       });
     })
@@ -3263,6 +3537,9 @@ window.onload = function() {
   
   // تحميل المعرض
   loadGallery();
+  
+  document.getElementById('notification-count').style.display = 'flex';
+  document.getElementById('notification-count').textContent = notificationCount;
 };
 
 // تعيين اللغة المحفوظة
