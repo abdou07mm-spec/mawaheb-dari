@@ -11,6 +11,10 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Chart.js للرسوم البيانية -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- مكتبة للتواريخ -->
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.0/build/global/luxon.min.js"></script>
+  <!-- مكتبة للـ Animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
   <style>
     * {
@@ -1146,11 +1150,6 @@
       background: rgba(244, 180, 27, 0.15);
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
     /* تأثيرات إضافية */
     .modal {
       position: fixed;
@@ -1202,11 +1201,6 @@
 
     .toast.info {
       background: var(--info);
-    }
-
-    @keyframes slideUp {
-      from { transform: translate(-50%, 100px); opacity: 0; }
-      to { transform: translate(-50%, 0); opacity: 1; }
     }
 
     /* تنسيقات الإعدادات */
@@ -1346,6 +1340,95 @@
     
     .radio-group input[type="radio"] {
       accent-color: var(--accent);
+    }
+
+    /* تحسينات إضافية للواجهة */
+    .btn-small {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 15px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-small:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
+    
+    .rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(244, 180, 27, 0.2);
+      padding: 5px 10px;
+      border-radius: 15px;
+      color: var(--accent);
+    }
+    
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .gallery-image {
+      transition: transform 0.3s;
+    }
+    
+    .gallery-item:hover .gallery-image {
+      transform: scale(1.1);
+    }
+    
+    /* تحسينات للشاشات الصغيرة */
+    @media (max-width: 400px) {
+      .header-top {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .filter-tabs {
+        justify-content: center;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .notification-item {
+      animation: slideInRight 0.3s ease;
+    }
+    
+    .modal-content {
+      max-height: 80vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) rgba(255,255,255,0.1);
+    }
+    
+    .modal-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .modal-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-content::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 3px;
     }
   </style>
 </head>
@@ -1625,9 +1708,7 @@
         <!-- الفعاليات القادمة -->
         <div class="card">
           <h3 style="margin-bottom: 20px;"><i class="fas fa-calendar-alt"></i> الفعاليات القادمة</h3>
-          <div id="events-container">
-            <!-- الفعاليات ستظهر هنا من Firebase -->
-          </div>
+          <div id="events-container"></div>
         </div>
 
         <!-- أماكن قريبة مع خريطة -->
@@ -1651,9 +1732,7 @@
       <section id="notifications" class="section">
         <div class="card">
           <h3 style="margin-bottom: 20px;"><i class="fas fa-bell"></i> آخر الإشعارات</h3>
-          <div id="notifications-container">
-            <!-- الإشعارات من Firebase -->
-          </div>
+          <div id="notifications-container"></div>
         </div>
       </section>
 
@@ -1661,17 +1740,13 @@
       <section id="leaderboard" class="section">
         <div class="card">
           <h3 style="margin-bottom: 20px;"><i class="fas fa-trophy"></i> لوحة الشرف</h3>
-          <div id="leaderboard-container">
-            <!-- المتطوعون النشطون من Firebase -->
-          </div>
+          <div id="leaderboard-container"></div>
         </div>
 
         <!-- معرض الصور -->
         <div class="card">
           <h3 style="margin-bottom: 20px;"><i class="fas fa-images"></i> معرض الفعاليات</h3>
-          <div class="gallery-grid" id="gallery-grid">
-            <!-- الصور من Firebase -->
-          </div>
+          <div class="gallery-grid" id="gallery-grid"></div>
           <button class="btn-save" style="margin-top: 15px;" onclick="showUploadPhotoModal()">+ إضافة صورة جديدة</button>
         </div>
       </section>
@@ -1944,9 +2019,7 @@
 
         <div class="card">
           <h3 style="margin-bottom: 20px;"><i class="fas fa-calendar-check"></i> الفعاليات الحالية</h3>
-          <div id="admin-events-list">
-            <!-- الفعاليات من Firebase -->
-          </div>
+          <div id="admin-events-list"></div>
         </div>
       </section>
 
@@ -2367,7 +2440,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
 <script>
-// تهيئة Firebase
+// ==================== تهيئة Firebase ====================
 let auth, database, storage;
 
 try {
@@ -2403,18 +2476,18 @@ let allUsers = [];
 let currentUser = null;
 let tempMarker = null;
 let notificationCount = 0;
+let currentLocation = { lat: 36.1885, lng: 5.4130 };
+let favoritePlaces = [];
+let userActivities = [];
+let chartInstance = null;
 
 // ==================== دوال الإعدادات ====================
 function showSettings() {
-  // تحديث اللغة في نافذة الإعدادات
   document.getElementById('settings-language').value = currentLang;
-  
-  // إظهار/إخفاء منطقة الخطر للمدير
   const dangerZone = document.getElementById('admin-danger-zone');
   if (dangerZone) {
     dangerZone.style.display = isAdmin() ? 'block' : 'none';
   }
-  
   document.getElementById('settings-modal').classList.add('active');
 }
 
@@ -2437,28 +2510,19 @@ function toggleDarkMode() {
 function changeFontSize(size) {
   const root = document.documentElement;
   switch(size) {
-    case 'small':
-      root.style.fontSize = '14px';
-      break;
-    case 'medium':
-      root.style.fontSize = '16px';
-      break;
-    case 'large':
-      root.style.fontSize = '18px';
-      break;
+    case 'small': root.style.fontSize = '14px'; break;
+    case 'medium': root.style.fontSize = '16px'; break;
+    case 'large': root.style.fontSize = '18px'; break;
   }
-  showToast(`📏 تم تغيير حجم الخط`);
+  showToast('📏 تم تغيير حجم الخط');
 }
 
 function clearCache() {
   showToast('🧹 جاري مسح التخزين المؤقت...', 'info');
-  setTimeout(() => {
-    showToast('✅ تم مسح التخزين المؤقت');
-  }, 1500);
+  setTimeout(() => showToast('✅ تم مسح التخزين المؤقت'), 1500);
 }
 
 function saveAllSettings() {
-  // حفظ جميع الإعدادات في localStorage
   const settings = {
     darkMode: document.getElementById('dark-mode').checked,
     language: document.getElementById('settings-language').value,
@@ -2497,37 +2561,25 @@ function loadSettings() {
       document.getElementById('image-quality').value = settings.imageQuality || 'medium';
       document.getElementById('offline-mode').checked = settings.offlineMode || false;
       
-      // تطبيق الإعدادات
-      if (settings.language !== currentLang) {
-        changeLanguage(settings.language);
-      }
+      if (settings.language !== currentLang) changeLanguage(settings.language);
       changeFontSize(settings.fontSize || 'medium');
-    } catch (e) {
-      console.log('خطأ في تحميل الإعدادات');
-    }
+    } catch (e) { console.log('خطأ في تحميل الإعدادات'); }
   }
 }
 
-// دوال منطقة الخطر (للمدير)
+// ==================== دوال منطقة الخطر (للمدير) ====================
 function resetAllData() {
   if (!isAdmin()) return;
-  
   if (confirm('⚠️ هل أنت متأكد؟ هذا سيحذف جميع بيانات المنصة!')) {
     showToast('🔄 جاري إعادة تعيين البيانات...', 'info');
-    // يمكن إضافة منطق الحذف هنا
-    setTimeout(() => {
-      showToast('✅ تم إعادة تعيين جميع البيانات');
-    }, 2000);
+    setTimeout(() => showToast('✅ تم إعادة تعيين جميع البيانات'), 2000);
   }
 }
 
 function exportData() {
   if (!isAdmin()) return;
-  
   showToast('📦 جاري تحضير ملف التصدير...', 'info');
-  setTimeout(() => {
-    showToast('✅ تم تصدير البيانات بنجاح');
-  }, 2000);
+  setTimeout(() => showToast('✅ تم تصدير البيانات بنجاح'), 2000);
 }
 
 function manageUsers() {
@@ -2540,25 +2592,20 @@ function isAdmin() {
   return selectedRole === 'admin';
 }
 
-// إظهار/إخفاء زر إضافة مكان
 function toggleAddPlaceButton() {
   const addButton = document.getElementById('addPlaceButton');
-  if (addButton) {
-    addButton.style.display = isAdmin() ? 'flex' : 'none';
-  }
+  if (addButton) addButton.style.display = isAdmin() ? 'flex' : 'none';
 }
 
 // ==================== دوال الخريطة ====================
 function initMap() {
   const userLocation = [36.1885, 5.4130];
-  
   map = L.map('map').setView(userLocation, 14);
   
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
   
-  // علامة المستخدم
   L.marker(userLocation, {
     icon: L.divIcon({
       className: 'user-marker',
@@ -2567,21 +2614,15 @@ function initMap() {
     })
   }).addTo(map).bindPopup('موقعك الحالي');
   
-  // تحميل الأماكن
   loadPlaces();
 }
 
-// تحميل الأماكن من Firebase
 function loadPlaces() {
   if (!database) return;
-  
   database.ref('places').on('value', (snapshot) => {
     allPlaces = [];
     snapshot.forEach((child) => {
-      allPlaces.push({
-        id: child.key,
-        ...child.val()
-      });
+      allPlaces.push({ id: child.key, ...child.val() });
     });
     updateMapPlaces();
     updatePlacesList();
@@ -2589,11 +2630,8 @@ function loadPlaces() {
   });
 }
 
-// تحديث الخريطة
 function updateMapPlaces() {
   if (!map) return;
-  
-  // حذف العلامات القديمة
   placeMarkers.forEach(m => map.removeLayer(m));
   placeMarkers = [];
   
@@ -2626,7 +2664,6 @@ function updateMapPlaces() {
   });
 }
 
-// تحديث قائمة الأماكن
 function updatePlacesList() {
   const list = document.getElementById('places-list');
   if (!list) return;
@@ -2655,6 +2692,10 @@ function updatePlacesList() {
   });
   
   list.innerHTML = html || '<p style="color: var(--text-muted); text-align: center;">لا توجد أماكن بعد</p>';
+}
+
+function flyToPlace(lat, lng) {
+  if (map) map.flyTo([lat, lng], 17, { duration: 2 });
 }
 
 // ==================== دوال إضافة الأماكن ====================
@@ -2698,34 +2739,24 @@ function savePlaceToFirebase() {
   }
   
   const placeData = {
-    name,
-    type,
-    address,
-    lat: parseFloat(lat),
-    lng: parseFloat(lng),
+    name, type, address,
+    lat: parseFloat(lat), lng: parseFloat(lng),
     addedBy: currentUser?.uid,
     addedByName: currentUser?.displayName,
     date: new Date().toISOString()
   };
   
   database.ref('places').push(placeData)
-    .then(() => {
-      showToast('✅ تم إضافة المكان');
-      closeAddPlaceModal();
-    });
+    .then(() => { showToast('✅ تم إضافة المكان'); closeAddPlaceModal(); });
 }
 
 // ==================== دوال الفعاليات ====================
 function loadEvents() {
   if (!database) return;
-  
   database.ref('events').on('value', (snapshot) => {
     allEvents = [];
     snapshot.forEach((child) => {
-      allEvents.push({
-        id: child.key,
-        ...child.val()
-      });
+      allEvents.push({ id: child.key, ...child.val() });
     });
     updateEventsDisplay();
     updateStats();
@@ -2771,12 +2802,7 @@ function createEvent() {
   }
   
   const eventData = {
-    title,
-    wilaya,
-    address,
-    description,
-    date,
-    time,
+    title, wilaya, address, description, date, time,
     volunteers: parseInt(volunteers),
     createdBy: currentUser?.uid,
     createdByName: currentUser?.displayName,
@@ -2786,7 +2812,6 @@ function createEvent() {
   database.ref('events').push(eventData)
     .then(() => {
       showToast('✅ تم إضافة الفعالية');
-      // تفريغ الحقول
       document.getElementById('event-title').value = '';
       document.getElementById('event-address').value = '';
       document.getElementById('event-description').value = '';
@@ -2800,21 +2825,16 @@ function volunteerForEvent(eventId) {
     showToast('❌ يجب تسجيل الدخول أولاً', 'error');
     return;
   }
-  
   showToast('✅ تم تسجيل تطوعك');
 }
 
 // ==================== دوال معرض الصور ====================
 function loadPhotos() {
   if (!database) return;
-  
   database.ref('photos').on('value', (snapshot) => {
     allPhotos = [];
     snapshot.forEach((child) => {
-      allPhotos.push({
-        id: child.key,
-        ...child.val()
-      });
+      allPhotos.push({ id: child.key, ...child.val() });
     });
     updateGallery();
     updateStats();
@@ -2849,7 +2869,6 @@ function showUploadPhotoModal() {
     return;
   }
   
-  // تحديث قائمة الفعاليات في الاختيار
   const select = document.getElementById('photo-event-select');
   select.innerHTML = '<option value="">اختر فعالية...</option>';
   allEvents.forEach(event => {
@@ -2877,355 +2896,24 @@ function uploadPhoto() {
   
   showToast('⏳ جاري رفع الصورة...', 'info');
   
-  // رفع الصورة إلى Storage
   const storageRef = storage.ref(`photos/${Date.now()}_${file.name}`);
-  storageRef.put(file).then(snapshot => {
-    return snapshot.ref.getDownloadURL();
-  }).then(url => {
-    // حفظ البيانات في Database
-    return database.ref('photos').push({
-      eventId,
-      description,
-      url,
-      uploadedBy: currentUser.uid,
-      uploadedByName: currentUser.displayName,
-      likes: 0,
-      likedBy: {},
-      comments: [],
-      timestamp: new Date().toISOString()
-    });
-  }).then(() => {
-    showToast('✅ تم رفع الصورة');
-    closeUploadPhotoModal();
-    document.getElementById('photo-description').value = '';
-    document.getElementById('photo-image').value = '';
-  }).catch(error => {
-    showToast('❌ خطأ في الرفع', 'error');
-  });
-}
-
-// ==================== دوال الإحصائيات ====================
-function updateStats() {
-  if (!isAdmin()) return;
-  
-  // عدد المتطوعين النشطين
-  const activeVolunteers = allUsers.filter(u => u && u.role === 'volunteer').length;
-  const volunteersEl = document.getElementById('total-volunteers');
-  if (volunteersEl) volunteersEl.textContent = activeVolunteers;
-  
-  // عدد الفعاليات
-  const eventsEl = document.getElementById('total-events');
-  if (eventsEl) eventsEl.textContent = allEvents.length;
-  
-  // عدد الأماكن
-  const placesEl = document.getElementById('total-places');
-  if (placesEl) placesEl.textContent = allPlaces.length;
-  
-  // عدد الصور
-  const photosEl = document.getElementById('total-photos');
-  if (photosEl) photosEl.textContent = allPhotos.length;
-}
-
-// ==================== دوال المصادقة ====================
-function selectRole(role) {
-  selectedRole = role;
-  document.getElementById('role-screen').style.opacity = '0';
-  setTimeout(() => {
-    document.getElementById('role-screen').style.display = 'none';
-    showAuthScreen(role);
-  }, 500);
-}
-
-function showAuthScreen(role) {
-  const authScreen = document.getElementById('auth-screen');
-  const authIcon = document.getElementById('auth-icon');
-  const authTitle = document.getElementById('auth-title');
-  const roleInput = document.getElementById('signup-role');
-  
-  if (role === 'volunteer') {
-    authIcon.className = 'fas fa-user-graduate';
-    authTitle.textContent = 'تسجيل دخول المتطوعين';
-    if (roleInput) roleInput.value = 'متطوع';
-  } else {
-    authIcon.className = 'fas fa-user-tie';
-    authTitle.textContent = 'تسجيل دخول المدراء';
-    if (roleInput) roleInput.value = 'مدير';
-  }
-  
-  authScreen.classList.add('active');
-}
-
-function goBackToRole() {
-  document.getElementById('auth-screen').classList.remove('active');
-  document.getElementById('role-screen').style.display = 'flex';
-  document.getElementById('role-screen').style.opacity = '1';
-}
-
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-  
-  if (tab === 'login') {
-    document.querySelectorAll('.auth-tab')[0].classList.add('active');
-    document.getElementById('login-form').classList.add('active');
-  } else {
-    document.querySelectorAll('.auth-tab')[1].classList.add('active');
-    document.getElementById('signup-form').classList.add('active');
-  }
-}
-
-function togglePassword(inputId, icon) {
-  const input = document.getElementById(inputId);
-  input.type = input.type === 'password' ? 'text' : 'password';
-  icon.className = input.type === 'password' ? 'fas fa-eye toggle-password' : 'fas fa-eye-slash toggle-password';
-}
-
-function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function login() {
-  if (!auth) return;
-  
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  
-  if (!email || !password) {
-    showToast('❌ الرجاء إدخال البريد وكلمة المرور', 'error');
-    return;
-  }
-  
-  showToast('✅ جاري تسجيل الدخول...');
-  
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      document.getElementById('auth-screen').classList.remove('active');
-    })
-    .catch(() => {
-      showToast('❌ خطأ في تسجيل الدخول', 'error');
-    });
-}
-
-function signup() {
-  if (!auth || !database) return;
-  
-  const name = document.getElementById('signup-name').value;
-  const email = document.getElementById('signup-email').value;
-  const phone = document.getElementById('signup-phone').value;
-  const wilaya = document.getElementById('signup-wilaya').value;
-  const password = document.getElementById('signup-password').value;
-  const confirm = document.getElementById('signup-confirm').value;
-  
-  if (!name || !email || !phone || !password) {
-    showToast('❌ الرجاء ملء جميع الحقول', 'error');
-    return;
-  }
-  
-  if (password !== confirm) {
-    showToast('❌ كلمة المرور غير متطابقة', 'error');
-    return;
-  }
-  
-  showToast('✅ جاري إنشاء الحساب...');
-  
-  auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      return user.updateProfile({ displayName: name }).then(() => {
-        return database.ref('users/' + user.uid).set({
-          name,
-          email,
-          phone,
-          wilaya,
-          role: selectedRole,
-          points: 0,
-          createdAt: new Date().toISOString()
-        });
+  storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL())
+    .then(url => {
+      return database.ref('photos').push({
+        eventId, description, url,
+        uploadedBy: currentUser.uid,
+        uploadedByName: currentUser.displayName,
+        likes: 0, likedBy: {}, comments: [],
+        timestamp: new Date().toISOString()
       });
     })
     .then(() => {
-      showToast('🎉 تم إنشاء الحساب');
+      showToast('✅ تم رفع الصورة');
+      closeUploadPhotoModal();
+      document.getElementById('photo-description').value = '';
+      document.getElementById('photo-image').value = '';
     })
-    .catch((error) => {
-      showToast('❌ خطأ: ' + error.message, 'error');
-    });
-}
-
-function forgotPassword() {
-  if (!auth) return;
-  
-  const email = document.getElementById('login-email').value;
-  if (!email) {
-    showToast('❌ الرجاء إدخال البريد', 'error');
-    return;
-  }
-  
-  auth.sendPasswordResetEmail(email)
-    .then(() => {
-      showToast('📧 تم إرسال رابط الاستعادة');
-    })
-    .catch(() => {
-      showToast('❌ خطأ في الإرسال', 'error');
-    });
-}
-
-function socialLogin(provider) {
-  showToast('🔑 تسجيل الدخول عبر ' + provider);
-}
-
-// ==================== دوال الملف الشخصي ====================
-function loadUserData(user) {
-  if (!database) return;
-  
-  database.ref('users/' + user.uid).once('value')
-    .then((snapshot) => {
-      const userData = snapshot.val();
-      if (!userData) return;
-      
-      document.getElementById('display-name').textContent = userData.name || user.displayName;
-      document.getElementById('display-phone').textContent = userData.phone || 'غير محدد';
-      document.getElementById('display-wilaya').textContent = getWilayaName(userData.wilaya);
-      document.getElementById('display-member').textContent = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('ar-SA') : 'غير محدد';
-      document.getElementById('points-display').textContent = userData.points || 0;
-      
-      if (userData.talents) {
-        const talents = userData.talents.split(',').map(t => t.trim());
-        let html = '';
-        talents.forEach(t => {
-          if (t) html += `<span class="talent-tag">${t}</span>`;
-        });
-        document.getElementById('display-talents').innerHTML = html;
-      }
-      
-      // تحديث نموذج التعديل
-      const nameParts = (userData.name || user.displayName || '').split(' ');
-      document.getElementById('edit-first').value = nameParts[0] || '';
-      document.getElementById('edit-last').value = nameParts.slice(1).join(' ') || '';
-      document.getElementById('edit-phone').value = userData.phone || '';
-      document.getElementById('edit-wilaya').value = userData.wilaya || '19';
-      document.getElementById('edit-talents').value = userData.talents || '';
-    });
-}
-
-function saveProfile() {
-  if (!currentUser || !database) return;
-  
-  const firstName = document.getElementById('edit-first').value;
-  const lastName = document.getElementById('edit-last').value;
-  const phone = document.getElementById('edit-phone').value;
-  const wilaya = document.getElementById('edit-wilaya').value;
-  const talents = document.getElementById('edit-talents').value;
-  
-  const fullName = (firstName + ' ' + lastName).trim();
-  
-  currentUser.updateProfile({ displayName: fullName })
-    .then(() => {
-      return database.ref('users/' + currentUser.uid).update({
-        name: fullName,
-        phone,
-        wilaya,
-        talents
-      });
-    })
-    .then(() => {
-      document.getElementById('display-name').textContent = fullName;
-      document.getElementById('display-phone').textContent = phone;
-      document.getElementById('display-wilaya').textContent = getWilayaName(wilaya);
-      
-      if (talents) {
-        const talentsArray = talents.split(',').map(t => t.trim());
-        let html = '';
-        talentsArray.forEach(t => {
-          if (t) html += `<span class="talent-tag">${t}</span>`;
-        });
-        document.getElementById('display-talents').innerHTML = html;
-      }
-      
-      showToast('✅ تم حفظ التعديلات');
-      toggleEditForm();
-    });
-}
-
-function toggleEditForm() {
-  const form = document.getElementById('edit-form');
-  form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
-
-function changePhoto(e) {
-  showToast('📸 ميزة تغيير الصورة قيد التطوير');
-}
-
-function getWilayaName(id) {
-  const names = {
-    "1": "أدرار", "2": "الشلف", "3": "الأغواط", "4": "أم البواقي",
-    "5": "باتنة", "6": "بجاية", "7": "بسكرة", "8": "بشار",
-    "9": "البليدة", "10": "البويرة", "11": "تمنراست", "12": "تبسة",
-    "13": "تلمسان", "14": "تيارت", "15": "تيزي وزو", "16": "الجزائر",
-    "17": "الجلفة", "18": "جيجل", "19": "سطيف", "20": "سعيدة",
-    "21": "سكيكدة", "22": "سيدي بلعباس", "23": "عنابة", "24": "قالمة",
-    "25": "قسنطينة", "26": "المدية", "27": "مستغانم", "28": "المسيلة",
-    "29": "معسكر", "30": "ورقلة", "31": "وهران", "32": "البيض",
-    "33": "إليزي", "34": "برج بوعريريج", "35": "بومرداس", "36": "الطارف",
-    "37": "تندوف", "38": "تيسمسيلت", "39": "الوادي", "40": "خنشلة",
-    "41": "سوق أهراس", "42": "تيبازة", "43": "ميلة", "44": "عين الدفلى",
-    "45": "النعامة", "46": "عين تموشنت", "47": "غرداية", "48": "غليزان",
-    "49": "تميمون", "50": "برج باجي مختار", "51": "أولاد جلال",
-    "52": "بني عباس", "53": "عين صالح", "54": "عين قزام", "55": "تقرت",
-    "56": "جانت", "57": "المغير", "58": "المنيعة"
-  };
-  return names[id] || 'غير محدد';
-}
-
-// ==================== دوال مساعدة ====================
-function switchTab(tabId) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (event && event.currentTarget) event.currentTarget.classList.add('active');
-}
-
-function flyToPlace(lat, lng) {
-  if (map) {
-    map.flyTo([lat, lng], 17, { duration: 2 });
-  }
-}
-
-function searchContent() {
-  const query = document.getElementById('search-input').value.toLowerCase();
-  if (!query) {
-    showToast('❌ أدخل كلمة للبحث', 'error');
-    return;
-  }
-  
-  const results = allPlaces.filter(p => 
-    p.name.toLowerCase().includes(query) || 
-    (p.address && p.address.toLowerCase().includes(query))
-  );
-  
-  showToast(`🔍 تم العثور على ${results.length} نتيجة`);
-}
-
-function filterContent(filter) {
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  if (event && event.currentTarget) event.currentTarget.classList.add('active');
-  showToast(`🔍 تصفية: ${filter}`);
-}
-
-function showToast(msg, type = 'success') {
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
-
-function changeLocation() {
-  showToast('📍 يمكنك تغيير الموقع من القائمة');
-}
-
-function closeModal() {
-  document.getElementById('details-modal').classList.remove('active');
+    .catch(() => showToast('❌ خطأ في الرفع', 'error'));
 }
 
 function showPhotoDetails(photoId) {
@@ -3287,7 +2975,7 @@ function addComment(photoId) {
     .then(() => {
       input.value = '';
       showToast('✅ تم إضافة التعليق');
-      showPhotoDetails(photoId); // تحديث النافذة
+      showPhotoDetails(photoId);
     });
 }
 
@@ -3310,9 +2998,337 @@ function likePhoto(photoId) {
       }
     }
     return photo;
-  }).then(() => {
-    showPhotoDetails(photoId);
+  }).then(() => showPhotoDetails(photoId));
+}
+
+// ==================== دوال الإحصائيات ====================
+function updateStats() {
+  if (!isAdmin()) return;
+  
+  const activeVolunteers = allUsers.filter(u => u && u.role === 'volunteer').length;
+  const volunteersEl = document.getElementById('total-volunteers');
+  if (volunteersEl) volunteersEl.textContent = activeVolunteers;
+  
+  const eventsEl = document.getElementById('total-events');
+  if (eventsEl) eventsEl.textContent = allEvents.length;
+  
+  const placesEl = document.getElementById('total-places');
+  if (placesEl) placesEl.textContent = allPlaces.length;
+  
+  const photosEl = document.getElementById('total-photos');
+  if (photosEl) photosEl.textContent = allPhotos.length;
+}
+
+// ==================== دوال المصادقة ====================
+function selectRole(role) {
+  selectedRole = role;
+  document.getElementById('role-screen').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('role-screen').style.display = 'none';
+    showAuthScreen(role);
+  }, 500);
+}
+
+function showAuthScreen(role) {
+  const authScreen = document.getElementById('auth-screen');
+  const authIcon = document.getElementById('auth-icon');
+  const authTitle = document.getElementById('auth-title');
+  const roleInput = document.getElementById('signup-role');
+  
+  if (role === 'volunteer') {
+    authIcon.className = 'fas fa-user-graduate';
+    authTitle.textContent = 'تسجيل دخول المتطوعين';
+    if (roleInput) roleInput.value = 'متطوع';
+  } else {
+    authIcon.className = 'fas fa-user-tie';
+    authTitle.textContent = 'تسجيل دخول المدراء';
+    if (roleInput) roleInput.value = 'مدير';
+  }
+  
+  authScreen.classList.add('active');
+}
+
+function goBackToRole() {
+  document.getElementById('auth-screen').classList.remove('active');
+  document.getElementById('role-screen').style.display = 'flex';
+  document.getElementById('role-screen').style.opacity = '1';
+}
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  
+  if (tab === 'login') {
+    document.querySelectorAll('.auth-tab')[0].classList.add('active');
+    document.getElementById('login-form').classList.add('active');
+  } else {
+    document.querySelectorAll('.auth-tab')[1].classList.add('active');
+    document.getElementById('signup-form').classList.add('active');
+  }
+}
+
+function togglePassword(inputId, icon) {
+  const input = document.getElementById(inputId);
+  input.type = input.type === 'password' ? 'text' : 'password';
+  icon.className = input.type === 'password' ? 'fas fa-eye toggle-password' : 'fas fa-eye-slash toggle-password';
+}
+
+function login() {
+  if (!auth) return;
+  
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  
+  if (!email || !password) {
+    showToast('❌ الرجاء إدخال البريد وكلمة المرور', 'error');
+    return;
+  }
+  
+  showToast('✅ جاري تسجيل الدخول...');
+  
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => document.getElementById('auth-screen').classList.remove('active'))
+    .catch(() => showToast('❌ خطأ في تسجيل الدخول', 'error'));
+}
+
+function signup() {
+  if (!auth || !database) return;
+  
+  const name = document.getElementById('signup-name').value;
+  const email = document.getElementById('signup-email').value;
+  const phone = document.getElementById('signup-phone').value;
+  const wilaya = document.getElementById('signup-wilaya').value;
+  const password = document.getElementById('signup-password').value;
+  const confirm = document.getElementById('signup-confirm').value;
+  
+  if (!name || !email || !phone || !password) {
+    showToast('❌ الرجاء ملء جميع الحقول', 'error');
+    return;
+  }
+  
+  if (password !== confirm) {
+    showToast('❌ كلمة المرور غير متطابقة', 'error');
+    return;
+  }
+  
+  showToast('✅ جاري إنشاء الحساب...');
+  
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      return user.updateProfile({ displayName: name }).then(() => {
+        return database.ref('users/' + user.uid).set({
+          name, email, phone, wilaya,
+          role: selectedRole,
+          points: 0,
+          createdAt: new Date().toISOString()
+        });
+      });
+    })
+    .then(() => showToast('🎉 تم إنشاء الحساب'))
+    .catch((error) => showToast('❌ خطأ: ' + error.message, 'error'));
+}
+
+function forgotPassword() {
+  if (!auth) return;
+  
+  const email = document.getElementById('login-email').value;
+  if (!email) {
+    showToast('❌ الرجاء إدخال البريد', 'error');
+    return;
+  }
+  
+  auth.sendPasswordResetEmail(email)
+    .then(() => showToast('📧 تم إرسال رابط الاستعادة'))
+    .catch(() => showToast('❌ خطأ في الإرسال', 'error'));
+}
+
+function socialLogin(provider) {
+  showToast('🔑 تسجيل الدخول عبر ' + provider);
+}
+
+// ==================== دوال الملف الشخصي ====================
+function loadUserData(user) {
+  if (!database) return;
+  
+  database.ref('users/' + user.uid).once('value')
+    .then((snapshot) => {
+      const userData = snapshot.val();
+      if (!userData) return;
+      
+      document.getElementById('display-name').textContent = userData.name || user.displayName;
+      document.getElementById('display-phone').textContent = userData.phone || 'غير محدد';
+      document.getElementById('display-wilaya').textContent = getWilayaName(userData.wilaya);
+      document.getElementById('display-member').textContent = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('ar-SA') : 'غير محدد';
+      document.getElementById('points-display').textContent = userData.points || 0;
+      
+      if (userData.talents) {
+        const talents = userData.talents.split(',').map(t => t.trim());
+        let html = '';
+        talents.forEach(t => { if (t) html += `<span class="talent-tag">${t}</span>`; });
+        document.getElementById('display-talents').innerHTML = html;
+      }
+      
+      const nameParts = (userData.name || user.displayName || '').split(' ');
+      document.getElementById('edit-first').value = nameParts[0] || '';
+      document.getElementById('edit-last').value = nameParts.slice(1).join(' ') || '';
+      document.getElementById('edit-phone').value = userData.phone || '';
+      document.getElementById('edit-wilaya').value = userData.wilaya || '19';
+      document.getElementById('edit-talents').value = userData.talents || '';
+    });
+}
+
+function saveProfile() {
+  if (!currentUser || !database) return;
+  
+  const firstName = document.getElementById('edit-first').value;
+  const lastName = document.getElementById('edit-last').value;
+  const phone = document.getElementById('edit-phone').value;
+  const wilaya = document.getElementById('edit-wilaya').value;
+  const talents = document.getElementById('edit-talents').value;
+  
+  const fullName = (firstName + ' ' + lastName).trim();
+  
+  currentUser.updateProfile({ displayName: fullName })
+    .then(() => {
+      return database.ref('users/' + currentUser.uid).update({
+        name: fullName, phone, wilaya, talents
+      });
+    })
+    .then(() => {
+      document.getElementById('display-name').textContent = fullName;
+      document.getElementById('display-phone').textContent = phone;
+      document.getElementById('display-wilaya').textContent = getWilayaName(wilaya);
+      
+      if (talents) {
+        const talentsArray = talents.split(',').map(t => t.trim());
+        let html = '';
+        talentsArray.forEach(t => { if (t) html += `<span class="talent-tag">${t}</span>`; });
+        document.getElementById('display-talents').innerHTML = html;
+      }
+      
+      showToast('✅ تم حفظ التعديلات');
+      toggleEditForm();
+    });
+}
+
+function toggleEditForm() {
+  const form = document.getElementById('edit-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function changePhoto(e) {
+  showToast('📸 ميزة تغيير الصورة قيد التطوير');
+}
+
+function getWilayaName(id) {
+  const names = {
+    "1": "أدرار", "2": "الشلف", "3": "الأغواط", "4": "أم البواقي",
+    "5": "باتنة", "6": "بجاية", "7": "بسكرة", "8": "بشار",
+    "9": "البليدة", "10": "البويرة", "11": "تمنراست", "12": "تبسة",
+    "13": "تلمسان", "14": "تيارت", "15": "تيزي وزو", "16": "الجزائر",
+    "17": "الجلفة", "18": "جيجل", "19": "سطيف", "20": "سعيدة",
+    "21": "سكيكدة", "22": "سيدي بلعباس", "23": "عنابة", "24": "قالمة",
+    "25": "قسنطينة", "26": "المدية", "27": "مستغانم", "28": "المسيلة",
+    "29": "معسكر", "30": "ورقلة", "31": "وهران", "32": "البيض",
+    "33": "إليزي", "34": "برج بوعريريج", "35": "بومرداس", "36": "الطارف",
+    "37": "تندوف", "38": "تيسمسيلت", "39": "الوادي", "40": "خنشلة",
+    "41": "سوق أهراس", "42": "تيبازة", "43": "ميلة", "44": "عين الدفلى",
+    "45": "النعامة", "46": "عين تموشنت", "47": "غرداية", "48": "غليزان",
+    "49": "تميمون", "50": "برج باجي مختار", "51": "أولاد جلال",
+    "52": "بني عباس", "53": "عين صالح", "54": "عين قزام", "55": "تقرت",
+    "56": "جانت", "57": "المغير", "58": "المنيعة"
+  };
+  return names[id] || 'غير محدد';
+}
+
+// ==================== دوال مساعدة ====================
+function switchTab(tabId) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  
+  if (tabId === 'leaderboard') loadLeaderboard();
+  else if (tabId === 'home') updatePlacesList();
+  else if (tabId === 'admin-stats' && isAdmin()) loadAdminDashboard();
+}
+
+function searchContent() {
+  const query = document.getElementById('search-input').value.toLowerCase();
+  if (!query) {
+    showToast('❌ أدخل كلمة للبحث', 'error');
+    return;
+  }
+  
+  const results = allPlaces.filter(p => 
+    p.name.toLowerCase().includes(query) || 
+    (p.address && p.address.toLowerCase().includes(query))
+  );
+  
+  showToast(`🔍 تم العثور على ${results.length} نتيجة`);
+}
+
+function filterContent(filter) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  
+  const container = document.getElementById('events-container');
+  if (!container) return;
+  
+  let filteredEvents = [];
+  const today = new Date().toISOString().split('T')[0];
+  
+  switch(filter) {
+    case 'today':
+      filteredEvents = allEvents.filter(e => e.date === today);
+      showToast(`📅 اليوم: ${filteredEvents.length} فعالية`);
+      break;
+    case 'events':
+      filteredEvents = allEvents;
+      showToast(`📋 جميع الفعاليات: ${filteredEvents.length}`);
+      break;
+    case 'places':
+      updatePlacesList();
+      return;
+    default:
+      filteredEvents = allEvents;
+  }
+  
+  let html = '';
+  filteredEvents.forEach(event => {
+    html += `
+      <div class="event-item">
+        <h4>${event.title}</h4>
+        <p><i class="fas fa-map-pin"></i> ${event.address}</p>
+        <p><i class="fas fa-calendar"></i> ${event.date} - ${event.time}</p>
+        <p><i class="fas fa-users"></i> ${event.volunteers || 0} متطوع</p>
+        <div class="event-buttons">
+          <button class="btn btn-primary" onclick="volunteerForEvent('${event.id}')">تطوع الآن</button>
+          ${event.averageRating ? `<span class="rating">⭐ ${event.averageRating}</span>` : ''}
+        </div>
+      </div>
+    `;
   });
+  
+  container.innerHTML = html || '<p style="color: var(--text-muted);">لا توجد فعاليات</p>';
+}
+
+function showToast(msg, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function changeLocation() {
+  showToast('📍 يمكنك تغيير الموقع من القائمة');
+}
+
+function closeModal() {
+  document.getElementById('details-modal').classList.remove('active');
 }
 
 // ==================== دوال لوحة الشرف ====================
@@ -3322,13 +3338,9 @@ function loadLeaderboard() {
   database.ref('users').orderByChild('points').limitToLast(10).on('value', (snapshot) => {
     const users = [];
     snapshot.forEach((child) => {
-      users.push({
-        id: child.key,
-        ...child.val()
-      });
+      users.push({ id: child.key, ...child.val() });
     });
     
-    // ترتيب تنازلي
     users.sort((a, b) => (b.points || 0) - (a.points || 0));
     
     const container = document.getElementById('leaderboard-container');
@@ -3338,19 +3350,10 @@ function loadLeaderboard() {
     users.forEach((user, index) => {
       let rankClass = '';
       let rankText = '';
-      if (index === 0) {
-        rankClass = 'rank gold';
-        rankText = '🥇';
-      } else if (index === 1) {
-        rankClass = 'rank silver';
-        rankText = '🥈';
-      } else if (index === 2) {
-        rankClass = 'rank bronze';
-        rankText = '🥉';
-      } else {
-        rankClass = 'rank';
-        rankText = index + 1;
-      }
+      if (index === 0) { rankClass = 'rank gold'; rankText = '🥇'; }
+      else if (index === 1) { rankClass = 'rank silver'; rankText = '🥈'; }
+      else if (index === 2) { rankClass = 'rank bronze'; rankText = '🥉'; }
+      else { rankClass = 'rank'; rankText = index + 1; }
       
       html += `
         <div class="leaderboard-item">
@@ -3374,13 +3377,9 @@ function loadNotifications() {
   database.ref('notifications').orderByChild('userId').equalTo(currentUser.uid).on('value', (snapshot) => {
     const notifications = [];
     snapshot.forEach((child) => {
-      notifications.push({
-        id: child.key,
-        ...child.val()
-      });
+      notifications.push({ id: child.key, ...child.val() });
     });
     
-    // ترتيب تنازلي حسب التاريخ
     notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     
     const container = document.getElementById('notifications-container');
@@ -3399,113 +3398,15 @@ function loadNotifications() {
     
     container.innerHTML = html || '<p style="color: var(--text-muted);">لا توجد إشعارات</p>';
     
-    // تحديث العداد
     document.getElementById('notification-count').textContent = notifications.length;
     document.getElementById('notification-count').style.display = notifications.length > 0 ? 'flex' : 'none';
   });
 }
 
-// ==================== التهيئة ====================
-if (auth) {
-  auth.onAuthStateChanged((user) => {
-    currentUser = user;
-    
-    if (user) {
-      document.getElementById('role-screen').style.display = 'none';
-      document.getElementById('auth-screen').classList.remove('active');
-      document.getElementById('app').style.display = 'block';
-      
-      if (database) {
-        database.ref('users/' + user.uid).once('value')
-          .then((snapshot) => {
-            const userData = snapshot.val();
-            if (userData) {
-              selectedRole = userData.role;
-              
-              if (selectedRole === 'volunteer') {
-                document.getElementById('volunteer-interface').style.display = 'block';
-                document.getElementById('admin-interface').style.display = 'none';
-                document.getElementById('volunteer-nav').style.display = 'flex';
-                document.getElementById('admin-nav').style.display = 'none';
-              } else {
-                document.getElementById('volunteer-interface').style.display = 'none';
-                document.getElementById('admin-interface').style.display = 'block';
-                document.getElementById('volunteer-nav').style.display = 'none';
-                document.getElementById('admin-nav').style.display = 'flex';
-              }
-              
-              loadUserData(user);
-              toggleAddPlaceButton();
-              loadNotifications();
-            }
-          });
-      }
-    }
-  });
-}
-
-// تحميل جميع البيانات
-if (database) {
-  loadPlaces();
-  loadEvents();
-  loadPhotos();
-  loadLeaderboard();
-  
-  // تحميل المستخدمين للإحصائيات
-  database.ref('users').on('value', (snapshot) => {
-    allUsers = [];
-    snapshot.forEach((child) => {
-      allUsers.push(child.val());
-    });
-    updateStats();
-  });
-}
-
-// تهيئة الخريطة بعد تحميل الصفحة
-setTimeout(initMap, 1000);
-
-// شاشة البداية
-setTimeout(() => {
-  const splashScreen = document.getElementById('splash-screen');
-  if (splashScreen) {
-    splashScreen.style.opacity = '0';
-    setTimeout(() => {
-      splashScreen.style.display = 'none';
-    }, 600);
-  }
-}, 2000);
-
-// تحميل الإعدادات المحفوظة
-loadSettings();
-
-// دوال الترجمة
-function changeLanguage(lang) {
-  currentLang = lang;
-  document.getElementById('lang-select').value = lang;
-  document.getElementById('settings-language').value = lang;
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  document.documentElement.lang = lang;
-  localStorage.setItem('preferredLang', lang);
-  showToast(`🌐 تم تغيير اللغة إلى ${lang === 'ar' ? 'العربية' : lang === 'fr' ? 'الفرنسية' : 'الإنجليزية'}`);
-}
-
-<script>
-// ==================== تهيئة Firebase إضافية وإعدادات متقدمة ====================
-
-// متغيرات عامة إضافية
-let currentLocation = { lat: 36.1885, lng: 5.4130 };
-let favoritePlaces = [];
-let userActivities = [];
-let chartInstance = null;
-
 // ==================== دوال متقدمة للمدير ====================
 function loadAdminDashboard() {
   if (!isAdmin() || !database) return;
-  
-  // إنشاء الرسم البياني للإحصائيات
   createStatsChart();
-  
-  // تحميل قائمة الفعاليات للمدير
   loadAdminEventsList();
 }
 
@@ -3513,7 +3414,6 @@ function createStatsChart() {
   const ctx = document.getElementById('statsChart');
   if (!ctx) return;
   
-  // تجميع البيانات حسب الشهر
   const months = ['جانفي', 'فيفري', 'مارس', 'أفريل', 'ماي', 'جوان', 
                   'جويلية', 'أوت', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
   
@@ -3525,10 +3425,7 @@ function createStatsChart() {
     }
   });
   
-  // حذف الرسم البياني السابق إن وجد
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
+  if (chartInstance) chartInstance.destroy();
   
   chartInstance = new Chart(ctx, {
     type: 'line',
@@ -3546,31 +3443,10 @@ function createStatsChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: {
-            color: '#f1f5f9'
-          }
-        }
-      },
+      plugins: { legend: { labels: { color: '#f1f5f9' } } },
       scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(255,255,255,0.1)'
-          },
-          ticks: {
-            color: '#94a3b8'
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: '#94a3b8'
-          }
-        }
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
+        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
       }
     }
   });
@@ -3624,7 +3500,6 @@ function editEvent(eventId) {
   document.getElementById('event-time').value = event.time || '';
   document.getElementById('event-volunteers').value = event.volunteers || 5;
   
-  // حذف الفعالية القديمة وإضافة جديدة
   database.ref('events/' + eventId).remove().then(() => {
     showToast('✏️ يمكنك الآن تعديل الفعالية');
   });
@@ -3647,19 +3522,16 @@ function searchContent() {
     return;
   }
   
-  // البحث في الأماكن
   const placeResults = allPlaces.filter(p => 
     p.name.toLowerCase().includes(query) || 
     (p.address && p.address.toLowerCase().includes(query))
   );
   
-  // البحث في الفعاليات
   const eventResults = allEvents.filter(e => 
     e.title.toLowerCase().includes(query) ||
     (e.description && e.description.toLowerCase().includes(query))
   );
   
-  // البحث في الصور (حسب الوصف)
   const photoResults = allPhotos.filter(p => 
     p.description && p.description.toLowerCase().includes(query)
   );
@@ -3668,8 +3540,6 @@ function searchContent() {
   
   if (totalResults > 0) {
     showToast(`🔍 تم العثور على ${totalResults} نتيجة (${placeResults.length} مكان، ${eventResults.length} فعالية، ${photoResults.length} صورة)`);
-    
-    // عرض النتائج في نافذة منبثقة
     showSearchResults(placeResults, eventResults, photoResults);
   } else {
     showToast('😕 لا توجد نتائج للبحث', 'info');
@@ -3711,23 +3581,18 @@ function showSearchResults(places, events, photos) {
 function calculateUserPoints() {
   if (!currentUser || !database) return;
   
-  // حساب النقاط بناءً على الأنشطة
   let points = 0;
   
-  // نقاط المشاركة في الفعاليات
   database.ref('participations').orderByChild('userId').equalTo(currentUser.uid)
     .once('value', (snapshot) => {
-      points += snapshot.numChildren() * 10; // 10 نقاط لكل مشاركة
+      points += snapshot.numChildren() * 10;
       
-      // نقاط إضافة الصور
       database.ref('photos').orderByChild('uploadedBy').equalTo(currentUser.uid)
         .once('value', (snapshot) => {
-          points += snapshot.numChildren() * 5; // 5 نقاط لكل صورة
+          points += snapshot.numChildren() * 5;
           
-          // تحديث النقاط في قاعدة البيانات
           database.ref('users/' + currentUser.uid + '/points').set(points);
           
-          // تحديث العرض
           document.getElementById('points-display').textContent = points;
           const progress = Math.min((points / 100) * 100, 100);
           document.getElementById('progress-fill').style.width = progress + '%';
@@ -3751,7 +3616,6 @@ function toggleFavorite(placeId) {
     showToast('💔 تمت الإزالة من المفضلة');
   }
   
-  // حفظ في قاعدة البيانات
   database.ref('users/' + currentUser.uid + '/favorites').set(favoritePlaces);
 }
 
@@ -3760,26 +3624,20 @@ function sendNotification(userId, title, message) {
   if (!database || !isAdmin()) return;
   
   const notification = {
-    userId,
-    title,
-    message,
+    userId, title, message,
     read: false,
     timestamp: new Date().toISOString()
   };
   
   database.ref('notifications').push(notification)
-    .then(() => {
-      showToast('📨 تم إرسال الإشعار');
-    });
+    .then(() => showToast('📨 تم إرسال الإشعار'));
 }
 
 function markNotificationAsRead(notificationId) {
   if (!database || !currentUser) return;
   
   database.ref('notifications/' + notificationId + '/read').set(true)
-    .then(() => {
-      loadNotifications();
-    });
+    .then(() => loadNotifications());
 }
 
 // ==================== دوال التقييم ====================
@@ -3790,24 +3648,20 @@ function rateEvent(eventId, rating) {
   }
   
   const ratingData = {
-    userId: currentUser.uid,
-    rating: rating,
+    userId: currentUser.uid, rating,
     timestamp: new Date().toISOString()
   };
   
   database.ref('ratings/' + eventId).push(ratingData)
     .then(() => {
       showToast(`⭐ تم التقييم ب ${rating} نجوم`);
-      
-      // حساب متوسط التقييم
       calculateAverageRating(eventId);
     });
 }
 
 function calculateAverageRating(eventId) {
   database.ref('ratings/' + eventId).once('value', (snapshot) => {
-    let total = 0;
-    let count = 0;
+    let total = 0, count = 0;
     
     snapshot.forEach((child) => {
       total += child.val().rating;
@@ -3831,25 +3685,15 @@ function getUserLocation() {
           lng: position.coords.longitude
         };
         
-        // تحديث الخريطة
-        if (map) {
-          map.flyTo([currentLocation.lat, currentLocation.lng], 14);
-        }
-        
-        // تحديث نص الموقع
+        if (map) map.flyTo([currentLocation.lat, currentLocation.lng], 14);
         document.getElementById('location-text').textContent = 'موقعك الحالي';
-        
         showToast('✅ تم تحديد موقعك بنجاح');
         
-        // حفظ في قاعدة البيانات إذا كان المستخدم يسمح
         if (document.getElementById('location-sharing')?.checked && currentUser) {
           database.ref('users/' + currentUser.uid + '/location').set(currentLocation);
         }
       },
-      (error) => {
-        showToast('❌ تعذر تحديد الموقع', 'error');
-        console.log('خطأ في تحديد الموقع:', error);
-      }
+      () => showToast('❌ تعذر تحديد الموقع', 'error')
     );
   } else {
     showToast('❌ المتصفح لا يدعم تحديد الموقع', 'error');
@@ -3871,9 +3715,7 @@ function backupUserData() {
     
     const backupData = {
       user: userSnap.val(),
-      participations: [],
-      photos: [],
-      ratings: [],
+      participations: [], photos: [], ratings: [],
       backupDate: new Date().toISOString()
     };
     
@@ -3881,7 +3723,6 @@ function backupUserData() {
     photosSnap.forEach(child => backupData.photos.push(child.val()));
     ratingsSnap.forEach(child => backupData.ratings.push(child.val()));
     
-    // تحويل إلى JSON وتحفيظ
     const dataStr = JSON.stringify(backupData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
@@ -3895,185 +3736,97 @@ function backupUserData() {
   });
 }
 
-// ==================== دوال التصفية المتقدمة ====================
-function filterContent(filter) {
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  if (event && event.currentTarget) {
-    event.currentTarget.classList.add('active');
-  }
-  
-  const container = document.getElementById('events-container');
-  if (!container) return;
-  
-  let filteredEvents = [];
-  const today = new Date().toISOString().split('T')[0];
-  
-  switch(filter) {
-    case 'today':
-      filteredEvents = allEvents.filter(e => e.date === today);
-      showToast(`📅 اليوم: ${filteredEvents.length} فعالية`);
-      break;
-    case 'events':
-      filteredEvents = allEvents;
-      showToast(`📋 جميع الفعاليات: ${filteredEvents.length}`);
-      break;
-    case 'places':
-      // عرض الأماكن بدلاً من الفعاليات
-      updatePlacesList();
-      return;
-    default:
-      filteredEvents = allEvents;
-  }
-  
-  // عرض الفعاليات المصفاة
-  let html = '';
-  filteredEvents.forEach(event => {
-    html += `
-      <div class="event-item">
-        <h4>${event.title}</h4>
-        <p><i class="fas fa-map-pin"></i> ${event.address}</p>
-        <p><i class="fas fa-calendar"></i> ${event.date} - ${event.time}</p>
-        <p><i class="fas fa-users"></i> ${event.volunteers || 0} متطوع</p>
-        <div class="event-buttons">
-          <button class="btn btn-primary" onclick="volunteerForEvent('${event.id}')">تطوع الآن</button>
-          ${event.averageRating ? `<span class="rating">⭐ ${event.averageRating}</span>` : ''}
-        </div>
-      </div>
-    `;
-  });
-  
-  container.innerHTML = html || '<p style="color: var(--text-muted);">لا توجد فعاليات</p>';
-}
-
-// ==================== دوال تحميل البيانات الأولية ====================
-function loadInitialData() {
-  if (database) {
-    loadPlaces();
-    loadEvents();
-    loadPhotos();
-    loadLeaderboard();
+// ==================== دوال التهيئة ====================
+if (auth) {
+  auth.onAuthStateChanged((user) => {
+    currentUser = user;
     
-    database.ref('users').on('value', (snapshot) => {
-      allUsers = [];
-      snapshot.forEach((child) => {
-        allUsers.push({
-          id: child.key,
-          ...child.val()
-        });
-      });
-      updateStats();
-    });
-  }
-}
-
-// ==================== تحديث دالة التبديل بين الواجهات ====================
-function switchTab(tabId) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  if (event && event.currentTarget) {
-    event.currentTarget.classList.add('active');
-  }
-  
-  // تحديث البيانات حسب التبويب
-  if (tabId === 'leaderboard') {
-    loadLeaderboard();
-  } else if (tabId === 'home') {
-    updatePlacesList();
-  } else if (tabId === 'admin-stats' && isAdmin()) {
-    loadAdminDashboard();
-  }
-}
-
-// ==================== دوال تصدير واستيراد البيانات للمدير ====================
-function exportAllData() {
-  if (!isAdmin()) return;
-  
-  showToast('📦 جاري تصدير جميع البيانات...', 'info');
-  
-  Promise.all([
-    database.ref('users').once('value'),
-    database.ref('events').once('value'),
-    database.ref('places').once('value'),
-    database.ref('photos').once('value'),
-    database.ref('notifications').once('value'),
-    database.ref('ratings').once('value')
-  ]).then(([users, events, places, photos, notifications, ratings]) => {
-    
-    const exportData = {
-      exportDate: new Date().toISOString(),
-      exportedBy: currentUser?.uid,
-      users: users.val(),
-      events: events.val(),
-      places: places.val(),
-      photos: photos.val(),
-      notifications: notifications.val(),
-      ratings: ratings.val()
-    };
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `mawaheb_full_backup_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    showToast('✅ تم تصدير جميع البيانات');
+    if (user) {
+      document.getElementById('role-screen').style.display = 'none';
+      document.getElementById('auth-screen').classList.remove('active');
+      document.getElementById('app').style.display = 'block';
+      
+      if (database) {
+        database.ref('users/' + user.uid).once('value')
+          .then((snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+              selectedRole = userData.role;
+              
+              if (selectedRole === 'volunteer') {
+                document.getElementById('volunteer-interface').style.display = 'block';
+                document.getElementById('admin-interface').style.display = 'none';
+                document.getElementById('volunteer-nav').style.display = 'flex';
+                document.getElementById('admin-nav').style.display = 'none';
+              } else {
+                document.getElementById('volunteer-interface').style.display = 'none';
+                document.getElementById('admin-interface').style.display = 'block';
+                document.getElementById('volunteer-nav').style.display = 'none';
+                document.getElementById('admin-nav').style.display = 'flex';
+              }
+              
+              loadUserData(user);
+              toggleAddPlaceButton();
+              loadNotifications();
+            }
+          });
+      }
+    }
   });
 }
 
-// ==================== دوال إضافية ====================
-function shareContent(type, id) {
-  const url = window.location.href;
-  const text = type === 'event' ? 'شاهد هذه الفعالية على مواهب داري' : 'شاهد هذا المكان على مواهب داري';
+if (database) {
+  loadPlaces();
+  loadEvents();
+  loadPhotos();
+  loadLeaderboard();
   
-  if (navigator.share) {
-    navigator.share({
-      title: 'مواهب داري',
-      text: text,
-      url: url
-    }).catch(console.error);
-  } else {
-    navigator.clipboard.writeText(url).then(() => {
-      showToast('📋 تم نسخ الرابط');
-    });
-  }
+  database.ref('users').on('value', (snapshot) => {
+    allUsers = [];
+    snapshot.forEach((child) => { allUsers.push(child.val()); });
+    updateStats();
+  });
 }
 
-function reportContent(type, id) {
-  if (!currentUser) {
-    showToast('❌ يجب تسجيل الدخول أولاً', 'error');
-    return;
+setTimeout(initMap, 1000);
+
+setTimeout(() => {
+  const splashScreen = document.getElementById('splash-screen');
+  if (splashScreen) {
+    splashScreen.style.opacity = '0';
+    setTimeout(() => splashScreen.style.display = 'none', 600);
   }
-  
-  showToast('📝 تم إرسال البلاغ', 'info');
+}, 2000);
+
+loadSettings();
+
+// ==================== دوال الترجمة ====================
+function changeLanguage(lang) {
+  currentLang = lang;
+  document.getElementById('lang-select').value = lang;
+  document.getElementById('settings-language').value = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+  localStorage.setItem('preferredLang', lang);
+  showToast(`🌐 تم تغيير اللغة إلى ${lang === 'ar' ? 'العربية' : lang === 'fr' ? 'الفرنسية' : 'الإنجليزية'}`);
 }
 
-// ==================== التهيئة النهائية ====================
-// تحميل جميع البيانات عند بدء التشغيل
+// استعادة اللغة المحفوظة
+const savedLang = localStorage.getItem('preferredLang');
+if (savedLang) {
+  currentLang = savedLang;
+  changeLanguage(savedLang);
+}
+
+// طلب تحديد الموقع إذا كان مسموحاً
 document.addEventListener('DOMContentLoaded', () => {
-  loadInitialData();
-  
-  // استعادة اللغة المحفوظة
-  const savedLang = localStorage.getItem('preferredLang');
-  if (savedLang) {
-    currentLang = savedLang;
-    changeLanguage(savedLang);
-  }
-  
-  // طلب تحديد الموقع إذا كان مسموحاً
   const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
-  if (settings.locationSharing) {
-    setTimeout(getUserLocation, 3000);
-  }
+  if (settings.locationSharing) setTimeout(getUserLocation, 3000);
 });
 
-// دالة لحساب المسافة بين موقعين (باستخدام صيغة هافرسين)
+// ==================== دوال إضافية ====================
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // نصف قطر الأرض بالكيلومتر
+  const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = 
@@ -4084,33 +3837,46 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// عرض الأماكن القريبة
 function showNearbyPlaces() {
   if (!currentLocation) return;
   
   const nearbyPlaces = allPlaces
     .map(place => ({
       ...place,
-      distance: calculateDistance(
-        currentLocation.lat, currentLocation.lng,
-        place.lat, place.lng
-      )
+      distance: calculateDistance(currentLocation.lat, currentLocation.lng, place.lat, place.lng)
     }))
-    .filter(place => place.distance <= 10) // ضمن 10 كم
+    .filter(place => place.distance <= 10)
     .sort((a, b) => a.distance - b.distance);
   
-  if (nearbyPlaces.length > 0) {
-    showToast(`📍 يوجد ${nearbyPlaces.length} مكان قريب منك`);
+  if (nearbyPlaces.length > 0) showToast(`📍 يوجد ${nearbyPlaces.length} مكان قريب منك`);
+}
+
+function shareContent(type, id) {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({
+      title: 'مواهب داري',
+      text: type === 'event' ? 'شاهد هذه الفعالية' : 'شاهد هذا المكان',
+      url: url
+    }).catch(console.error);
+  } else {
+    navigator.clipboard.writeText(url).then(() => showToast('📋 تم نسخ الرابط'));
   }
 }
 
-// تحديث دالة التبديل بين الواجهات لتشمل لوحة المدير
+function reportContent() {
+  if (!currentUser) {
+    showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+    return;
+  }
+  showToast('📝 تم إرسال البلاغ', 'info');
+}
+
 function switchToAdmin() {
   document.getElementById('volunteer-interface').style.display = 'none';
   document.getElementById('admin-interface').style.display = 'block';
   document.getElementById('volunteer-nav').style.display = 'none';
   document.getElementById('admin-nav').style.display = 'flex';
-  
   loadAdminDashboard();
 }
 
@@ -4120,121 +3886,7 @@ function switchToVolunteer() {
   document.getElementById('volunteer-nav').style.display = 'flex';
   document.getElementById('admin-nav').style.display = 'none';
 }
-
-// ==================== حفظ اللغة المختارة (النقطة التي توقفنا عندها) ====================
-// تم إضافة هذا الجزء في دالة changeLanguage الموجودة سابقاً
-// وحفظ اللغة في localStorage عند التغيير
 </script>
-
-<!-- إضافة بعض التحسينات النهائية -->
-<style>
-  /* تحسينات إضافية للواجهة */
-  .btn-small {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 15px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-  
-  .btn-small:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--glow);
-  }
-  
-  .rating {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(244, 180, 27, 0.2);
-    padding: 5px 10px;
-    border-radius: 15px;
-    color: var(--accent);
-  }
-  
-  .place-item {
-    transition: all 0.3s;
-    cursor: pointer;
-  }
-  
-  .place-item:hover {
-    background: rgba(244, 180, 27, 0.1);
-    transform: translateX(-5px);
-  }
-  
-  .gallery-item {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .gallery-image {
-    transition: transform 0.3s;
-  }
-  
-  .gallery-item:hover .gallery-image {
-    transform: scale(1.1);
-  }
-  
-  /* تحسينات للشاشات الصغيرة */
-  @media (max-width: 400px) {
-    .header-top {
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .filter-tabs {
-      justify-content: center;
-    }
-    
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  /* تأثيرات حركية للعناصر */
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  .notification-item {
-    animation: slideInRight 0.3s ease;
-  }
-  
-  /* تحسين ظهور النماذج */
-  .modal-content {
-    max-height: 80vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent) rgba(255,255,255,0.1);
-  }
-  
-  .modal-content::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .modal-content::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.1);
-  }
-  
-  .modal-content::-webkit-scrollbar-thumb {
-    background: var(--accent);
-    border-radius: 3px;
-  }
-</style>
-
-<!-- إضافة مكتبة لتسهيل التعامل مع التواريخ -->
-<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.0/build/global/luxon.min.js"></script>
-
-<!-- إضافة مكتبة للـ Animations -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 </body>
 </html>
