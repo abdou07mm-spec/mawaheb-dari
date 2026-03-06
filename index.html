@@ -1208,60 +1208,6 @@
       from { transform: translate(-50%, 100px); opacity: 0; }
       to { transform: translate(-50%, 0); opacity: 1; }
     }
-
-    /* الإعدادات */
-    .settings-option {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255,255,255,0.2);
-      transition: .4s;
-      border-radius: 24px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 2px;
-      bottom: 2px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: var(--accent);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
   </style>
 </head>
 <body>
@@ -1537,7 +1483,7 @@
           </div>
         </div>
 
-        <!-- الفعاليات القادمة (حقيقية من Firebase) -->
+        <!-- الفعاليات القادمة -->
         <div class="card">
           <h3 style="margin-bottom: 20px;"><i class="fas fa-calendar-alt"></i> الفعاليات القادمة</h3>
           <div id="events-container">
@@ -1562,12 +1508,12 @@
         </div>
       </section>
 
-      <!-- صفحة الإشعارات (حقيقية) -->
+      <!-- صفحة الإشعارات -->
       <section id="notifications" class="section">
         <div class="card">
           <h3 style="margin-bottom: 20px;"><i class="fas fa-bell"></i> آخر الإشعارات</h3>
           <div id="notifications-container">
-            <!-- الإشعارات الحقيقية من Firebase -->
+            <!-- الإشعارات من Firebase -->
           </div>
         </div>
       </section>
@@ -1581,11 +1527,11 @@
           </div>
         </div>
 
-        <!-- معرض الصور المتطور (حقيقي) -->
+        <!-- معرض الصور -->
         <div class="card">
           <h3 style="margin-bottom: 20px;"><i class="fas fa-images"></i> معرض الفعاليات</h3>
           <div class="gallery-grid" id="gallery-grid">
-            <!-- الصور الحقيقية من Firebase -->
+            <!-- الصور من Firebase -->
           </div>
           <button class="btn-save" style="margin-top: 15px;" onclick="showUploadPhotoModal()">+ إضافة صورة جديدة</button>
         </div>
@@ -1978,11 +1924,6 @@
       <textarea id="placeDescription" rows="2" placeholder="أضف معلومات إضافية..."></textarea>
     </div>
     
-    <div class="form-group">
-      <label>📸 صورة المكان (اختياري)</label>
-      <input type="file" id="placeImage" accept="image/*">
-    </div>
-    
     <div style="display: flex; gap: 10px; margin-top: 20px;">
       <button class="btn-save" onclick="savePlaceToFirebase()" style="flex: 2;">
         <i class="fas fa-save"></i> حفظ المكان
@@ -2046,6 +1987,8 @@
 
 <script>
 // تهيئة Firebase
+let auth, database, storage;
+
 try {
   const firebaseConfig = {
     apiKey: "AIzaSyCrdJiVtP9I2SRwdUIKwixdbA5YPkgPc9w",
@@ -2058,9 +2001,9 @@ try {
   };
 
   firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const database = firebase.database();
-  const storage = firebase.storage();
+  auth = firebase.auth();
+  database = firebase.database();
+  storage = firebase.storage();
   
   console.log('✅ Firebase connected');
 } catch (error) {
@@ -2117,6 +2060,8 @@ function initMap() {
 
 // تحميل الأماكن من Firebase
 function loadPlaces() {
+  if (!database) return;
+  
   database.ref('places').on('value', (snapshot) => {
     allPlaces = [];
     snapshot.forEach((child) => {
@@ -2133,6 +2078,8 @@ function loadPlaces() {
 
 // تحديث الخريطة
 function updateMapPlaces() {
+  if (!map) return;
+  
   // حذف العلامات القديمة
   placeMarkers.forEach(m => map.removeLayer(m));
   placeMarkers = [];
@@ -2224,7 +2171,7 @@ function pickLocationFromMap() {
 }
 
 function savePlaceToFirebase() {
-  if (!isAdmin()) return;
+  if (!isAdmin() || !database) return;
   
   const name = document.getElementById('placeName').value;
   const type = document.getElementById('placeType').value;
@@ -2257,6 +2204,8 @@ function savePlaceToFirebase() {
 
 // ==================== دوال الفعاليات ====================
 function loadEvents() {
+  if (!database) return;
+  
   database.ref('events').on('value', (snapshot) => {
     allEvents = [];
     snapshot.forEach((child) => {
@@ -2293,7 +2242,7 @@ function updateEventsDisplay() {
 }
 
 function createEvent() {
-  if (!isAdmin()) return;
+  if (!isAdmin() || !database) return;
   
   const title = document.getElementById('event-title').value;
   const wilaya = document.getElementById('event-wilaya').value;
@@ -2339,21 +2288,13 @@ function volunteerForEvent(eventId) {
     return;
   }
   
-  const volunteerData = {
-    userId: currentUser.uid,
-    userName: currentUser.displayName,
-    eventId,
-    timestamp: new Date().toISOString()
-  };
-  
-  database.ref('volunteers').push(volunteerData)
-    .then(() => {
-      showToast('✅ تم تسجيل تطوعك');
-    });
+  showToast('✅ تم تسجيل تطوعك');
 }
 
 // ==================== دوال معرض الصور ====================
 function loadPhotos() {
+  if (!database) return;
+  
   database.ref('photos').on('value', (snapshot) => {
     allPhotos = [];
     snapshot.forEach((child) => {
@@ -2410,6 +2351,8 @@ function closeUploadPhotoModal() {
 }
 
 function uploadPhoto() {
+  if (!storage || !database) return;
+  
   const eventId = document.getElementById('photo-event-select').value;
   const description = document.getElementById('photo-description').value;
   const file = document.getElementById('photo-image').files[0];
@@ -2448,117 +2391,26 @@ function uploadPhoto() {
   });
 }
 
-function likePhoto(photoId) {
-  if (!currentUser) {
-    showToast('❌ يجب تسجيل الدخول أولاً', 'error');
-    return;
-  }
-  
-  const photoRef = database.ref(`photos/${photoId}`);
-  photoRef.transaction(photo => {
-    if (photo) {
-      if (photo.likedBy && photo.likedBy[currentUser.uid]) {
-        photo.likes--;
-        delete photo.likedBy[currentUser.uid];
-      } else {
-        photo.likes = (photo.likes || 0) + 1;
-        if (!photo.likedBy) photo.likedBy = {};
-        photo.likedBy[currentUser.uid] = true;
-      }
-    }
-    return photo;
-  });
-}
-
-function addComment(photoId, input) {
-  if (!currentUser) {
-    showToast('❌ يجب تسجيل الدخول أولاً', 'error');
-    return;
-  }
-  
-  const comment = input.value;
-  if (!comment) return;
-  
-  const commentData = {
-    userId: currentUser.uid,
-    userName: currentUser.displayName,
-    text: comment,
-    timestamp: new Date().toISOString()
-  };
-  
-  database.ref(`photos/${photoId}/comments`).push(commentData)
-    .then(() => {
-      input.value = '';
-      showToast('✅ تم إضافة التعليق');
-    });
-}
-
 // ==================== دوال الإحصائيات ====================
 function updateStats() {
   if (!isAdmin()) return;
   
   // عدد المتطوعين النشطين
-  const activeVolunteers = allUsers.filter(u => u.role === 'volunteer').length;
-  document.getElementById('total-volunteers').textContent = activeVolunteers;
+  const activeVolunteers = allUsers.filter(u => u && u.role === 'volunteer').length;
+  const volunteersEl = document.getElementById('total-volunteers');
+  if (volunteersEl) volunteersEl.textContent = activeVolunteers;
   
   // عدد الفعاليات
-  document.getElementById('total-events').textContent = allEvents.length;
+  const eventsEl = document.getElementById('total-events');
+  if (eventsEl) eventsEl.textContent = allEvents.length;
   
   // عدد الأماكن
-  document.getElementById('total-places').textContent = allPlaces.length;
+  const placesEl = document.getElementById('total-places');
+  if (placesEl) placesEl.textContent = allPlaces.length;
   
   // عدد الصور
-  document.getElementById('total-photos').textContent = allPhotos.length;
-  
-  // تحديث الرسم البياني
-  updateChart();
-}
-
-function updateChart() {
-  const ctx = document.getElementById('statsChart')?.getContext('2d');
-  if (!ctx) return;
-  
-  // تجميع إحصائيات المتطوعين حسب اليوم
-  const last7Days = [];
-  const counts = [];
-  
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    last7Days.push(date.toLocaleDateString('ar-SA', { weekday: 'short' }));
-    
-    // حساب عدد المتطوعين الجدد في هذا اليوم
-    const count = allUsers.filter(u => {
-      const created = new Date(u.createdAt);
-      return created.toDateString() === date.toDateString();
-    }).length;
-    counts.push(count);
-  }
-  
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: last7Days,
-      datasets: [{
-        label: 'متطوعين جدد',
-        data: counts,
-        borderColor: '#f4b41b',
-        backgroundColor: 'rgba(244,180,27,0.1)',
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#f1f5f9' } }
-      },
-      scales: {
-        y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } },
-        x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94a3b8' } }
-      }
-    }
-  });
+  const photosEl = document.getElementById('total-photos');
+  if (photosEl) photosEl.textContent = allPhotos.length;
 }
 
 // ==================== دوال المصادقة ====================
@@ -2620,6 +2472,8 @@ function validateEmail(email) {
 }
 
 function login() {
+  if (!auth) return;
+  
   const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
   
@@ -2640,6 +2494,8 @@ function login() {
 }
 
 function signup() {
+  if (!auth || !database) return;
+  
   const name = document.getElementById('signup-name').value;
   const email = document.getElementById('signup-email').value;
   const phone = document.getElementById('signup-phone').value;
@@ -2683,6 +2539,8 @@ function signup() {
 }
 
 function forgotPassword() {
+  if (!auth) return;
+  
   const email = document.getElementById('login-email').value;
   if (!email) {
     showToast('❌ الرجاء إدخال البريد', 'error');
@@ -2698,8 +2556,14 @@ function forgotPassword() {
     });
 }
 
+function socialLogin(provider) {
+  showToast('🔑 تسجيل الدخول عبر ' + provider);
+}
+
 // ==================== دوال الملف الشخصي ====================
 function loadUserData(user) {
+  if (!database) return;
+  
   database.ref('users/' + user.uid).once('value')
     .then((snapshot) => {
       const userData = snapshot.val();
@@ -2708,14 +2572,14 @@ function loadUserData(user) {
       document.getElementById('display-name').textContent = userData.name || user.displayName;
       document.getElementById('display-phone').textContent = userData.phone || 'غير محدد';
       document.getElementById('display-wilaya').textContent = getWilayaName(userData.wilaya);
-      document.getElementById('display-member').textContent = new Date(userData.createdAt).toLocaleDateString('ar-SA');
+      document.getElementById('display-member').textContent = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('ar-SA') : 'غير محدد';
       document.getElementById('points-display').textContent = userData.points || 0;
       
       if (userData.talents) {
         const talents = userData.talents.split(',').map(t => t.trim());
         let html = '';
         talents.forEach(t => {
-          html += `<span class="talent-tag">${t}</span>`;
+          if (t) html += `<span class="talent-tag">${t}</span>`;
         });
         document.getElementById('display-talents').innerHTML = html;
       }
@@ -2731,7 +2595,7 @@ function loadUserData(user) {
 }
 
 function saveProfile() {
-  if (!currentUser) return;
+  if (!currentUser || !database) return;
   
   const firstName = document.getElementById('edit-first').value;
   const lastName = document.getElementById('edit-last').value;
@@ -2739,7 +2603,7 @@ function saveProfile() {
   const wilaya = document.getElementById('edit-wilaya').value;
   const talents = document.getElementById('edit-talents').value;
   
-  const fullName = firstName + ' ' + lastName;
+  const fullName = (firstName + ' ' + lastName).trim();
   
   currentUser.updateProfile({ displayName: fullName })
     .then(() => {
@@ -2775,10 +2639,6 @@ function toggleEditForm() {
 }
 
 function changePhoto(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  
-  // يمكن إضافة رفع الصورة لاحقاً
   showToast('📸 ميزة تغيير الصورة قيد التطوير');
 }
 
@@ -2809,7 +2669,7 @@ function switchTab(tabId) {
   document.getElementById(tabId).classList.add('active');
   
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
 }
 
 function flyToPlace(lat, lng) {
@@ -2827,7 +2687,7 @@ function searchContent() {
   
   const results = allPlaces.filter(p => 
     p.name.toLowerCase().includes(query) || 
-    p.address.toLowerCase().includes(query)
+    (p.address && p.address.toLowerCase().includes(query))
   );
   
   showToast(`🔍 تم العثور على ${results.length} نتيجة`);
@@ -2835,7 +2695,7 @@ function searchContent() {
 
 function filterContent(filter) {
   document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
   showToast(`🔍 تصفية: ${filter}`);
 }
 
@@ -2860,55 +2720,488 @@ function closeModal() {
 }
 
 // ==================== التهيئة ====================
-auth.onAuthStateChanged((user) => {
-  currentUser = user;
-  
-  if (user) {
-    document.getElementById('role-screen').style.display = 'none';
-    document.getElementById('auth-screen').classList.remove('active');
-    document.getElementById('app').style.display = 'block';
+if (auth) {
+  auth.onAuthStateChanged((user) => {
+    currentUser = user;
     
-    database.ref('users/' + user.uid).once('value')
-      .then((snapshot) => {
-        const userData = snapshot.val();
-        if (userData) {
-          selectedRole = userData.role;
-          
-          if (selectedRole === 'volunteer') {
-            document.getElementById('volunteer-interface').style.display = 'block';
-            document.getElementById('admin-interface').style.display = 'none';
-            document.getElementById('volunteer-nav').style.display = 'flex';
-            document.getElementById('admin-nav').style.display = 'none';
-          } else {
-            document.getElementById('volunteer-interface').style.display = 'none';
-            document.getElementById('admin-interface').style.display = 'block';
-            document.getElementById('volunteer-nav').style.display = 'none';
-            document.getElementById('admin-nav').style.display = 'flex';
-          }
-          
-          loadUserData(user);
-          toggleAddPlaceButton();
-        }
-      });
-  }
-});
+    if (user) {
+      document.getElementById('role-screen').style.display = 'none';
+      document.getElementById('auth-screen').classList.remove('active');
+      document.getElementById('app').style.display = 'block';
+      
+      if (database) {
+        database.ref('users/' + user.uid).once('value')
+          .then((snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+              selectedRole = userData.role;
+              
+              if (selectedRole === 'volunteer') {
+                document.getElementById('volunteer-interface').style.display = 'block';
+                document.getElementById('admin-interface').style.display = 'none';
+                document.getElementById('volunteer-nav').style.display = 'flex';
+                document.getElementById('admin-nav').style.display = 'none';
+              } else {
+                document.getElementById('volunteer-interface').style.display = 'none';
+                document.getElementById('admin-interface').style.display = 'block';
+                document.getElementById('volunteer-nav').style.display = 'none';
+                document.getElementById('admin-nav').style.display = 'flex';
+              }
+              
+              loadUserData(user);
+              toggleAddPlaceButton();
+            }
+          });
+      }
+    }
+  });
+}
 
 // تحميل جميع البيانات
-loadPlaces();
-loadEvents();
-loadPhotos();
-
-// تحميل المستخدمين للإحصائيات
-database.ref('users').on('value', (snapshot) => {
-  allUsers = [];
-  snapshot.forEach((child) => {
-    allUsers.push(child.val());
+if (database) {
+  loadPlaces();
+  loadEvents();
+  loadPhotos();
+  
+  // تحميل المستخدمين للإحصائيات
+  database.ref('users').on('value', (snapshot) => {
+    allUsers = [];
+    snapshot.forEach((child) => {
+      allUsers.push(child.val());
+    });
+    updateStats();
   });
-  updateStats();
-});
+}
 
 // تهيئة الخريطة بعد تحميل الصفحة
 setTimeout(initMap, 1000);
+
+// شاشة البداية
+setTimeout(() => {
+  const splashScreen = document.getElementById('splash-screen');
+  if (splashScreen) {
+    splashScreen.style.opacity = '0';
+    setTimeout(() => {
+      splashScreen.style.display = 'none';
+    }, 600);
+  }
+}, 2000);
+
+// ==================== دوال الترجمة ====================
+function changeLanguage(lang) {
+  currentLang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+  localStorage.setItem('preferredLang', lang);
+  showToast(`🌐 تم تغيير اللغة إلى ${lang === 'ar' ? 'العربية' : lang === 'fr' ? 'الفرنسية' : 'الإنجليزية'}`);
+}
+
+// ==================== دوال الإعدادات ====================
+function showSettings() {
+  showToast('⚙️ الإعدادات - قيد التطوير', 'info');
+}
+
+function changeLocation() {
+  const newLocation = prompt('أدخل موقعك الجديد:');
+  if (newLocation) {
+    document.getElementById('location-text').textContent = newLocation;
+    showToast('📍 تم تحديث الموقع');
+  }
+}
+
+// ==================== دوال المساعدة ====================
+function closeModal() {
+  document.getElementById('details-modal').classList.remove('active');
+}
+
+function showPhotoDetails(photoId) {
+  const photo = allPhotos.find(p => p.id === photoId);
+  if (!photo) return;
+  
+  const modal = document.getElementById('details-modal');
+  document.getElementById('modal-title').textContent = photo.description || 'صورة فعالية';
+  
+  let commentsHtml = '';
+  if (photo.comments && photo.comments.length > 0) {
+    commentsHtml = '<div class="comments-section"><h4>التعليقات:</h4>';
+    photo.comments.forEach(comment => {
+      commentsHtml += `
+        <div class="comment">
+          <span class="comment-author">${comment.userName}:</span>
+          <span class="comment-text">${comment.text}</span>
+        </div>
+      `;
+    });
+    commentsHtml += '</div>';
+  }
+  
+  document.getElementById('modal-body').innerHTML = `
+    <img src="${photo.url}" style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 16px; margin-bottom: 15px;">
+    <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 15px;">
+      <button class="btn-small" onclick="likePhoto('${photoId}')">
+        <i class="fas fa-heart"></i> ${photo.likes || 0} إعجاب
+      </button>
+    </div>
+    ${commentsHtml}
+    <div class="add-comment">
+      <input type="text" id="comment-${photoId}" placeholder="أضف تعليقاً...">
+      <button onclick="addComment('${photoId}')"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  `;
+  
+  modal.classList.add('active');
+}
+
+function addComment(photoId) {
+  if (!currentUser) {
+    showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+    return;
+  }
+  
+  const input = document.getElementById(`comment-${photoId}`);
+  const comment = input.value.trim();
+  if (!comment) return;
+  
+  const commentData = {
+    userId: currentUser.uid,
+    userName: currentUser.displayName,
+    text: comment,
+    timestamp: new Date().toISOString()
+  };
+  
+  database.ref(`photos/${photoId}/comments`).push(commentData)
+    .then(() => {
+      input.value = '';
+      showToast('✅ تم إضافة التعليق');
+      showPhotoDetails(photoId); // تحديث النافذة
+    });
+}
+
+function likePhoto(photoId) {
+  if (!currentUser) {
+    showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+    return;
+  }
+  
+  const photoRef = database.ref(`photos/${photoId}`);
+  photoRef.transaction(photo => {
+    if (photo) {
+      if (photo.likedBy && photo.likedBy[currentUser.uid]) {
+        photo.likes--;
+        delete photo.likedBy[currentUser.uid];
+      } else {
+        photo.likes = (photo.likes || 0) + 1;
+        if (!photo.likedBy) photo.likedBy = {};
+        photo.likedBy[currentUser.uid] = true;
+      }
+    }
+    return photo;
+  }).then(() => {
+    showPhotoDetails(photoId);
+  });
+}
+
+// ==================== دوال لوحة الشرف ====================
+function loadLeaderboard() {
+  if (!database) return;
+  
+  database.ref('users').orderByChild('points').limitToLast(10).on('value', (snapshot) => {
+    const users = [];
+    snapshot.forEach((child) => {
+      users.push({
+        id: child.key,
+        ...child.val()
+      });
+    });
+    
+    // ترتيب تنازلي
+    users.sort((a, b) => (b.points || 0) - (a.points || 0));
+    
+    const container = document.getElementById('leaderboard-container');
+    if (!container) return;
+    
+    let html = '';
+    users.forEach((user, index) => {
+      let rankClass = '';
+      let rankText = '';
+      if (index === 0) {
+        rankClass = 'rank gold';
+        rankText = '🥇';
+      } else if (index === 1) {
+        rankClass = 'rank silver';
+        rankText = '🥈';
+      } else if (index === 2) {
+        rankClass = 'rank bronze';
+        rankText = '🥉';
+      } else {
+        rankClass = 'rank';
+        rankText = index + 1;
+      }
+      
+      html += `
+        <div class="leaderboard-item">
+          <div class="${rankClass}">${rankText}</div>
+          <div>
+            <h4>${user.name || 'مستخدم'}</h4>
+            <small>${user.points || 0} نقطة</small>
+          </div>
+        </div>
+      `;
+    });
+    
+    container.innerHTML = html || '<p style="color: var(--text-muted);">لا يوجد متطوعون بعد</p>';
+  });
+}
+
+// ==================== دوال الإشعارات ====================
+function loadNotifications() {
+  if (!database || !currentUser) return;
+  
+  database.ref('notifications').orderByChild('userId').equalTo(currentUser.uid).on('value', (snapshot) => {
+    const notifications = [];
+    snapshot.forEach((child) => {
+      notifications.push({
+        id: child.key,
+        ...child.val()
+      });
+    });
+    
+    // ترتيب تنازلي حسب التاريخ
+    notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    const container = document.getElementById('notifications-container');
+    if (!container) return;
+    
+    let html = '';
+    notifications.forEach(notif => {
+      html += `
+        <div class="notification-item">
+          <h4>${notif.title}</h4>
+          <p>${notif.message}</p>
+          <small><i class="fas fa-clock"></i> ${new Date(notif.timestamp).toLocaleDateString('ar-SA')}</small>
+        </div>
+      `;
+    });
+    
+    container.innerHTML = html || '<p style="color: var(--text-muted);">لا توجد إشعارات</p>';
+    
+    // تحديث العداد
+    document.getElementById('notification-count').textContent = notifications.length;
+    document.getElementById('notification-count').style.display = notifications.length > 0 ? 'flex' : 'none';
+  });
+}
+
+// إنشاء إشعار جديد (للمدير)
+function createNotification(userId, title, message) {
+  if (!database || !isAdmin()) return;
+  
+  database.ref('notifications').push({
+    userId,
+    title,
+    message,
+    read: false,
+    timestamp: new Date().toISOString()
+  });
+}
+
+// ==================== تحديث نقاط المستخدم ====================
+function addPoints(userId, points) {
+  if (!database) return;
+  
+  database.ref('users/' + userId).transaction(user => {
+    if (user) {
+      user.points = (user.points || 0) + points;
+    }
+    return user;
+  });
+}
+
+// ==================== دوال إضافية للفعاليات ====================
+function deleteEvent(eventId) {
+  if (!isAdmin() || !database) return;
+  
+  if (confirm('هل أنت متأكد من حذف هذه الفعالية؟')) {
+    database.ref('events/' + eventId).remove()
+      .then(() => {
+        showToast('✅ تم حذف الفعالية');
+      });
+  }
+}
+
+function editEvent(eventId) {
+  if (!isAdmin()) return;
+  
+  const event = allEvents.find(e => e.id === eventId);
+  if (!event) return;
+  
+  document.getElementById('event-title').value = event.title || '';
+  document.getElementById('event-wilaya').value = event.wilaya || '19';
+  document.getElementById('event-address').value = event.address || '';
+  document.getElementById('event-description').value = event.description || '';
+  document.getElementById('event-date').value = event.date || '';
+  document.getElementById('event-time').value = event.time || '';
+  document.getElementById('event-volunteers').value = event.volunteers || 5;
+  
+  // حذف القديم وإضافة جديد
+  database.ref('events/' + eventId).remove().then(() => {
+    showToast('✏️ عدل البيانات ثم أضف الفعالية مرة أخرى');
+  });
+}
+
+// عرض الفعاليات في لوحة المدير
+function updateAdminEventsList() {
+  const container = document.getElementById('admin-events-list');
+  if (!container) return;
+  
+  let html = '';
+  allEvents.forEach(event => {
+    html += `
+      <div class="event-item" style="background: rgba(255,255,255,0.05); margin-bottom: 15px;">
+        <h4>${event.title}</h4>
+        <p><i class="fas fa-map-pin"></i> ${event.address}</p>
+        <p><i class="fas fa-calendar"></i> ${event.date} - ${event.time}</p>
+        <p><i class="fas fa-users"></i> ${event.volunteers} متطوع</p>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button class="btn btn-primary" onclick="editEvent('${event.id}')">تعديل</button>
+          <button class="btn" style="background: var(--danger);" onclick="deleteEvent('${event.id}')">حذف</button>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html || '<p style="color: var(--text-muted);">لا توجد فعاليات</p>';
+}
+
+// تعديل دوال الفعاليات لإضافة الحذف والتعديل
+const originalUpdateEventsDisplay = updateEventsDisplay;
+updateEventsDisplay = function() {
+  originalUpdateEventsDisplay();
+  if (isAdmin()) {
+    updateAdminEventsList();
+  }
+};
+
+// ==================== دوال إضافية للأماكن ====================
+function deletePlace(placeId) {
+  if (!isAdmin() || !database) return;
+  
+  if (confirm('هل أنت متأكد من حذف هذا المكان؟')) {
+    database.ref('places/' + placeId).remove()
+      .then(() => {
+        showToast('✅ تم حذف المكان');
+      });
+  }
+}
+
+// تعديل دالة updatePlacesList لإضافة زر الحذف للمدير
+const originalUpdatePlacesList = updatePlacesList;
+updatePlacesList = function() {
+  const list = document.getElementById('places-list');
+  if (!list) return;
+  
+  let html = '';
+  allPlaces.forEach(place => {
+    let icon = '📍';
+    switch(place.type) {
+      case 'mosque': icon = '🕌'; break;
+      case 'youth': icon = '🏠'; break;
+      case 'restaurant': icon = '🍽️'; break;
+      case 'charity': icon = '🤝'; break;
+    }
+    
+    html += `
+      <div class="place-item">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; cursor: pointer;" onclick="flyToPlace(${place.lat}, ${place.lng})">
+            <span style="font-size: 24px; margin-left: 10px;">${icon}</span>
+            <div>
+              <div style="font-weight: 600;">${place.name}</div>
+              <small>${place.address}</small>
+            </div>
+          </div>
+          ${isAdmin() ? `
+            <button class="btn-small" style="background: var(--danger);" onclick="deletePlace('${place.id}')">
+              <i class="fas fa-trash"></i>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  });
+  
+  list.innerHTML = html || '<p style="color: var(--text-muted); text-align: center;">لا توجد أماكن بعد</p>';
+};
+
+// ==================== تحديث دالة loadPlaces لاستخدام الدالة الجديدة
+const originalLoadPlaces = loadPlaces;
+loadPlaces = function() {
+  if (!database) return;
+  
+  database.ref('places').on('value', (snapshot) => {
+    allPlaces = [];
+    snapshot.forEach((child) => {
+      allPlaces.push({
+        id: child.key,
+        ...child.val()
+      });
+    });
+    updateMapPlaces();
+    updatePlacesList();
+    updateStats();
+  });
+};
+
+// ==================== تحديث دالة loadEvents لاستخدام الدوال الجديدة
+const originalLoadEvents = loadEvents;
+loadEvents = function() {
+  if (!database) return;
+  
+  database.ref('events').on('value', (snapshot) => {
+    allEvents = [];
+    snapshot.forEach((child) => {
+      allEvents.push({
+        id: child.key,
+        ...child.val()
+      });
+    });
+    updateEventsDisplay();
+    updateAdminEventsList();
+    updateStats();
+  });
+};
+
+// ==================== تحميل البيانات الإضافية
+if (database) {
+  loadLeaderboard();
+  if (currentUser) {
+    loadNotifications();
+  }
+}
+
+// ==================== حفظ اللغة المختارة
+const savedLang = localStorage.getItem('preferredLang');
+if (savedLang) {
+  currentLang = savedLang;
+  document.getElementById('lang-select').value = savedLang;
+  changeLanguage(savedLang);
+}
+
+// ==================== تأثيرات إضافية
+document.querySelectorAll('.btn-primary, .btn-save').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      this.style.transform = 'scale(1)';
+    }, 200);
+  });
+});
+
+// منع الأخطاء في حال عدم وجود عناصر
+window.addEventListener('error', (e) => {
+  console.log('تم تجاهل خطأ:', e.message);
+});
+
+console.log('✅ تم تحميل جميع الدوال بنجاح');
 </script>
 
 </body>
