@@ -3886,6 +3886,61 @@ function switchToVolunteer() {
   document.getElementById('volunteer-nav').style.display = 'flex';
   document.getElementById('admin-nav').style.display = 'none';
 }
+// ==================== دوال التبديل بين الواجهات ====================
+function switchToAdmin() {
+    // إخفاء واجهة المتطوع
+    document.getElementById('volunteer-interface').style.display = 'none';
+    // إظهار واجهة المدير
+    document.getElementById('admin-interface').style.display = 'block';
+    // إخفاء التبويب السفلي للمتطوع
+    document.getElementById('volunteer-nav').style.display = 'none';
+    // إظهار التبويب السفلي للمدير
+    document.getElementById('admin-nav').style.display = 'flex';
+    
+    // تحميل لوحة تحكم المدير
+    if (typeof loadAdminDashboard === 'function') {
+        loadAdminDashboard();
+    }
+    
+    showToast('👋 مرحباً بك في لوحة تحكم المدير', 'info');
+}
+
+function switchToVolunteer() {
+    // إظهار واجهة المتطوع
+    document.getElementById('volunteer-interface').style.display = 'block';
+    // إخفاء واجهة المدير
+    document.getElementById('admin-interface').style.display = 'none';
+    // إظهار التبويب السفلي للمتطوع
+    document.getElementById('volunteer-nav').style.display = 'flex';
+    // إخفاء التبويب السفلي للمدير
+    document.getElementById('admin-nav').style.display = 'none';
+    
+    showToast('👋 مرحباً بك في منصة التطوع', 'info');
+}
+
+// إضافة أزرار التبديل في الإعدادات (اختياري)
+function addSwitchButtons() {
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) {
+        const switchDiv = document.createElement('div');
+        switchDiv.className = 'settings-section';
+        switchDiv.innerHTML = `
+            <h4>🔄 تبديل الواجهة</h4>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-small" onclick="switchToVolunteer()" style="background: var(--success); flex: 1;">
+                    <i class="fas fa-user"></i> واجهة المتطوع
+                </button>
+                <button class="btn-small" onclick="switchToAdmin()" style="background: var(--info); flex: 1;">
+                    <i class="fas fa-user-tie"></i> واجهة المدير
+                </button>
+            </div>
+        `;
+        settingsModal.querySelector('.modal-content').appendChild(switchDiv);
+    }
+}
+
+// تنفيذ بعد تحميل الصفحة
+setTimeout(addSwitchButtons, 2000);
 </script>
 
 </body>
