@@ -47,12 +47,20 @@
             --transition: all 0.3s ease;
         }
 
+        body.light-mode {
+            --bg-dark: #f1f5f9;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --text: #0f172a;
+            --text-muted: #475569;
+        }
+
         body {
             font-family: 'Tajawal', sans-serif;
             background: linear-gradient(145deg, #0b1120 0%, #1a2639 100%);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
+            transition: var(--transition);
         }
 
         /* شاشة البداية */
@@ -87,6 +95,11 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .splash-content p {
+            color: white;
+            margin-top: 20px;
+        }
+
         .progress-bar {
             width: 200px;
             height: 4px;
@@ -106,6 +119,11 @@
         @keyframes loading {
             0% { width: 0%; }
             100% { width: 100%; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         /* شاشة اختيار الدور */
@@ -129,6 +147,16 @@
             max-width: 500px;
             box-shadow: var(--shadow);
             border: 1px solid rgba(244, 180, 27, 0.2);
+        }
+
+        .role-overlay h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .role-overlay p {
+            margin-bottom: 40px;
+            color: var(--text-muted);
         }
 
         .role-btn {
@@ -284,7 +312,7 @@
             position: relative;
         }
 
-        .input-group i {
+        .input-group i:first-child {
             position: absolute;
             right: 15px;
             top: 50%;
@@ -294,7 +322,8 @@
         }
 
         .input-group input,
-        .input-group select {
+        .input-group select,
+        .input-group textarea {
             width: 100%;
             padding: 15px 50px 15px 15px;
             background: rgba(255,255,255,0.05);
@@ -306,8 +335,14 @@
             transition: all 0.3s;
         }
 
+        .input-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
         .input-group input:focus,
-        .input-group select:focus {
+        .input-group select:focus,
+        .input-group textarea:focus {
             border-color: var(--accent);
             outline: none;
             box-shadow: var(--glow);
@@ -374,6 +409,11 @@
             box-shadow: var(--glow);
         }
 
+        .auth-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .social-login {
             margin-top: 30px;
             text-align: center;
@@ -407,6 +447,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
         .social-icon {
@@ -480,6 +521,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .logo {
@@ -508,6 +551,25 @@
 
         .header-icons i:hover {
             transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: relative;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .language-selector select {
@@ -561,6 +623,13 @@
             border-radius: 30px;
             color: white;
             font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .search-container input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: var(--glow);
         }
 
         .search-container i {
@@ -661,12 +730,41 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .card-title {
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--accent);
+        }
+
+        /* الفلاتر */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-tab {
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            background: var(--accent);
+            color: #0f172a;
+        }
+
+        .filter-tab:hover {
+            background: var(--accent-glow);
+            color: #0f172a;
         }
 
         /* الخريطة */
@@ -680,8 +778,8 @@
         .map-controls {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
             flex-wrap: wrap;
+            margin-bottom: 10px;
         }
 
         .map-btn {
@@ -695,10 +793,23 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: var(--transition);
+        }
+
+        .map-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+        }
+
+        .map-btn.secondary {
+            background: var(--info);
+            color: white;
         }
 
         .places-list {
             margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         .place-item {
@@ -733,6 +844,11 @@
         .place-address {
             font-size: 0.85rem;
             color: var(--text-muted);
+        }
+
+        .place-actions {
+            display: flex;
+            gap: 5px;
         }
 
         /* الفعاليات */
@@ -777,6 +893,7 @@
             margin: 10px 0;
             font-size: 0.9rem;
             color: var(--text-muted);
+            flex-wrap: wrap;
         }
 
         .event-meta i {
@@ -833,6 +950,7 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -850,6 +968,11 @@
             color: #0f172a;
         }
 
+        .btn-secondary {
+            background: var(--info);
+            color: white;
+        }
+
         .btn-success {
             background: var(--success);
             color: white;
@@ -860,9 +983,25 @@
             color: white;
         }
 
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* الملف الشخصي */
@@ -899,6 +1038,11 @@
             justify-content: center;
             cursor: pointer;
             border: 2px solid white;
+            transition: var(--transition);
+        }
+
+        .edit-avatar:hover {
+            transform: scale(1.1);
         }
 
         .profile-stats {
@@ -1000,6 +1144,15 @@
             border-radius: 16px;
             color: white;
             font-family: 'Tajawal', sans-serif;
+            transition: var(--transition);
+        }
+
+        .edit-field input:focus,
+        .edit-field textarea:focus,
+        .edit-field select:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: var(--glow);
         }
 
         .btn-save {
@@ -1012,12 +1165,166 @@
             font-size: 1.1rem;
             cursor: pointer;
             color: #0f172a;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .btn-save:hover {
             transform: translateY(-2px);
             box-shadow: var(--glow);
+        }
+
+        /* الإشعارات */
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 15px;
+            border-right: 4px solid var(--accent);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-item:hover {
+            transform: translateX(-5px);
+            background: rgba(244,180,27,0.1);
+        }
+
+        .notification-item.unread {
+            background: rgba(244,180,27,0.15);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+        }
+
+        /* لوحة الشرف */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+
+        .rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            margin-left: 15px;
+        }
+
+        .rank.gold {
+            background: #fbbf24;
+            color: #0f172a;
+        }
+
+        .rank.silver {
+            background: #94a3b8;
+            color: #0f172a;
+        }
+
+        .rank.bronze {
+            background: #b45309;
+            color: white;
+        }
+
+        .rank.default {
+            background: var(--accent);
+            color: #0f172a;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-points {
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        /* معرض الصور */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 8px;
+            transform: translateY(100%);
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            transform: translateY(0);
+        }
+
+        .gallery-stats {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: white;
         }
 
         /* النوافذ المنبثقة */
@@ -1071,13 +1378,149 @@
             color: var(--text-muted);
             font-size: 24px;
             cursor: pointer;
+            transition: var(--transition);
         }
 
         .close-modal:hover {
             color: var(--danger);
+            transform: scale(1.1);
         }
 
-        /* الإشعارات */
+        /* الإعدادات */
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .settings-section h4 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item-info h5 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .settings-item-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .settings-item-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,0.2);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .settings-select {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--accent);
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .danger-zone {
+            border: 1px solid var(--danger);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .danger-zone h5 {
+            color: var(--danger);
+            margin-bottom: 10px;
+        }
+
+        /* مؤشر التحميل */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10002;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--accent);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* الإشعارات المنبثقة */
         .toast {
             position: fixed;
             bottom: 100px;
@@ -1100,6 +1543,10 @@
             background: var(--info);
         }
 
+        .toast.warning {
+            background: var(--warning);
+        }
+
         @keyframes slideUp {
             from { transform: translate(-50%, 100px); opacity: 0; }
             to { transform: translate(-50%, 0); opacity: 1; }
@@ -1116,6 +1563,10 @@
             50% { transform: translateY(-20px); }
         }
 
+        .user-marker {
+            z-index: 1000;
+        }
+
         .leaflet-popup-content {
             direction: rtl;
             text-align: center;
@@ -1124,12 +1575,53 @@
 
         .leaflet-popup-content button {
             font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s;
+            transition: var(--transition);
+            margin: 5px;
         }
 
         .leaflet-popup-content button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(244, 180, 27, 0.3);
+            box-shadow: var(--glow);
+        }
+
+        /* تحسينات للشاشات الصغيرة */
+        @media (max-width: 400px) {
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .event-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .map-controls {
+                flex-direction: column;
+            }
+
+            .map-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -1140,7 +1632,7 @@
     <div class="splash-content">
         <i class="fas fa-hands-helping"></i>
         <h1>مواهب داري</h1>
-        <p style="color: white; margin-top: 20px;">منصة التطوع الجزائرية</p>
+        <p>منصة التطوع الجزائرية</p>
         <div class="progress-bar">
             <div class="progress-fill"></div>
         </div>
@@ -1150,8 +1642,8 @@
 <!-- شاشة اختيار الدور -->
 <div id="role-screen">
     <div class="role-overlay">
-        <h1 style="font-size: 32px; margin-bottom: 10px;">🌙 مرحباً بك</h1>
-        <p style="margin-bottom: 40px; color: var(--text-muted);">اختر نوع المستخدم</p>
+        <h1>🌙 مرحباً بك</h1>
+        <p>اختر نوع المستخدم</p>
         
         <button class="role-btn volunteer" onclick="selectRole('volunteer')">
             <i class="fas fa-user-graduate"></i> متطوع - شاب موهوب
@@ -1242,12 +1734,63 @@
                 <div class="input-group">
                     <i class="fas fa-map-marker-alt"></i>
                     <select id="signup-wilaya">
+                        <option value="1">أدرار</option>
+                        <option value="2">الشلف</option>
+                        <option value="3">الأغواط</option>
+                        <option value="4">أم البواقي</option>
+                        <option value="5">باتنة</option>
+                        <option value="6">بجاية</option>
+                        <option value="7">بسكرة</option>
+                        <option value="8">بشار</option>
+                        <option value="9">البليدة</option>
+                        <option value="10">البويرة</option>
+                        <option value="11">تمنراست</option>
+                        <option value="12">تبسة</option>
+                        <option value="13">تلمسان</option>
+                        <option value="14">تيارت</option>
+                        <option value="15">تيزي وزو</option>
                         <option value="16">الجزائر</option>
+                        <option value="17">الجلفة</option>
+                        <option value="18">جيجل</option>
                         <option value="19">سطيف</option>
-                        <option value="31">وهران</option>
-                        <option value="25">قسنطينة</option>
+                        <option value="20">سعيدة</option>
+                        <option value="21">سكيكدة</option>
+                        <option value="22">سيدي بلعباس</option>
                         <option value="23">عنابة</option>
+                        <option value="24">قالمة</option>
+                        <option value="25">قسنطينة</option>
+                        <option value="26">المدية</option>
+                        <option value="27">مستغانم</option>
+                        <option value="28">المسيلة</option>
+                        <option value="29">معسكر</option>
+                        <option value="30">ورقلة</option>
+                        <option value="31">وهران</option>
+                        <option value="32">البيض</option>
+                        <option value="33">إليزي</option>
+                        <option value="34">برج بوعريريج</option>
+                        <option value="35">بومرداس</option>
+                        <option value="36">الطارف</option>
+                        <option value="37">تندوف</option>
+                        <option value="38">تيسمسيلت</option>
+                        <option value="39">الوادي</option>
+                        <option value="40">خنشلة</option>
+                        <option value="41">سوق أهراس</option>
+                        <option value="42">تيبازة</option>
+                        <option value="43">ميلة</option>
+                        <option value="44">عين الدفلى</option>
+                        <option value="45">النعامة</option>
+                        <option value="46">عين تموشنت</option>
+                        <option value="47">غرداية</option>
+                        <option value="48">غليزان</option>
                     </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>المواهب (اختياري)</label>
+                <div class="input-group">
+                    <i class="fas fa-star"></i>
+                    <input type="text" id="signup-talents" placeholder="مثال: تصميم, برمجة, تنظيم">
                 </div>
             </div>
 
@@ -1279,13 +1822,32 @@
 
             <div class="form-options">
                 <label class="remember-me">
-                    <input type="checkbox" id="agree-terms"> أوافق على الشروط
+                    <input type="checkbox" id="agree-terms"> أوافق على الشروط والأحكام
                 </label>
             </div>
 
             <button class="auth-btn" onclick="signup()">
                 <i class="fas fa-user-plus"></i> إنشاء حساب
             </button>
+        </div>
+
+        <!-- خيارات تسجيل الدخول الاجتماعي -->
+        <div class="social-login">
+            <p>أو سجل عبر</p>
+            <div class="social-icons">
+                <div class="social-icon" onclick="socialLogin('google')">
+                    <i class="fab fa-google"></i>
+                </div>
+                <div class="social-icon" onclick="socialLogin('facebook')">
+                    <i class="fab fa-facebook-f"></i>
+                </div>
+                <div class="social-icon" onclick="socialLogin('twitter')">
+                    <i class="fab fa-twitter"></i>
+                </div>
+                <div class="social-icon" onclick="socialLogin('apple')">
+                    <i class="fab fa-apple"></i>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1297,7 +1859,7 @@
         <div class="header-top">
             <div class="logo"><span>مواهب</span> داري</div>
             <div class="header-icons">
-                <i class="fas fa-plus-circle" onclick="showAddEventModal()" title="إضافة فعالية"></i>
+                <i class="fas fa-plus-circle" onclick="showAddEventModal()" title="إضافة فعالية جديدة"></i>
                 <div class="language-selector">
                     <select id="lang-select" onchange="changeLanguage(this.value)">
                         <option value="ar">🇸🇦 العربية</option>
@@ -1309,6 +1871,7 @@
                     <i class="fas fa-bell" onclick="switchTab('notifications')"></i>
                     <span class="badge" id="notification-count">0</span>
                 </div>
+                <i class="fas fa-cog" onclick="showSettings()" title="الإعدادات"></i>
             </div>
         </div>
         
@@ -1319,8 +1882,8 @@
         </div>
         
         <div class="search-container">
-            <input type="text" id="search-input" placeholder="ابحث عن فعاليات، أماكن...">
-            <i class="fas fa-search"></i>
+            <input type="text" id="search-input" placeholder="ابحث عن فعاليات، أماكن، أشخاص..." onkeypress="if(event.key==='Enter') searchContent()">
+            <i class="fas fa-search" onclick="searchContent()"></i>
         </div>
     </div>
 
@@ -1333,15 +1896,19 @@
                 <span class="filter-tab" onclick="filterContent('events')">فعاليات</span>
                 <span class="filter-tab" onclick="filterContent('places')">أماكن</span>
                 <span class="filter-tab" onclick="filterContent('today')">اليوم</span>
+                <span class="filter-tab" onclick="filterContent('nearby')">قريب مني</span>
             </div>
 
             <!-- الخريطة -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-map-marked-alt"></i> الخريطة</h3>
+                    <h3 class="card-title"><i class="fas fa-map-marked-alt"></i> الخريطة التفاعلية</h3>
                     <div class="map-controls">
                         <button class="map-btn" onclick="getUserLocation()">
                             <i class="fas fa-location-arrow"></i> موقعي
+                        </button>
+                        <button class="map-btn secondary" onclick="toggleMapType()">
+                            <i class="fas fa-layer-group"></i> نوع الخريطة
                         </button>
                     </div>
                 </div>
@@ -1363,8 +1930,32 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title"><i class="fas fa-bell"></i> الإشعارات</h3>
+                    <button class="btn btn-small btn-outline" onclick="markAllNotificationsRead()">
+                        تحديد الكل كمقروء
+                    </button>
                 </div>
-                <div id="notifications-container"></div>
+                <div id="notifications-container" class="notifications-list"></div>
+            </div>
+        </section>
+
+        <!-- صفحة التنافس -->
+        <section id="leaderboard" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-trophy"></i> لوحة الشرف</h3>
+                </div>
+                <div id="leaderboard-container" class="leaderboard-list"></div>
+            </div>
+
+            <!-- معرض الصور -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-images"></i> معرض الصور</h3>
+                    <button class="btn btn-small btn-primary" onclick="showUploadPhotoModal()">
+                        <i class="fas fa-plus"></i> إضافة
+                    </button>
+                </div>
+                <div id="gallery-grid" class="gallery-grid"></div>
             </div>
         </section>
 
@@ -1373,7 +1964,7 @@
             <div class="card">
                 <div class="profile-header">
                     <div class="profile-avatar">
-                        <img id="profile-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" alt="الصورة">
+                        <img id="profile-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" alt="الصورة الشخصية">
                         <div class="edit-avatar" onclick="document.getElementById('avatar-input').click()">
                             <i class="fas fa-camera"></i>
                         </div>
@@ -1381,12 +1972,17 @@
                     <input type="file" id="avatar-input" accept="image/*" style="display: none;" onchange="changeAvatar(event)">
                     
                     <h2 id="display-name">مستخدم جديد</h2>
+                    <p id="display-bio" style="color: var(--text-muted); margin-top: 5px;">متطوع في منصة مواهب داري</p>
                 </div>
 
                 <div class="profile-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="stat-events">0</div>
                         <div class="stat-label">فعاليات</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-hours">0</div>
+                        <div class="stat-label">ساعات</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="stat-points">0</div>
@@ -1412,6 +2008,14 @@
                     </div>
 
                     <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-star"></i></div>
+                        <div>
+                            <div class="info-label">المواهب</div>
+                            <div id="display-talents"></div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
                         <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
                         <div>
                             <div class="info-label">عضو منذ</div>
@@ -1420,9 +2024,11 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary" onclick="toggleEditForm()" style="width: 100%; margin-top: 20px;">
-                    <i class="fas fa-edit"></i> تعديل الملف
-                </button>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="toggleEditForm()" style="flex: 1;">
+                        <i class="fas fa-edit"></i> تعديل الملف
+                    </button>
+                </div>
             </div>
 
             <!-- نموذج التعديل -->
@@ -1435,6 +2041,11 @@
                 </div>
 
                 <div class="edit-field">
+                    <label>نبذة عني</label>
+                    <textarea id="edit-bio" rows="3" placeholder="اكتب نبذة قصيرة عنك..."></textarea>
+                </div>
+
+                <div class="edit-field">
                     <label>رقم الهاتف</label>
                     <input type="tel" id="edit-phone">
                 </div>
@@ -1442,12 +2053,60 @@
                 <div class="edit-field">
                     <label>الولاية</label>
                     <select id="edit-wilaya">
+                        <option value="1">أدرار</option>
+                        <option value="2">الشلف</option>
+                        <option value="3">الأغواط</option>
+                        <option value="4">أم البواقي</option>
+                        <option value="5">باتنة</option>
+                        <option value="6">بجاية</option>
+                        <option value="7">بسكرة</option>
+                        <option value="8">بشار</option>
+                        <option value="9">البليدة</option>
+                        <option value="10">البويرة</option>
+                        <option value="11">تمنراست</option>
+                        <option value="12">تبسة</option>
+                        <option value="13">تلمسان</option>
+                        <option value="14">تيارت</option>
+                        <option value="15">تيزي وزو</option>
                         <option value="16">الجزائر</option>
+                        <option value="17">الجلفة</option>
+                        <option value="18">جيجل</option>
                         <option value="19">سطيف</option>
-                        <option value="31">وهران</option>
-                        <option value="25">قسنطينة</option>
+                        <option value="20">سعيدة</option>
+                        <option value="21">سكيكدة</option>
+                        <option value="22">سيدي بلعباس</option>
                         <option value="23">عنابة</option>
+                        <option value="24">قالمة</option>
+                        <option value="25">قسنطينة</option>
+                        <option value="26">المدية</option>
+                        <option value="27">مستغانم</option>
+                        <option value="28">المسيلة</option>
+                        <option value="29">معسكر</option>
+                        <option value="30">ورقلة</option>
+                        <option value="31">وهران</option>
+                        <option value="32">البيض</option>
+                        <option value="33">إليزي</option>
+                        <option value="34">برج بوعريريج</option>
+                        <option value="35">بومرداس</option>
+                        <option value="36">الطارف</option>
+                        <option value="37">تندوف</option>
+                        <option value="38">تيسمسيلت</option>
+                        <option value="39">الوادي</option>
+                        <option value="40">خنشلة</option>
+                        <option value="41">سوق أهراس</option>
+                        <option value="42">تيبازة</option>
+                        <option value="43">ميلة</option>
+                        <option value="44">عين الدفلى</option>
+                        <option value="45">النعامة</option>
+                        <option value="46">عين تموشنت</option>
+                        <option value="47">غرداية</option>
+                        <option value="48">غليزان</option>
                     </select>
+                </div>
+
+                <div class="edit-field">
+                    <label>المواهب (افصل بينها بفواصل)</label>
+                    <textarea id="edit-talents" rows="3" placeholder="مثال: تصميم, برمجة, تنظيم"></textarea>
                 </div>
 
                 <button class="btn-save" onclick="saveProfile()">
@@ -1455,802 +2114,2023 @@
                 </button>
             </div>
         </section>
+
+        <!-- صفحة إدارة الفعاليات للمدير -->
+        <section id="admin-events" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-tasks"></i> إدارة الفعاليات</h3>
+                </div>
+                
+                <div class="filter-tabs">
+                    <span class="filter-tab active" onclick="filterAdminEvents('pending')">قيد المراجعة</span>
+                    <span class="filter-tab" onclick="filterAdminEvents('approved')">مقبولة</span>
+                    <span class="filter-tab" onclick="filterAdminEvents('rejected')">مرفوضة</span>
+                    <span class="filter-tab" onclick="filterAdminEvents('all')">الكل</span>
+                </div>
+                
+                <div id="admin-events-list" class="events-grid"></div>
+            </div>
+        </section>
+
+        <!-- صفحة الإعدادات -->
+        <section id="settings" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-cog"></i> الإعدادات</h3>
+                </div>
+
+                <!-- المظهر -->
+                <div class="settings-section">
+                    <h4>🎨 المظهر</h4>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>الوضع الليلي</h5>
+                            <p>تفعيل الألوان الداكنة للواجهة</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="dark-mode" onchange="toggleDarkMode()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>اللغة</h5>
+                            <p>اختر اللغة المناسبة</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <select class="settings-select" id="settings-language" onchange="changeLanguage(this.value)">
+                                <option value="ar">🇸🇦 العربية</option>
+                                <option value="fr">🇫🇷 Français</option>
+                                <option value="en">🇬🇧 English</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>حجم الخط</h5>
+                            <p>تحكم في حجم النصوص</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <select class="settings-select" id="font-size" onchange="changeFontSize(this.value)">
+                                <option value="small">صغير</option>
+                                <option value="medium" selected>متوسط</option>
+                                <option value="large">كبير</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الإشعارات -->
+                <div class="settings-section">
+                    <h4>🔔 الإشعارات</h4>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>إشعارات الفعاليات</h5>
+                            <p>تنبيه عند إضافة فعالية جديدة</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="notif-events" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>إشعارات الأماكن</h5>
+                            <p>تنبيه عند إضافة مكان جديد</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="notif-places" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>صوت الإشعارات</h5>
+                            <p>تشغيل صوت عند وصول إشعار</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="notif-sound" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الخصوصية -->
+                <div class="settings-section">
+                    <h4>🔒 الخصوصية</h4>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>الملف الشخصي عام</h5>
+                            <p>السماح للآخرين برؤية ملفك</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="profile-public" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>مشاركة الموقع</h5>
+                            <p>السماح للتطبيق بمعرفة موقعك</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="location-sharing" onchange="toggleLocationSharing()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>ظهوري في لوحة الشرف</h5>
+                            <p>إظهار اسمي في قائمة المتطوعين</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="show-in-leaderboard" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- التخزين والبيانات -->
+                <div class="settings-section">
+                    <h4>💾 التخزين والبيانات</h4>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>جودة الصور</h5>
+                            <p>اختر جودة تحميل الصور</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <select class="settings-select" id="image-quality">
+                                <option value="high">عالية</option>
+                                <option value="medium" selected>متوسطة</option>
+                                <option value="low">منخفضة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>التخزين المؤقت</h5>
+                            <p>حفظ البيانات للتصفح بدون نت</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="offline-mode">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>تصدير بياناتي</h5>
+                            <p>تحميل نسخة من بياناتك</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <button class="btn-small" onclick="exportUserData()">تصدير</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- المنطقة الحمراء (للمدير فقط) -->
+                <div class="danger-zone" id="admin-danger-zone" style="display: none;">
+                    <h5>⚠️ منطقة الخطر (للمدير فقط)</h5>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>إعادة تعيين البيانات</h5>
+                            <p>حذف جميع بيانات المنصة</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <button class="btn-danger" onclick="resetAllData()">إعادة تعيين</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>تصدير جميع البيانات</h5>
+                            <p>تحميل نسخة احتياطية كاملة</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <button class="btn-save" onclick="exportAllData()">تصدير</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h5>إدارة المستخدمين</h5>
+                            <p>عرض وحظر المستخدمين</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <button class="btn-primary" onclick="manageUsers()">إدارة</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- حفظ الإعدادات -->
+                <button class="btn-save" onclick="saveAllSettings()" style="margin-top: 20px;">
+                    <i class="fas fa-save"></i> حفظ جميع الإعدادات
+                </button>
+            </div>
+        </section>
     </main>
 
-    <!-- التبويب السفلي -->
+    <!-- التبويب السفلي (يتم تحديثه حسب الدور عبر JavaScript) -->
     <div class="bottom-nav" id="volunteer-nav">
         <div class="nav-item active" onclick="switchTab('home')">
-            <i class="fas fa-home"></i>
-            <span>الرئيسية</span>
+            <i class="fas fa-home"></i><span>الرئيسية</span>
         </div>
         <div class="nav-item" onclick="switchTab('notifications')">
-            <i class="fas fa-bell"></i>
-            <span>الإشعارات</span>
+            <i class="fas fa-bell"></i><span>الإشعارات</span>
             <span class="badge" id="nav-notification-count">0</span>
         </div>
+        <div class="nav-item" onclick="switchTab('leaderboard')">
+            <i class="fas fa-trophy"></i><span>التنافس</span>
+        </div>
         <div class="nav-item" onclick="switchTab('profile')">
-            <i class="fas fa-user"></i>
-            <span>ملفي</span>
+            <i class="fas fa-user"></i><span>ملفي</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('settings')">
+            <i class="fas fa-cog"></i><span>الإعدادات</span>
+        </div>
+    </div>
+    <div class="bottom-nav" id="admin-nav" style="display: none;"></div>
+</div>
+
+<!-- نافذة إضافة فعالية -->
+<div id="addEventModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fas fa-calendar-plus"></i> إضافة فعالية جديدة</h3>
+            <button class="close-modal" onclick="closeModal('addEventModal')"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="edit-field">
+            <label>عنوان الفعالية</label>
+            <input type="text" id="eventTitle" placeholder="مثال: موائد إفطار رمضان">
+        </div>
+        
+        <div class="edit-field">
+            <label>الولاية</label>
+            <select id="eventWilaya">
+                <option value="16">الجزائر</option>
+                <option value="19">سطيف</option>
+                <option value="31">وهران</option>
+                <option value="25">قسنطينة</option>
+                <option value="23">عنابة</option>
+            </select>
+        </div>
+        
+        <div class="edit-field">
+            <label>العنوان بالتفصيل</label>
+            <input type="text" id="eventAddress" placeholder="العنوان الكامل">
+        </div>
+        
+        <div class="edit-field">
+            <label>الموقع على الخريطة</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="eventLat" placeholder="خط العرض" readonly style="flex:1; background: rgba(255,255,255,0.05);">
+                <input type="text" id="eventLng" placeholder="خط الطول" readonly style="flex:1; background: rgba(255,255,255,0.05);">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="pickLocationFromMap()" class="btn btn-secondary" style="flex:1;">
+                    <i class="fas fa-map-marker-alt"></i> اختر من الخريطة
+                </button>
+                <button type="button" onclick="getCurrentLocationForEvent()" class="btn btn-success" style="flex:1;">
+                    <i class="fas fa-location-arrow"></i> موقعي الحالي
+                </button>
+            </div>
+            <small style="color: var(--text-muted); display: block; margin-top: 5px;">انقر على الخريطة لاختيار الموقع</small>
+        </div>
+        
+        <div class="edit-field">
+            <label>وصف الفعالية</label>
+            <textarea id="eventDescription" rows="3" placeholder="وصف الفعالية"></textarea>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="edit-field">
+                <label>التاريخ</label>
+                <input type="date" id="eventDate">
+            </div>
+            <div class="edit-field">
+                <label>الوقت</label>
+                <input type="time" id="eventTime">
+            </div>
+        </div>
+        
+        <div class="edit-field">
+            <label>عدد المتطوعين المطلوب</label>
+            <input type="number" id="eventVolunteers" value="5" min="1">
+        </div>
+        
+        <div class="edit-field">
+            <label>نوع المكان</label>
+            <select id="eventPlaceType">
+                <option value="mosque">🕌 مسجد</option>
+                <option value="youth">🏠 دار شباب</option>
+                <option value="restaurant">🍽️ مائدة إفطار</option>
+                <option value="charity">🤝 جمعية خيرية</option>
+                <option value="school">🏫 مدرسة</option>
+                <option value="hospital">🏥 مستشفى</option>
+                <option value="other">📍 أخرى</option>
+            </select>
+        </div>
+        
+        <div class="edit-field">
+            <label>رقم الهاتف للتواصل</label>
+            <input type="tel" id="eventPhone" placeholder="مثال: 0555123456">
+        </div>
+        
+        <div class="edit-field">
+            <label>متطلبات خاصة</label>
+            <textarea id="eventRequirements" rows="2" placeholder="أي متطلبات خاصة للمتطوعين..."></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="createEvent()" class="btn-save" style="flex:2;">إضافة الفعالية</button>
+            <button onclick="closeModal('addEventModal')" class="btn btn-danger" style="flex:1;">إلغاء</button>
         </div>
     </div>
 </div>
 
-<!-- نافذة إضافة فعالية -->
-<div id="addEventModal" class="modal"></div>
+<!-- نافذة إضافة مكان (تظهر للمدير عند الضغط على الخريطة) -->
+<div id="addPlaceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fas fa-map-pin"></i> إضافة مكان جديد</h3>
+            <button class="close-modal" onclick="closeModal('addPlaceModal')"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="edit-field">
+            <label>اسم المكان</label>
+            <input type="text" id="placeName" placeholder="مثال: مسجد النور">
+        </div>
+        
+        <div class="edit-field">
+            <label>نوع المكان</label>
+            <select id="placeType">
+                <option value="mosque">🕌 مسجد</option>
+                <option value="youth">🏠 دار شباب</option>
+                <option value="restaurant">🍽️ مائدة إفطار</option>
+                <option value="charity">🤝 جمعية خيرية</option>
+                <option value="school">🏫 مدرسة</option>
+                <option value="hospital">🏥 مستشفى</option>
+                <option value="other">📍 أخرى</option>
+            </select>
+        </div>
+        
+        <div class="edit-field">
+            <label>العنوان</label>
+            <input type="text" id="placeAddress" placeholder="العنوان الكامل">
+        </div>
+        
+        <div class="edit-field">
+            <label>الإحداثيات</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="placeLat" readonly style="flex:1; background: rgba(255,255,255,0.05);">
+                <input type="text" id="placeLng" readonly style="flex:1; background: rgba(255,255,255,0.05);">
+            </div>
+        </div>
+        
+        <div class="edit-field">
+            <label>وصف إضافي (اختياري)</label>
+            <textarea id="placeDescription" rows="2" placeholder="أضف معلومات إضافية..."></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="savePlace()" class="btn-save" style="flex:2;">حفظ المكان</button>
+            <button onclick="closeModal('addPlaceModal')" class="btn btn-danger" style="flex:1;">إلغاء</button>
+        </div>
+    </div>
+</div>
 
-<!-- نافذة إضافة مكان -->
-<div id="addPlaceModal" class="modal"></div>
+<!-- نافذة إضافة صورة -->
+<div id="uploadPhotoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fas fa-camera"></i> إضافة صورة جديدة</h3>
+            <button class="close-modal" onclick="closeModal('uploadPhotoModal')"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="edit-field">
+            <label>اختر الفعالية</label>
+            <select id="photoEvent">
+                <option value="">اختر فعالية...</option>
+            </select>
+        </div>
+        
+        <div class="edit-field">
+            <label>وصف الصورة</label>
+            <input type="text" id="photoDescription" placeholder="وصف الصورة">
+        </div>
+        
+        <div class="edit-field">
+            <label>رفع الصورة</label>
+            <input type="file" id="photoFile" accept="image/*">
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="uploadPhoto()" class="btn-save" style="flex:2;">رفع الصورة</button>
+            <button onclick="closeModal('uploadPhotoModal')" class="btn btn-danger" style="flex:1;">إلغاء</button>
+        </div>
+    </div>
+</div>
 
+<!-- مؤشر التحميل -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<!-- Firebase -->
 <script>
-// ==================== تهيئة Firebase ====================
-const firebaseConfig = {
-    apiKey: "AIzaSyCrdJiVtP9I2SRwdUIKwixdbA5YPkgPc9w",
-    authDomain: "mawaheb-dari.firebaseapp.com",
-    databaseURL: "https://mawaheb-dari-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "mawaheb-dari",
-    storageBucket: "mawaheb-dari.firebasestorage.app",
-    messagingSenderId: "366330802478",
-    appId: "1:366330802478:web:ed1aa9746da0e44d784abf"
-};
+    // ==================== تهيئة Firebase ====================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCrdJiVtP9I2SRwdUIKwixdbA5YPkgPc9w",
+        authDomain: "mawaheb-dari.firebaseapp.com",
+        databaseURL: "https://mawaheb-dari-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "mawaheb-dari",
+        storageBucket: "mawaheb-dari.firebasestorage.app",
+        messagingSenderId: "366330802478",
+        appId: "1:366330802478:web:ed1aa9746da0e44d784abf"
+    };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
-const storage = firebase.storage();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const storage = firebase.storage();
 
-// ==================== متغيرات عامة ====================
-let currentUser = null;
-let selectedRole = '';
-let currentLang = 'ar';
-let map = null;
-let currentLocation = { lat: 36.1885, lng: 5.4130 };
-let userMarker = null;
-let locationCircle = null;
-let tempEventMarker = null;
-let tempPlaceMarker = null;
-let allPlaces = [];
-let allEvents = [];
+    // ==================== متغيرات عامة ====================
+    let currentUser = null;
+    let selectedRole = '';
+    let currentLang = 'ar';
+    let map = null;
+    let mapType = 'street'; // 'street' or 'satellite'
+    let currentLocation = { lat: 36.1885, lng: 5.4130 };
+    let userMarker = null;
+    let locationCircle = null;
+    let tempEventMarker = null;
+    let tempPlaceMarker = null;
+    let allPlaces = [];
+    let allEvents = [];
+    let allPhotos = [];
+    let allUsers = [];
+    let notifications = [];
+    let eventsListeners = []; // لتخزين references المستمعين
 
-// ==================== تهيئة التطبيق ====================
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        document.getElementById('splash-screen').style.opacity = '0';
+    // ==================== دوال التحميل والإظهار ====================
+    function showLoading() {
+        document.getElementById('loading-overlay').style.display = 'flex';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+    function showToast(msg, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+        if (tempEventMarker) map.removeLayer(tempEventMarker);
+        if (tempPlaceMarker) map.removeLayer(tempPlaceMarker);
+    }
+
+    // ==================== تهيئة التطبيق ====================
+    document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
-            document.getElementById('splash-screen').style.display = 'none';
-        }, 600);
-    }, 2000);
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+            }, 600);
+        }, 2000);
 
-    createAddEventModal();
-    createAddPlaceModal();
-    initMap();
-});
+        initMap();
+        loadSettings();
+        
+        const savedLang = localStorage.getItem('preferredLang');
+        if (savedLang) changeLanguage(savedLang);
+    });
 
-auth.onAuthStateChanged((user) => {
-    currentUser = user;
-    if (user) {
-        document.getElementById('role-screen').style.display = 'none';
+    auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        if (user) {
+            document.getElementById('role-screen').style.display = 'none';
+            document.getElementById('auth-screen').classList.remove('active');
+            document.getElementById('app').style.display = 'block';
+            
+            // تحديد نوع المستخدم من قاعدة البيانات
+            database.ref('users/' + user.uid).once('value').then((snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    selectedRole = userData.role;
+                    if (selectedRole === 'admin') {
+                        // تحديث التبويب السفلي للمدير
+                        document.getElementById('volunteer-nav').style.display = 'none';
+                        const adminNav = document.getElementById('admin-nav');
+                        adminNav.style.display = 'flex';
+                        adminNav.innerHTML = `
+                            <div class="nav-item active" onclick="switchTab('home')">
+                                <i class="fas fa-home"></i><span>الرئيسية</span>
+                            </div>
+                            <div class="nav-item" onclick="switchTab('admin-events')">
+                                <i class="fas fa-tasks"></i><span>الإدارة</span>
+                                <span class="badge" id="admin-pending-badge">0</span>
+                            </div>
+                            <div class="nav-item" onclick="switchTab('notifications')">
+                                <i class="fas fa-bell"></i><span>الإشعارات</span>
+                                <span class="badge" id="admin-nav-notification-count">0</span>
+                            </div>
+                            <div class="nav-item" onclick="switchTab('profile')">
+                                <i class="fas fa-user"></i><span>ملفي</span>
+                            </div>
+                            <div class="nav-item" onclick="switchTab('settings')">
+                                <i class="fas fa-cog"></i><span>الإعدادات</span>
+                            </div>
+                        `;
+                        document.getElementById('admin-danger-zone').style.display = 'block';
+                    } else {
+                        document.getElementById('volunteer-nav').style.display = 'flex';
+                        document.getElementById('admin-nav').style.display = 'none';
+                    }
+                }
+            }).catch(error => showToast('❌ خطأ في تحميل بيانات المستخدم: ' + error.message, 'error'));
+            
+            loadUserData();
+            loadEvents();
+            loadPlaces();
+            loadPhotos();
+            loadNotifications();
+            loadLeaderboard();
+        }
+    });
+
+    // ==================== دوال المصادقة ====================
+    function selectRole(role) {
+        selectedRole = role;
+        document.getElementById('role-screen').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('role-screen').style.display = 'none';
+            document.getElementById('auth-screen').classList.add('active');
+            document.getElementById('auth-icon').className = role === 'volunteer' ? 'fas fa-user-graduate' : 'fas fa-user-tie';
+            document.getElementById('auth-title').textContent = role === 'volunteer' ? 'تسجيل دخول المتطوعين' : 'تسجيل دخول المدراء';
+            document.getElementById('signup-role').value = role === 'volunteer' ? 'متطوع' : 'مدير';
+        }, 500);
+    }
+
+    function goBackToRole() {
         document.getElementById('auth-screen').classList.remove('active');
-        document.getElementById('app').style.display = 'block';
-        loadUserData();
-        loadEvents();
+        document.getElementById('role-screen').style.display = 'flex';
+        document.getElementById('role-screen').style.opacity = '1';
+    }
+
+    function switchAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        
+        if (tab === 'login') {
+            document.querySelectorAll('.auth-tab')[0].classList.add('active');
+            document.getElementById('login-form').classList.add('active');
+        } else {
+            document.querySelectorAll('.auth-tab')[1].classList.add('active');
+            document.getElementById('signup-form').classList.add('active');
+        }
+    }
+
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        input.type = input.type === 'password' ? 'text' : 'password';
+        icon.className = input.type === 'password' ? 'fas fa-eye toggle-password' : 'fas fa-eye-slash toggle-password';
+    }
+
+    function login() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        if (!email || !password) {
+            showToast('❌ الرجاء إدخال البريد وكلمة المرور', 'error');
+            return;
+        }
+        
+        showToast('⏳ جاري تسجيل الدخول...', 'info');
+        
+        auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                document.getElementById('auth-screen').classList.remove('active');
+                showToast('✅ تم تسجيل الدخول بنجاح');
+            })
+            .catch(error => showToast('❌ ' + error.message, 'error'));
+    }
+
+    function signup() {
+        const name = document.getElementById('signup-name').value;
+        const email = document.getElementById('signup-email').value;
+        const phone = document.getElementById('signup-phone').value;
+        const wilaya = document.getElementById('signup-wilaya').value;
+        const talents = document.getElementById('signup-talents').value;
+        const password = document.getElementById('signup-password').value;
+        const confirm = document.getElementById('signup-confirm').value;
+        
+        if (!name || !email || !phone || !password) {
+            showToast('❌ الرجاء ملء جميع الحقول', 'error');
+            return;
+        }
+        
+        if (password !== confirm) {
+            showToast('❌ كلمة المرور غير متطابقة', 'error');
+            return;
+        }
+        
+        if (!document.getElementById('agree-terms').checked) {
+            showToast('❌ يجب الموافقة على الشروط', 'error');
+            return;
+        }
+        
+        showLoading();
+        
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                return user.updateProfile({ displayName: name }).then(() => {
+                    return database.ref('users/' + user.uid).set({
+                        name, email, phone, wilaya, talents,
+                        role: selectedRole,
+                        points: 0,
+                        events: 0,
+                        hours: 0,
+                        createdAt: new Date().toISOString()
+                    });
+                });
+            })
+            .then(() => {
+                hideLoading();
+                showToast('🎉 تم إنشاء الحساب بنجاح');
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    function forgotPassword() {
+        const email = document.getElementById('login-email').value;
+        if (!email) {
+            showToast('❌ الرجاء إدخال البريد الإلكتروني', 'error');
+            return;
+        }
+        auth.sendPasswordResetEmail(email)
+            .then(() => showToast('📧 تم إرسال رابط استعادة كلمة المرور'))
+            .catch(error => showToast('❌ ' + error.message, 'error'));
+    }
+
+    function socialLogin(provider) {
+        showToast(`🔑 جاري تسجيل الدخول عبر ${provider}...`, 'info');
+    }
+
+    // ==================== دوال الملف الشخصي ====================
+    function loadUserData() {
+        if (!currentUser) return;
+        
+        database.ref('users/' + currentUser.uid).once('value')
+            .then((snapshot) => {
+                const userData = snapshot.val();
+                if (!userData) return;
+                
+                document.getElementById('display-name').textContent = userData.name || currentUser.displayName;
+                document.getElementById('display-bio').textContent = userData.bio || 'متطوع في منصة مواهب داري';
+                document.getElementById('display-phone').textContent = userData.phone || 'غير محدد';
+                document.getElementById('display-wilaya').textContent = getWilayaName(userData.wilaya);
+                document.getElementById('display-member').textContent = new Date(userData.createdAt).toLocaleDateString('ar-SA');
+                
+                document.getElementById('stat-events').textContent = userData.events || 0;
+                document.getElementById('stat-hours').textContent = userData.hours || 0;
+                document.getElementById('stat-points').textContent = userData.points || 0;
+                
+                if (userData.talents) {
+                    const talents = userData.talents.split(',').map(t => t.trim());
+                    document.getElementById('display-talents').innerHTML = talents.map(t => 
+                        `<span class="talent-tag">${t}</span>`
+                    ).join('');
+                }
+                
+                document.getElementById('edit-name').value = userData.name || '';
+                document.getElementById('edit-bio').value = userData.bio || '';
+                document.getElementById('edit-phone').value = userData.phone || '';
+                document.getElementById('edit-wilaya').value = userData.wilaya || '16';
+                document.getElementById('edit-talents').value = userData.talents || '';
+                
+                if (userData.photoURL) {
+                    document.getElementById('profile-avatar').src = userData.photoURL;
+                }
+            })
+            .catch(error => showToast('❌ خطأ في تحميل بيانات المستخدم: ' + error.message, 'error'));
+    }
+
+    function saveProfile() {
+        const name = document.getElementById('edit-name').value;
+        const bio = document.getElementById('edit-bio').value;
+        const phone = document.getElementById('edit-phone').value;
+        const wilaya = document.getElementById('edit-wilaya').value;
+        const talents = document.getElementById('edit-talents').value;
+        
+        showLoading();
+        
+        currentUser.updateProfile({ displayName: name })
+            .then(() => {
+                return database.ref('users/' + currentUser.uid).update({
+                    name, bio, phone, wilaya, talents
+                });
+            })
+            .then(() => {
+                hideLoading();
+                showToast('✅ تم حفظ التعديلات');
+                document.getElementById('display-name').textContent = name;
+                document.getElementById('display-bio').textContent = bio;
+                document.getElementById('display-phone').textContent = phone;
+                document.getElementById('display-wilaya').textContent = getWilayaName(wilaya);
+                
+                if (talents) {
+                    const talentsArray = talents.split(',').map(t => t.trim());
+                    document.getElementById('display-talents').innerHTML = talentsArray.map(t => 
+                        `<span class="talent-tag">${t}</span>`
+                    ).join('');
+                }
+                
+                toggleEditForm();
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    function toggleEditForm() {
+        const form = document.getElementById('edit-form');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function changeAvatar(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // التحقق من حجم الصورة (5MB كحد أقصى)
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('❌ حجم الصورة كبير جداً (الحد الأقصى 5 ميجابايت)', 'error');
+            return;
+        }
+        
+        showLoading();
+        
+        const storageRef = storage.ref(`avatars/${currentUser.uid}`);
+        storageRef.put(file).then(() => storageRef.getDownloadURL())
+            .then(url => {
+                document.getElementById('profile-avatar').src = url;
+                return currentUser.updateProfile({ photoURL: url });
+            })
+            .then(() => {
+                return database.ref('users/' + currentUser.uid + '/photoURL').set(url);
+            })
+            .then(() => {
+                hideLoading();
+                showToast('✅ تم تغيير الصورة الشخصية');
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    function getWilayaName(id) {
+        const names = {
+            "1": "أدرار", "2": "الشلف", "3": "الأغواط", "4": "أم البواقي",
+            "5": "باتنة", "6": "بجاية", "7": "بسكرة", "8": "بشار",
+            "9": "البليدة", "10": "البويرة", "11": "تمنراست", "12": "تبسة",
+            "13": "تلمسان", "14": "تيارت", "15": "تيزي وزو", "16": "الجزائر",
+            "17": "الجلفة", "18": "جيجل", "19": "سطيف", "20": "سعيدة",
+            "21": "سكيكدة", "22": "سيدي بلعباس", "23": "عنابة", "24": "قالمة",
+            "25": "قسنطينة", "26": "المدية", "27": "مستغانم", "28": "المسيلة",
+            "29": "معسكر", "30": "ورقلة", "31": "وهران", "32": "البيض",
+            "33": "إليزي", "34": "برج بوعريريج", "35": "بومرداس", "36": "الطارف",
+            "37": "تندوف", "38": "تيسمسيلت", "39": "الوادي", "40": "خنشلة",
+            "41": "سوق أهراس", "42": "تيبازة", "43": "ميلة", "44": "عين الدفلى",
+            "45": "النعامة", "46": "عين تموشنت", "47": "غرداية", "48": "غليزان"
+        };
+        return names[id] || 'غير محدد';
+    }
+
+    // ==================== دوال الخريطة ====================
+    function initMap() {
+        map = L.map('map').setView([currentLocation.lat, currentLocation.lng], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+        mapType = 'street';
+        
+        // تفعيل إضافة الأماكن للمدير عند الضغط على الخريطة
+        map.on('click', function(e) {
+            if (selectedRole === 'admin') {
+                showAddPlacePrompt(e.latlng);
+            }
+        });
+        
         loadPlaces();
     }
-});
 
-// ==================== دوال المصادقة ====================
-function selectRole(role) {
-    selectedRole = role;
-    document.getElementById('role-screen').style.opacity = '0';
-    setTimeout(() => {
-        document.getElementById('role-screen').style.display = 'none';
-        document.getElementById('auth-screen').classList.add('active');
-        document.getElementById('auth-icon').className = role === 'volunteer' ? 'fas fa-user-graduate' : 'fas fa-user-tie';
-        document.getElementById('auth-title').textContent = role === 'volunteer' ? 'تسجيل دخول المتطوعين' : 'تسجيل دخول المدراء';
-        document.getElementById('signup-role').value = role === 'volunteer' ? 'متطوع' : 'مدير';
-    }, 500);
-}
-
-function goBackToRole() {
-    document.getElementById('auth-screen').classList.remove('active');
-    document.getElementById('role-screen').style.display = 'flex';
-    document.getElementById('role-screen').style.opacity = '1';
-}
-
-function switchAuthTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    
-    if (tab === 'login') {
-        document.querySelectorAll('.auth-tab')[0].classList.add('active');
-        document.getElementById('login-form').classList.add('active');
-    } else {
-        document.querySelectorAll('.auth-tab')[1].classList.add('active');
-        document.getElementById('signup-form').classList.add('active');
-    }
-}
-
-function togglePassword(id, icon) {
-    const input = document.getElementById(id);
-    input.type = input.type === 'password' ? 'text' : 'password';
-    icon.className = input.type === 'password' ? 'fas fa-eye toggle-password' : 'fas fa-eye-slash toggle-password';
-}
-
-function login() {
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    
-    if (!email || !password) {
-        showToast('❌ الرجاء إدخال البريد وكلمة المرور', 'error');
-        return;
-    }
-    
-    showToast('⏳ جاري تسجيل الدخول...', 'info');
-    
-    auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            document.getElementById('auth-screen').classList.remove('active');
-            showToast('✅ تم تسجيل الدخول بنجاح');
-        })
-        .catch(error => showToast('❌ ' + error.message, 'error'));
-}
-
-function signup() {
-    const name = document.getElementById('signup-name').value;
-    const email = document.getElementById('signup-email').value;
-    const phone = document.getElementById('signup-phone').value;
-    const wilaya = document.getElementById('signup-wilaya').value;
-    const password = document.getElementById('signup-password').value;
-    const confirm = document.getElementById('signup-confirm').value;
-    
-    if (!name || !email || !phone || !password) {
-        showToast('❌ الرجاء ملء جميع الحقول', 'error');
-        return;
-    }
-    
-    if (password !== confirm) {
-        showToast('❌ كلمة المرور غير متطابقة', 'error');
-        return;
-    }
-    
-    if (!document.getElementById('agree-terms').checked) {
-        showToast('❌ يجب الموافقة على الشروط', 'error');
-        return;
-    }
-    
-    showToast('⏳ جاري إنشاء الحساب...', 'info');
-    
-    auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            return user.updateProfile({ displayName: name }).then(() => {
-                return database.ref('users/' + user.uid).set({
-                    name, email, phone, wilaya,
-                    role: selectedRole,
-                    points: 0,
-                    events: 0,
-                    createdAt: new Date().toISOString()
-                });
-            });
-        })
-        .then(() => showToast('🎉 تم إنشاء الحساب بنجاح'))
-        .catch(error => showToast('❌ ' + error.message, 'error'));
-}
-
-function forgotPassword() {
-    const email = document.getElementById('login-email').value;
-    if (!email) {
-        showToast('❌ الرجاء إدخال البريد', 'error');
-        return;
-    }
-    auth.sendPasswordResetEmail(email)
-        .then(() => showToast('📧 تم إرسال رابط استعادة كلمة المرور'))
-        .catch(error => showToast('❌ ' + error.message, 'error'));
-}
-
-// ==================== دوال الملف الشخصي ====================
-function loadUserData() {
-    if (!currentUser) return;
-    
-    database.ref('users/' + currentUser.uid).once('value')
-        .then((snapshot) => {
-            const userData = snapshot.val();
-            if (!userData) return;
-            
-            document.getElementById('display-name').textContent = userData.name || currentUser.displayName;
-            document.getElementById('display-phone').textContent = userData.phone || 'غير محدد';
-            document.getElementById('display-wilaya').textContent = userData.wilaya || 'غير محدد';
-            document.getElementById('display-member').textContent = new Date(userData.createdAt).toLocaleDateString('ar-SA');
-            document.getElementById('stat-points').textContent = userData.points || 0;
-            
-            const nameParts = (userData.name || currentUser.displayName || '').split(' ');
-            document.getElementById('edit-name').value = userData.name || '';
-            document.getElementById('edit-phone').value = userData.phone || '';
-            document.getElementById('edit-wilaya').value = userData.wilaya || '16';
-        });
-}
-
-function saveProfile() {
-    const name = document.getElementById('edit-name').value;
-    const phone = document.getElementById('edit-phone').value;
-    const wilaya = document.getElementById('edit-wilaya').value;
-    
-    currentUser.updateProfile({ displayName: name })
-        .then(() => {
-            return database.ref('users/' + currentUser.uid).update({
-                name, phone, wilaya
-            });
-        })
-        .then(() => {
-            showToast('✅ تم حفظ التعديلات');
-            document.getElementById('display-name').textContent = name;
-            document.getElementById('display-phone').textContent = phone;
-            document.getElementById('display-wilaya').textContent = wilaya;
-            toggleEditForm();
-        });
-}
-
-function toggleEditForm() {
-    const form = document.getElementById('edit-form');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
-
-function changeAvatar(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const storageRef = storage.ref(`avatars/${currentUser.uid}`);
-    storageRef.put(file).then(() => storageRef.getDownloadURL())
-        .then(url => {
-            document.getElementById('profile-avatar').src = url;
-            return currentUser.updateProfile({ photoURL: url });
-        })
-        .then(() => showToast('✅ تم تغيير الصورة'));
-}
-
-// ==================== دوال الخريطة ====================
-function initMap() {
-    map = L.map('map').setView([currentLocation.lat, currentLocation.lng], 13);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
-    
-    // تفعيل إضافة الأماكن بالضغط على الخريطة للمدير
-    map.on('click', function(e) {
-        if (selectedRole === 'admin' && document.getElementById('admin-interface')?.style.display === 'block') {
-            showAddPlacePrompt(e.latlng);
+    function toggleMapType() {
+        if (!map) return;
+        
+        // إزالة الطبقة الحالية
+        map.eachLayer(l => { if (l instanceof L.TileLayer) map.removeLayer(l); });
+        
+        if (mapType === 'street') {
+            // تبديل إلى القمر الصناعي
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri'
+            }).addTo(map);
+            mapType = 'satellite';
+        } else {
+            // تبديل إلى الشارع
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            mapType = 'street';
         }
-    });
-    
-    loadPlaces();
-}
-
-function getUserLocation() {
-    if (!navigator.geolocation) {
-        showToast('❌ المتصفح لا يدعم تحديد الموقع', 'error');
-        return;
     }
-    
-    showToast('📍 جاري تحديد موقعك...', 'info');
-    
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            currentLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
-            
-            // إزالة الماركر القديم
-            if (userMarker) map.removeLayer(userMarker);
-            if (locationCircle) map.removeLayer(locationCircle);
-            
-            // إنشاء ماركر جديد للموقع
-            const userIcon = L.divIcon({
-                className: 'user-marker',
-                html: `
-                    <div style="position: relative;">
-                        <div style="width: 20px; height: 20px; background: #3b82f6; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 20px #3b82f6;"></div>
-                        <div style="position: absolute; top: -15px; left: -15px; width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; opacity: 0.3; animation: ping 1.5s infinite;"></div>
-                    </div>
-                `,
-                iconSize: [50, 50],
-                iconAnchor: [25, 25]
-            });
-            
-            userMarker = L.marker([currentLocation.lat, currentLocation.lng], { icon: userIcon }).addTo(map);
-            userMarker.bindPopup('📍 موقعي الحالي').openPopup();
-            
-            // رسم دائرة حول الموقع
-            locationCircle = L.circle([currentLocation.lat, currentLocation.lng], {
-                color: '#3b82f6',
-                fillColor: '#3b82f6',
-                fillOpacity: 0.1,
-                radius: 1000
+
+    function getUserLocation() {
+        if (!navigator.geolocation) {
+            showToast('❌ المتصفح لا يدعم تحديد الموقع', 'error');
+            return;
+        }
+        
+        showToast('📍 جاري تحديد موقعك...', 'info');
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                currentLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                
+                // إزالة الماركر القديم
+                if (userMarker) map.removeLayer(userMarker);
+                if (locationCircle) map.removeLayer(locationCircle);
+                
+                // إنشاء ماركر جديد للموقع
+                const userIcon = L.divIcon({
+                    className: 'user-marker',
+                    html: `
+                        <div style="position: relative;">
+                            <div style="width: 20px; height: 20px; background: #3b82f6; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 20px #3b82f6;"></div>
+                            <div style="position: absolute; top: -15px; left: -15px; width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; opacity: 0.3; animation: ping 1.5s infinite;"></div>
+                            <div style="position: absolute; top: -30px; left: -10px; background: #3b82f6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap;">
+                                موقعي الحالي
+                            </div>
+                        </div>
+                    `,
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25]
+                });
+                
+                userMarker = L.marker([currentLocation.lat, currentLocation.lng], { icon: userIcon }).addTo(map);
+                userMarker.bindPopup('📍 موقعي الحالي').openPopup();
+                
+                // رسم دائرة حول الموقع
+                locationCircle = L.circle([currentLocation.lat, currentLocation.lng], {
+                    color: '#3b82f6',
+                    fillColor: '#3b82f6',
+                    fillOpacity: 0.1,
+                    radius: 1000
+                }).addTo(map);
+                
+                map.flyTo([currentLocation.lat, currentLocation.lng], 16);
+                document.getElementById('location-text').textContent = 'تم تحديد موقعك';
+                showToast('✅ تم تحديد موقعك بنجاح');
+            },
+            (error) => {
+                let message = '❌ تعذر تحديد الموقع';
+                if (error.code === 1) message = '❌ تم رفض الإذن بتحديد الموقع';
+                else if (error.code === 2) message = '❌ معلومات الموقع غير متوفرة';
+                else if (error.code === 3) message = '❌ انتهى وقت طلب الموقع';
+                showToast(message, 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    function loadPlaces() {
+        database.ref('places').on('value', (snapshot) => {
+            allPlaces = [];
+            snapshot.forEach(child => allPlaces.push({ id: child.key, ...child.val() }));
+            updateMapPlaces();
+            updatePlacesList();
+        }, error => showToast('❌ خطأ في تحميل الأماكن: ' + error.message, 'error'));
+    }
+
+    function updateMapPlaces() {
+        if (!map) return;
+        
+        map.eachLayer(layer => {
+            if (layer instanceof L.Marker && layer !== userMarker) {
+                map.removeLayer(layer);
+            }
+        });
+        
+        allPlaces.forEach(place => {
+            const icon = getPlaceIcon(place.type);
+            const marker = L.marker([place.lat, place.lng], {
+                icon: L.divIcon({
+                    html: `<span style="font-size: 24px;">${icon}</span>`,
+                    className: 'place-marker',
+                    iconSize: [30, 30]
+                })
             }).addTo(map);
             
-            map.flyTo([currentLocation.lat, currentLocation.lng], 16);
-            document.getElementById('location-text').textContent = 'تم تحديد موقعك';
-            showToast('✅ تم تحديد موقعك بنجاح');
-        },
-        (error) => {
-            showToast('❌ تعذر تحديد الموقع', 'error');
-        }
-    );
-}
+            const deleteBtn = selectedRole === 'admin' ? 
+                `<button class="btn btn-danger btn-small" onclick="deletePlace('${place.id}')" style="margin-top:5px;"><i class="fas fa-trash"></i> حذف</button>` : '';
+            
+            marker.bindPopup(`
+                <div style="text-align: center;">
+                    <h4>${place.name}</h4>
+                    <p>${place.address}</p>
+                    <small>أضيف بواسطة: ${place.addedByName || 'مدير'}</small>
+                    ${deleteBtn}
+                </div>
+            `);
+        });
+    }
 
-function loadPlaces() {
-    database.ref('places').on('value', (snapshot) => {
-        allPlaces = [];
-        snapshot.forEach(child => allPlaces.push({ id: child.key, ...child.val() }));
-        updateMapPlaces();
-        updatePlacesList();
-    });
-}
-
-function updateMapPlaces() {
-    // إزالة جميع علامات الأماكن
-    map.eachLayer(layer => {
-        if (layer instanceof L.Marker && layer !== userMarker) {
-            map.removeLayer(layer);
+    function updatePlacesList() {
+        const list = document.getElementById('places-list');
+        if (!list) return;
+        
+        if (allPlaces.length === 0) {
+            list.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد أماكن بعد</p>';
+            return;
         }
-    });
-    
-    // إضافة علامات الأماكن
-    allPlaces.forEach(place => {
-        const icon = getPlaceIcon(place.type);
-        const marker = L.marker([place.lat, place.lng], {
-            icon: L.divIcon({
-                html: `<span style="font-size: 24px;">${icon}</span>`,
-                className: 'place-marker',
-                iconSize: [30, 30]
+        
+        list.innerHTML = allPlaces.map(place => `
+            <div class="place-item">
+                <span class="place-icon" onclick="flyToPlace(${place.lat}, ${place.lng})">${getPlaceIcon(place.type)}</span>
+                <div class="place-info" onclick="flyToPlace(${place.lat}, ${place.lng})">
+                    <div class="place-name">${place.name}</div>
+                    <div class="place-address">${place.address}</div>
+                </div>
+                ${selectedRole === 'admin' ? `
+                    <div class="place-actions">
+                        <button class="btn btn-danger btn-small" onclick="deletePlace('${place.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+    }
+
+    function getPlaceIcon(type) {
+        const icons = {
+            mosque: '🕌', youth: '🏠', restaurant: '🍽️',
+            charity: '🤝', school: '🏫', hospital: '🏥', other: '📍'
+        };
+        return icons[type] || '📍';
+    }
+
+    function flyToPlace(lat, lng) {
+        map.flyTo([lat, lng], 17);
+    }
+
+    function deletePlace(placeId) {
+        if (selectedRole !== 'admin') return;
+        if (!confirm('⚠️ هل أنت متأكد من حذف هذا المكان؟')) return;
+        
+        showLoading();
+        database.ref('places/' + placeId).remove()
+            .then(() => {
+                hideLoading();
+                showToast('✅ تم حذف المكان');
             })
-        }).addTo(map);
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    function showAddPlacePrompt(latlng) {
+        const { lat, lng } = latlng;
         
-        marker.bindPopup(`
-            <div style="text-align: center;">
-                <h4>${place.name}</h4>
-                <p>${place.address}</p>
-                <small>أضيف بواسطة: ${place.addedByName || 'مدير'}</small>
-            </div>
-        `);
-    });
-}
-
-function updatePlacesList() {
-    const list = document.getElementById('places-list');
-    if (!list) return;
-    
-    if (allPlaces.length === 0) {
-        list.innerHTML = '<p style="text-align: center;">لا توجد أماكن بعد</p>';
-        return;
-    }
-    
-    list.innerHTML = allPlaces.map(place => `
-        <div class="place-item" onclick="flyToPlace(${place.lat}, ${place.lng})">
-            <span class="place-icon">${getPlaceIcon(place.type)}</span>
-            <div class="place-info">
-                <div class="place-name">${place.name}</div>
-                <div class="place-address">${place.address}</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function getPlaceIcon(type) {
-    const icons = {
-        mosque: '🕌', youth: '🏠', restaurant: '🍽️',
-        charity: '🤝', school: '🏫', hospital: '🏥', other: '📍'
-    };
-    return icons[type] || '📍';
-}
-
-function flyToPlace(lat, lng) {
-    map.flyTo([lat, lng], 17);
-}
-
-// ==================== دوال إضافة الأماكن للمدير ====================
-function showAddPlacePrompt(latlng) {
-    const { lat, lng } = latlng;
-    
-    if (tempPlaceMarker) map.removeLayer(tempPlaceMarker);
-    
-    const icon = L.divIcon({
-        html: `
-            <div style="position: relative; animation: bounce 0.5s;">
-                <i class="fas fa-building" style="color: var(--accent); font-size: 40px;"></i>
-                <div style="position: absolute; top: -30px; left: 5px; background: var(--accent); color: black; padding: 4px 12px; border-radius: 20px; font-size: 12px;">
-                    إضافة مكان
-                </div>
-            </div>
-        `,
-        className: 'place-marker',
-        iconSize: [40, 40],
-        iconAnchor: [20, 40]
-    });
-    
-    tempPlaceMarker = L.marker([lat, lng], { icon: icon }).addTo(map);
-    tempPlaceMarker.bindPopup(`
-        <div style="text-align: center;">
-            <h4>➕ إضافة مكان جديد</h4>
-            <p>${lat.toFixed(6)}<br>${lng.toFixed(6)}</p>
-            <button onclick="openAddPlaceModal(${lat}, ${lng})" style="background: var(--accent); color: black; border: none; border-radius: 30px; padding: 10px 20px; cursor: pointer;">
-                <i class="fas fa-plus"></i> إضافة هذا المكان
-            </button>
-        </div>
-    `).openPopup();
-}
-
-function openAddPlaceModal(lat, lng) {
-    document.getElementById('placeLat').value = lat.toFixed(6);
-    document.getElementById('placeLng').value = lng.toFixed(6);
-    document.getElementById('addPlaceModal').classList.add('active');
-    map.closePopup();
-}
-
-function savePlace() {
-    const name = document.getElementById('placeName').value;
-    const type = document.getElementById('placeType').value;
-    const address = document.getElementById('placeAddress').value;
-    const lat = parseFloat(document.getElementById('placeLat').value);
-    const lng = parseFloat(document.getElementById('placeLng').value);
-    
-    if (!name || !type || !address) {
-        showToast('❌ الرجاء ملء جميع الحقول', 'error');
-        return;
-    }
-    
-    const placeData = {
-        name, type, address, lat, lng,
-        addedBy: currentUser?.uid,
-        addedByName: currentUser?.displayName || 'مدير',
-        date: new Date().toISOString()
-    };
-    
-    database.ref('places').push(placeData)
-        .then(() => {
-            showToast('✅ تم إضافة المكان بنجاح');
-            closeModal('addPlaceModal');
-        })
-        .catch(error => showToast('❌ ' + error.message, 'error'));
-}
-
-// ==================== دوال إضافة الفعاليات ====================
-function createAddEventModal() {
-    const modal = document.getElementById('addEventModal');
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title"><i class="fas fa-calendar-plus"></i> إضافة فعالية جديدة</h3>
-                <button class="close-modal" onclick="closeModal('addEventModal')"><i class="fas fa-times"></i></button>
-            </div>
-            
-            <div class="edit-field">
-                <label>عنوان الفعالية</label>
-                <input type="text" id="eventTitle" placeholder="مثال: موائد إفطار رمضان">
-            </div>
-            
-            <div class="edit-field">
-                <label>الولاية</label>
-                <select id="eventWilaya">
-                    <option value="16">الجزائر</option>
-                    <option value="19">سطيف</option>
-                    <option value="31">وهران</option>
-                    <option value="25">قسنطينة</option>
-                    <option value="23">عنابة</option>
-                </select>
-            </div>
-            
-            <div class="edit-field">
-                <label>العنوان بالتفصيل</label>
-                <input type="text" id="eventAddress" placeholder="العنوان الكامل">
-            </div>
-            
-            <div class="edit-field">
-                <label>الموقع على الخريطة</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" id="eventLat" placeholder="خط العرض" readonly style="flex:1;">
-                    <input type="text" id="eventLng" placeholder="خط الطول" readonly style="flex:1;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="pickLocationFromMap()" style="flex:1; background: var(--info); color: white; border: none; border-radius: 30px; padding: 12px; cursor: pointer;">
-                        <i class="fas fa-map-marker-alt"></i> اختر من الخريطة
-                    </button>
-                    <button onclick="getCurrentLocationForEvent()" style="flex:1; background: var(--success); color: white; border: none; border-radius: 30px; padding: 12px; cursor: pointer;">
-                        <i class="fas fa-location-arrow"></i> موقعي
-                    </button>
-                </div>
-            </div>
-            
-            <div class="edit-field">
-                <label>وصف الفعالية</label>
-                <textarea id="eventDescription" rows="3" placeholder="وصف الفعالية"></textarea>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label>التاريخ</label>
-                    <input type="date" id="eventDate">
-                </div>
-                <div>
-                    <label>الوقت</label>
-                    <input type="time" id="eventTime">
-                </div>
-            </div>
-            
-            <div class="edit-field">
-                <label>عدد المتطوعين</label>
-                <input type="number" id="eventVolunteers" value="5" min="1">
-            </div>
-            
-            <div class="edit-field">
-                <label>نوع المكان</label>
-                <select id="eventPlaceType">
-                    <option value="mosque">🕌 مسجد</option>
-                    <option value="youth">🏠 دار شباب</option>
-                    <option value="restaurant">🍽️ مائدة إفطار</option>
-                    <option value="charity">🤝 جمعية خيرية</option>
-                    <option value="school">🏫 مدرسة</option>
-                    <option value="hospital">🏥 مستشفى</option>
-                    <option value="other">📍 أخرى</option>
-                </select>
-            </div>
-            
-            <div class="edit-field">
-                <label>رقم الهاتف</label>
-                <input type="tel" id="eventPhone" placeholder="مثال: 0555123456">
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="createEvent()" class="btn-save" style="flex:2;">إضافة الفعالية</button>
-                <button onclick="closeModal('addEventModal')" class="btn-danger" style="flex:1;">إلغاء</button>
-            </div>
-        </div>
-    `;
-}
-
-function createAddPlaceModal() {
-    const modal = document.getElementById('addPlaceModal');
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title"><i class="fas fa-map-pin"></i> إضافة مكان جديد</h3>
-                <button class="close-modal" onclick="closeModal('addPlaceModal')"><i class="fas fa-times"></i></button>
-            </div>
-            
-            <div class="edit-field">
-                <label>اسم المكان</label>
-                <input type="text" id="placeName" placeholder="مثال: مسجد النور">
-            </div>
-            
-            <div class="edit-field">
-                <label>نوع المكان</label>
-                <select id="placeType">
-                    <option value="mosque">🕌 مسجد</option>
-                    <option value="youth">🏠 دار شباب</option>
-                    <option value="restaurant">🍽️ مائدة إفطار</option>
-                    <option value="charity">🤝 جمعية خيرية</option>
-                    <option value="school">🏫 مدرسة</option>
-                    <option value="hospital">🏥 مستشفى</option>
-                    <option value="other">📍 أخرى</option>
-                </select>
-            </div>
-            
-            <div class="edit-field">
-                <label>العنوان</label>
-                <input type="text" id="placeAddress" placeholder="العنوان الكامل">
-            </div>
-            
-            <div class="edit-field">
-                <label>الإحداثيات</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="placeLat" readonly style="flex:1;">
-                    <input type="text" id="placeLng" readonly style="flex:1;">
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="savePlace()" class="btn-save" style="flex:2;">حفظ المكان</button>
-                <button onclick="closeModal('addPlaceModal')" class="btn-danger" style="flex:1;">إلغاء</button>
-            </div>
-        </div>
-    `;
-}
-
-function showAddEventModal() {
-    if (!currentUser) {
-        showToast('❌ يجب تسجيل الدخول أولاً', 'error');
-        document.getElementById('auth-screen').classList.add('active');
-        return;
-    }
-    document.getElementById('addEventModal').classList.add('active');
-}
-
-function pickLocationFromMap() {
-    showToast('📍 انقر على الخريطة لاختيار الموقع', 'info');
-    map.getContainer().style.cursor = 'crosshair';
-    
-    map.once('click', (e) => {
-        map.getContainer().style.cursor = '';
-        const { lat, lng } = e.latlng;
-        
-        if (tempEventMarker) map.removeLayer(tempEventMarker);
+        if (tempPlaceMarker) map.removeLayer(tempPlaceMarker);
         
         const icon = L.divIcon({
-            html: `<i class="fas fa-map-pin" style="color: var(--success); font-size: 40px;"></i>`,
+            html: `
+                <div style="position: relative; animation: bounce 0.5s;">
+                    <i class="fas fa-building" style="color: var(--accent); font-size: 40px;"></i>
+                    <div style="position: absolute; top: -30px; left: 5px; background: var(--accent); color: black; padding: 4px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap;">
+                        إضافة مكان
+                    </div>
+                </div>
+            `,
+            className: 'place-marker',
             iconSize: [40, 40],
             iconAnchor: [20, 40]
         });
         
-        tempEventMarker = L.marker([lat, lng], { icon: icon }).addTo(map);
-        tempEventMarker.bindPopup('موقع الفعالية').openPopup();
-        
-        document.getElementById('eventLat').value = lat.toFixed(6);
-        document.getElementById('eventLng').value = lng.toFixed(6);
-        showToast('✅ تم اختيار الموقع');
-    });
-}
-
-function getCurrentLocationForEvent() {
-    if (!navigator.geolocation) return;
-    
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            document.getElementById('eventLat').value = position.coords.latitude.toFixed(6);
-            document.getElementById('eventLng').value = position.coords.longitude.toFixed(6);
-            showToast('✅ تم تحديد موقعك');
-        }
-    );
-}
-
-function createEvent() {
-    const eventData = {
-        title: document.getElementById('eventTitle').value,
-        wilaya: document.getElementById('eventWilaya').value,
-        address: document.getElementById('eventAddress').value,
-        lat: parseFloat(document.getElementById('eventLat').value),
-        lng: parseFloat(document.getElementById('eventLng').value),
-        description: document.getElementById('eventDescription').value,
-        date: document.getElementById('eventDate').value,
-        time: document.getElementById('eventTime').value,
-        volunteers: parseInt(document.getElementById('eventVolunteers').value),
-        placeType: document.getElementById('eventPlaceType').value,
-        phone: document.getElementById('eventPhone').value,
-        createdBy: currentUser.uid,
-        createdByName: currentUser.displayName,
-        createdAt: new Date().toISOString(),
-        status: 'pending'
-    };
-    
-    if (!eventData.title || !eventData.address || !eventData.date || !eventData.time) {
-        showToast('❌ الرجاء ملء جميع الحقول', 'error');
-        return;
-    }
-    
-    database.ref('events').push(eventData)
-        .then(() => {
-            showToast('✅ تم إضافة الفعالية بنجاح');
-            closeModal('addEventModal');
-        })
-        .catch(error => showToast('❌ ' + error.message, 'error'));
-}
-
-// ==================== دوال الفعاليات ====================
-function loadEvents() {
-    database.ref('events').on('value', (snapshot) => {
-        allEvents = [];
-        snapshot.forEach(child => allEvents.push({ id: child.key, ...child.val() }));
-        updateEventsDisplay();
-    });
-}
-
-function updateEventsDisplay() {
-    const container = document.getElementById('events-container');
-    if (!container) return;
-    
-    const approvedEvents = allEvents.filter(e => e.status === 'approved');
-    
-    if (approvedEvents.length === 0) {
-        container.innerHTML = '<p style="text-align: center;">لا توجد فعاليات حالياً</p>';
-        return;
-    }
-    
-    container.innerHTML = approvedEvents.map(event => `
-        <div class="event-card">
-            <div class="event-header">
-                <span class="event-icon">${getPlaceIcon(event.placeType)}</span>
-                <h4 class="event-title">${event.title}</h4>
-            </div>
-            <div class="event-organizer">
-                <div class="organizer-avatar">${event.createdByName?.[0] || '?'}</div>
-                <span>${event.createdByName}</span>
-            </div>
-            <div class="event-meta">
-                <span><i class="fas fa-calendar"></i> ${event.date}</span>
-                <span><i class="fas fa-clock"></i> ${event.time}</span>
-            </div>
-            <div class="event-meta">
-                <span><i class="fas fa-map-pin"></i> ${event.address}</span>
-            </div>
-            <div class="event-meta">
-                <span><i class="fas fa-users"></i> ${event.volunteers} متطوع</span>
-            </div>
-            <div class="event-buttons">
-                <button class="btn btn-primary" onclick="volunteerForEvent('${event.id}')">
-                    <i class="fas fa-hand-paper"></i> تطوع
+        tempPlaceMarker = L.marker([lat, lng], { icon: icon }).addTo(map);
+        tempPlaceMarker.bindPopup(`
+            <div style="text-align: center;">
+                <h4>➕ إضافة مكان جديد</h4>
+                <p>${lat.toFixed(6)}<br>${lng.toFixed(6)}</p>
+                <button onclick="openAddPlaceModal(${lat}, ${lng})" class="btn btn-primary btn-small">
+                    <i class="fas fa-plus"></i> إضافة
+                </button>
+                <button onclick="map.closePopup()" class="btn btn-danger btn-small">
+                    <i class="fas fa-times"></i> إلغاء
                 </button>
             </div>
-        </div>
-    `).join('');
-}
-
-function volunteerForEvent(id) {
-    if (!currentUser) {
-        showToast('❌ يجب تسجيل الدخول أولاً', 'error');
-        return;
+        `).openPopup();
     }
-    
-    database.ref('events/' + id + '/participants/' + currentUser.uid).set({
-        userId: currentUser.uid,
-        userName: currentUser.displayName,
-        volunteeredAt: new Date().toISOString()
-    }).then(() => {
-        showToast('✅ تم تسجيل تطوعك');
-        updateUserPoints();
-    });
-}
 
-// ==================== دوال النقاط ====================
-function updateUserPoints() {
-    database.ref('events').once('value', (snapshot) => {
-        let points = 0;
-        snapshot.forEach(event => {
-            if (event.val().participants?.[currentUser.uid]) {
-                points += 10;
-            }
+    function openAddPlaceModal(lat, lng) {
+        document.getElementById('placeLat').value = lat.toFixed(6);
+        document.getElementById('placeLng').value = lng.toFixed(6);
+        document.getElementById('addPlaceModal').classList.add('active');
+        map.closePopup();
+    }
+
+    function savePlace() {
+        if (selectedRole !== 'admin') {
+            showToast('❌ فقط المدير يمكنه إضافة أماكن', 'error');
+            return;
+        }
+        
+        const name = document.getElementById('placeName').value;
+        const type = document.getElementById('placeType').value;
+        const address = document.getElementById('placeAddress').value;
+        const lat = parseFloat(document.getElementById('placeLat').value);
+        const lng = parseFloat(document.getElementById('placeLng').value);
+        const description = document.getElementById('placeDescription').value;
+        
+        if (!name || !type || !address) {
+            showToast('❌ الرجاء ملء جميع الحقول', 'error');
+            return;
+        }
+        
+        showLoading();
+        
+        const placeData = {
+            name, type, address, lat, lng, description,
+            addedBy: currentUser?.uid,
+            addedByName: currentUser?.displayName || 'مدير',
+            date: new Date().toISOString()
+        };
+        
+        database.ref('places').push(placeData)
+            .then(() => {
+                hideLoading();
+                showToast('✅ تم إضافة المكان بنجاح');
+                closeModal('addPlaceModal');
+                document.getElementById('placeName').value = '';
+                document.getElementById('placeAddress').value = '';
+                document.getElementById('placeDescription').value = '';
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    // ==================== دوال الفعاليات ====================
+    function loadEvents() {
+        database.ref('events').on('value', (snapshot) => {
+            allEvents = [];
+            snapshot.forEach(child => allEvents.push({ id: child.key, ...child.val() }));
+            updateEventsDisplay();
+            updatePendingCount();
+            if (selectedRole === 'admin') filterAdminEvents('pending');
+        }, error => showToast('❌ خطأ في تحميل الفعاليات: ' + error.message, 'error'));
+    }
+
+    function updatePendingCount() {
+        const pending = allEvents.filter(e => e.status === 'pending').length;
+        const badge = document.getElementById('admin-pending-badge');
+        if (badge) {
+            badge.textContent = pending;
+            badge.style.display = pending > 0 ? 'flex' : 'none';
+        }
+    }
+
+    function updateEventsDisplay() {
+        const container = document.getElementById('events-container');
+        if (!container) return;
+        
+        // عرض الفعاليات المقبولة فقط للمستخدمين العاديين
+        const approvedEvents = allEvents.filter(e => e.status === 'approved');
+        
+        if (approvedEvents.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد فعاليات حالياً</p>';
+            return;
+        }
+        
+        container.innerHTML = approvedEvents.map(event => `
+            <div class="event-card">
+                <div class="event-header">
+                    <span class="event-icon">${getPlaceIcon(event.placeType)}</span>
+                    <h4 class="event-title">${event.title}</h4>
+                </div>
+                <div class="event-organizer">
+                    <div class="organizer-avatar">${event.createdByName?.[0] || '?'}</div>
+                    <span>${event.createdByName}</span>
+                </div>
+                <div class="event-meta">
+                    <span><i class="fas fa-calendar"></i> ${event.date}</span>
+                    <span><i class="fas fa-clock"></i> ${event.time}</span>
+                </div>
+                <div class="event-meta">
+                    <span><i class="fas fa-map-pin"></i> ${event.address}</span>
+                </div>
+                <div class="event-meta">
+                    <span><i class="fas fa-users"></i> ${event.volunteers} متطوع</span>
+                    ${event.phone ? `<span><i class="fas fa-phone"></i> ${event.phone}</span>` : ''}
+                </div>
+                ${event.requirements ? `<p><small>📋 ${event.requirements}</small></p>` : ''}
+                <div class="event-buttons">
+                    <button class="btn btn-primary" onclick="volunteerForEvent('${event.id}')">
+                        <i class="fas fa-hand-paper"></i> تطوع
+                    </button>
+                    <button class="btn btn-outline btn-small" onclick="shareEvent('${event.id}')">
+                        <i class="fas fa-share"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function showAddEventModal() {
+        if (!currentUser) {
+            showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+            document.getElementById('auth-screen').classList.add('active');
+            return;
+        }
+        document.getElementById('addEventModal').classList.add('active');
+    }
+
+    function pickLocationFromMap() {
+        showToast('📍 انقر على الخريطة لاختيار الموقع', 'info');
+        map.getContainer().style.cursor = 'crosshair';
+        
+        map.once('click', (e) => {
+            map.getContainer().style.cursor = '';
+            const { lat, lng } = e.latlng;
+            
+            if (tempEventMarker) map.removeLayer(tempEventMarker);
+            
+            const icon = L.divIcon({
+                html: `
+                    <div style="position: relative;">
+                        <i class="fas fa-map-pin" style="color: var(--success); font-size: 40px;"></i>
+                        <div style="position: absolute; top: -30px; left: 5px; background: var(--success); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap;">
+                            موقع الفعالية
+                        </div>
+                    </div>
+                `,
+                iconSize: [40, 40],
+                iconAnchor: [20, 40]
+            });
+            
+            tempEventMarker = L.marker([lat, lng], { icon: icon }).addTo(map);
+            tempEventMarker.bindPopup('موقع الفعالية').openPopup();
+            
+            document.getElementById('eventLat').value = lat.toFixed(6);
+            document.getElementById('eventLng').value = lng.toFixed(6);
+            showToast('✅ تم اختيار الموقع');
         });
-        database.ref('users/' + currentUser.uid + '/points').set(points);
-        document.getElementById('stat-points').textContent = points;
+    }
+
+    function getCurrentLocationForEvent() {
+        if (!navigator.geolocation) {
+            showToast('❌ المتصفح لا يدعم تحديد الموقع', 'error');
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                document.getElementById('eventLat').value = position.coords.latitude.toFixed(6);
+                document.getElementById('eventLng').value = position.coords.longitude.toFixed(6);
+                showToast('✅ تم تحديد موقعك');
+            },
+            () => showToast('❌ تعذر تحديد الموقع', 'error')
+        );
+    }
+
+    function createEvent() {
+        if (!currentUser) {
+            showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+            return;
+        }
+        
+        const title = document.getElementById('eventTitle').value;
+        const address = document.getElementById('eventAddress').value;
+        const date = document.getElementById('eventDate').value;
+        const time = document.getElementById('eventTime').value;
+        const lat = parseFloat(document.getElementById('eventLat').value);
+        const lng = parseFloat(document.getElementById('eventLng').value);
+        
+        if (!title || !address || !date || !time) {
+            showToast('❌ الرجاء ملء جميع الحقول الأساسية', 'error');
+            return;
+        }
+        
+        if (isNaN(lat) || isNaN(lng)) {
+            showToast('❌ الرجاء اختيار موقع الفعالية من الخريطة', 'error');
+            return;
+        }
+        
+        const eventData = {
+            title,
+            wilaya: document.getElementById('eventWilaya').value,
+            address,
+            lat, lng,
+            description: document.getElementById('eventDescription').value,
+            date,
+            time,
+            volunteers: parseInt(document.getElementById('eventVolunteers').value) || 5,
+            placeType: document.getElementById('eventPlaceType').value,
+            phone: document.getElementById('eventPhone').value,
+            requirements: document.getElementById('eventRequirements').value,
+            createdBy: currentUser.uid,
+            createdByName: currentUser.displayName,
+            createdAt: new Date().toISOString(),
+            status: 'pending', // تنتظر الموافقة
+            participants: {}
+        };
+        
+        showLoading();
+        
+        database.ref('events').push(eventData)
+            .then(() => {
+                hideLoading();
+                showToast('✅ تم إضافة الفعالية بنجاح، تنتظر موافقة المدير');
+                closeModal('addEventModal');
+                
+                // إرسال إشعار للمديرين
+                sendNotificationToAdmins('📢 فعالية جديدة', `تمت إضافة "${title}" بواسطة ${currentUser.displayName}`);
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    function volunteerForEvent(id) {
+        if (!currentUser) {
+            showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+            return;
+        }
+        
+        const event = allEvents.find(e => e.id === id);
+        if (!event) return;
+        
+        // التحقق من عدم التطوع المسبق
+        if (event.participants && event.participants[currentUser.uid]) {
+            showToast('❌ لقد تطوعت في هذه الفعالية مسبقاً', 'error');
+            return;
+        }
+        
+        showLoading();
+        
+        database.ref('events/' + id + '/participants/' + currentUser.uid).set({
+            userId: currentUser.uid,
+            userName: currentUser.displayName,
+            volunteeredAt: new Date().toISOString()
+        }).then(() => {
+            hideLoading();
+            showToast('✅ تم تسجيل تطوعك');
+            updateUserPoints();
+            
+            if (event.createdBy) {
+                sendNotification(event.createdBy, '👥 متطوع جديد', 
+                    `تطوع ${currentUser.displayName} في "${event.title}"`);
+            }
+        }).catch(error => {
+            hideLoading();
+            showToast('❌ ' + error.message, 'error');
+        });
+    }
+
+    function shareEvent(id) {
+        const event = allEvents.find(e => e.id === id);
+        if (!event) return;
+        
+        const text = `📢 فعالية: ${event.title}\n📅 ${event.date} - ${event.time}\n📍 ${event.address}\n👥 نحتاج ${event.volunteers} متطوع`;
+        
+        if (navigator.share) {
+            navigator.share({ title: 'مواهب داري', text });
+        } else {
+            navigator.clipboard.writeText(text);
+            showToast('📋 تم نسخ التفاصيل');
+        }
+    }
+
+    // ==================== دوال إدارة الفعاليات للمدير ====================
+    function filterAdminEvents(filter) {
+        document.querySelectorAll('#admin-events .filter-tab').forEach(t => t.classList.remove('active'));
+        if (event?.currentTarget) event.currentTarget.classList.add('active');
+        
+        let filtered = allEvents;
+        if (filter !== 'all') {
+            filtered = allEvents.filter(e => e.status === filter);
+        }
+        
+        const container = document.getElementById('admin-events-list');
+        if (!container) return;
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد فعاليات</p>';
+            return;
+        }
+        
+        container.innerHTML = filtered.map(event => `
+            <div class="event-card" style="border-right: 4px solid ${
+                event.status === 'approved' ? 'var(--success)' : 
+                event.status === 'rejected' ? 'var(--danger)' : 'var(--warning)'
+            }">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <h4>${event.title}</h4>
+                        <p class="event-organizer"><i class="fas fa-user"></i> ${event.createdByName}</p>
+                        <p class="event-meta"><i class="fas fa-calendar"></i> ${event.date} - ${event.time}</p>
+                        <p class="event-meta"><i class="fas fa-map-pin"></i> ${event.address}</p>
+                        <p class="event-meta"><i class="fas fa-phone"></i> ${event.phone || 'غير محدد'}</p>
+                        <p><span class="event-status status-${event.status}">
+                            ${event.status === 'pending' ? '⏳ قيد المراجعة' : 
+                              event.status === 'approved' ? '✅ مقبولة' : '❌ مرفوضة'}
+                        </span></p>
+                        ${event.rejectReason ? `<p><small>سبب الرفض: ${event.rejectReason}</small></p>` : ''}
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        ${event.status === 'pending' ? `
+                            <button class="btn btn-success btn-small" onclick="approveEvent('${event.id}')">
+                                <i class="fas fa-check"></i> قبول
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="rejectEventPrompt('${event.id}')">
+                                <i class="fas fa-times"></i> رفض
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-secondary btn-small" onclick="deleteEvent('${event.id}')">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function approveEvent(id) {
+        if (selectedRole !== 'admin') return;
+        showLoading();
+        database.ref('events/' + id).update({ status: 'approved' })
+            .then(() => {
+                hideLoading();
+                showToast('✅ تمت الموافقة على الفعالية');
+                database.ref('events/' + id).once('value', snap => {
+                    const event = snap.val();
+                    if (event?.createdBy) {
+                        sendNotification(event.createdBy, '✅ تمت الموافقة', `تمت الموافقة على فعالية "${event.title}"`);
+                    }
+                });
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    function rejectEventPrompt(id) {
+        const reason = prompt('سبب الرفض:');
+        if (reason) rejectEvent(id, reason);
+    }
+
+    function rejectEvent(id, reason) {
+        if (selectedRole !== 'admin') return;
+        showLoading();
+        database.ref('events/' + id).update({ status: 'rejected', rejectReason: reason })
+            .then(() => {
+                hideLoading();
+                showToast('❌ تم رفض الفعالية');
+                database.ref('events/' + id).once('value', snap => {
+                    const event = snap.val();
+                    if (event?.createdBy) {
+                        sendNotification(event.createdBy, '❌ تم رفض فعاليتك', 
+                            `تم رفض فعالية "${event.title}" بسبب: ${reason}`);
+                    }
+                });
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    function deleteEvent(id) {
+        if (selectedRole !== 'admin') return;
+        if (!confirm('⚠️ هل أنت متأكد من حذف هذه الفعالية؟')) return;
+        showLoading();
+        database.ref('events/' + id).remove()
+            .then(() => {
+                hideLoading();
+                showToast('✅ تم حذف الفعالية');
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    // ==================== دوال الصور ====================
+    function loadPhotos() {
+        database.ref('photos').on('value', (snapshot) => {
+            allPhotos = [];
+            snapshot.forEach(child => allPhotos.push({ id: child.key, ...child.val() }));
+            updateGallery();
+        }, error => showToast('❌ خطأ في تحميل الصور: ' + error.message, 'error'));
+    }
+
+    function updateGallery() {
+        const gallery = document.getElementById('gallery-grid');
+        if (!gallery) return;
+        
+        if (allPhotos.length === 0) {
+            gallery.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد صور بعد</p>';
+            return;
+        }
+        
+        gallery.innerHTML = allPhotos.map(photo => `
+            <div class="gallery-item" onclick="viewImage('${photo.id}')">
+                <img src="${photo.url}" alt="${photo.description}">
+                <div class="gallery-overlay">
+                    <div class="gallery-stats">
+                        <span><i class="fas fa-heart"></i> ${photo.likes || 0}</span>
+                        <span><i class="fas fa-comment"></i> ${photo.comments?.length || 0}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function showUploadPhotoModal() {
+        const select = document.getElementById('photoEvent');
+        select.innerHTML = '<option value="">اختر فعالية...</option>';
+        allEvents.filter(e => e.status === 'approved').forEach(event => {
+            select.innerHTML += `<option value="${event.id}">${event.title}</option>`;
+        });
+        document.getElementById('uploadPhotoModal').classList.add('active');
+    }
+
+    function uploadPhoto() {
+        const eventId = document.getElementById('photoEvent').value;
+        const description = document.getElementById('photoDescription').value;
+        const file = document.getElementById('photoFile').files[0];
+        
+        if (!eventId || !description || !file) {
+            showToast('❌ الرجاء ملء جميع الحقول', 'error');
+            return;
+        }
+        
+        // التحقق من حجم الصورة
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('❌ حجم الصورة كبير جداً (الحد الأقصى 5 ميجابايت)', 'error');
+            return;
+        }
+        
+        showLoading();
+        
+        const storageRef = storage.ref(`photos/${Date.now()}_${file.name}`);
+        storageRef.put(file).then(s => s.ref.getDownloadURL())
+            .then(url => {
+                return database.ref('photos').push({
+                    eventId, description, url,
+                    uploadedBy: currentUser.uid,
+                    uploadedByName: currentUser.displayName,
+                    likes: 0,
+                    likedBy: {},
+                    comments: [],
+                    timestamp: new Date().toISOString()
+                });
+            })
+            .then(() => {
+                hideLoading();
+                showToast('✅ تم رفع الصورة');
+                closeModal('uploadPhotoModal');
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('❌ ' + error.message, 'error');
+            });
+    }
+
+    function viewImage(id) {
+        const photo = allPhotos.find(p => p.id === id);
+        if (!photo) return;
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px; background: transparent;">
+                <img src="${photo.url}" style="width: 100%; border-radius: 16px;" alt="${photo.description}">
+                <div style="display: flex; justify-content: space-between; margin-top: 15px; background: var(--bg-card); padding: 15px; border-radius: 16px;">
+                    <div>
+                        <p><i class="fas fa-user"></i> ${photo.uploadedByName}</p>
+                        <p>${photo.description}</p>
+                    </div>
+                    <button class="close-modal" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-primary btn-small" onclick="likePhoto('${photo.id}')">
+                        <i class="fas fa-heart"></i> ${photo.likes || 0}
+                    </button>
+                    <button class="btn btn-secondary btn-small" onclick="downloadImage('${photo.url}')">
+                        <i class="fas fa-download"></i> تحميل
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    function downloadImage(url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'image.jpg';
+        a.click();
+    }
+
+    function likePhoto(photoId) {
+        if (!currentUser) {
+            showToast('❌ يجب تسجيل الدخول أولاً', 'error');
+            return;
+        }
+        
+        const photoRef = database.ref('photos/' + photoId);
+        photoRef.transaction(photo => {
+            if (photo) {
+                if (photo.likedBy && photo.likedBy[currentUser.uid]) {
+                    photo.likes--;
+                    delete photo.likedBy[currentUser.uid];
+                } else {
+                    photo.likes = (photo.likes || 0) + 1;
+                    if (!photo.likedBy) photo.likedBy = {};
+                    photo.likedBy[currentUser.uid] = true;
+                }
+            }
+            return photo;
+        }).then(() => showToast('✅ تم التحديث'));
+    }
+
+    // ==================== دوال الإشعارات ====================
+    function loadNotifications() {
+        if (!currentUser) return;
+        
+        database.ref('notifications').orderByChild('userId').equalTo(currentUser.uid)
+            .on('value', (snapshot) => {
+                notifications = [];
+                snapshot.forEach(child => notifications.push({ id: child.key, ...child.val() }));
+                
+                const unread = notifications.filter(n => !n.read).length;
+                document.getElementById('notification-count').textContent = unread;
+                document.getElementById('nav-notification-count').textContent = unread;
+                if (document.getElementById('admin-nav-notification-count')) {
+                    document.getElementById('admin-nav-notification-count').textContent = unread;
+                }
+                
+                const container = document.getElementById('notifications-container');
+                if (!container) return;
+                
+                if (notifications.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد إشعارات</p>';
+                    return;
+                }
+                
+                container.innerHTML = notifications.map(n => `
+                    <div class="notification-item ${n.read ? '' : 'unread'}" onclick="markNotificationRead('${n.id}')">
+                        <div class="notification-header">
+                            <span class="notification-title">${n.title}</span>
+                            <span class="notification-time">${new Date(n.timestamp).toLocaleDateString('ar-SA')}</span>
+                        </div>
+                        <div class="notification-message">${n.message}</div>
+                    </div>
+                `).join('');
+            }, error => showToast('❌ خطأ في تحميل الإشعارات: ' + error.message, 'error'));
+    }
+
+    function sendNotification(userId, title, message) {
+        database.ref('notifications').push({
+            userId, title, message,
+            read: false,
+            timestamp: new Date().toISOString()
+        }).catch(error => console.error('خطأ في إرسال الإشعار:', error));
+    }
+
+    function sendNotificationToAdmins(title, message) {
+        database.ref('users').orderByChild('role').equalTo('admin').once('value', snap => {
+            snap.forEach(user => {
+                sendNotification(user.key, title, message);
+            });
+        }).catch(error => console.error('خطأ في إرسال الإشعار للمدراء:', error));
+    }
+
+    function markNotificationRead(id) {
+        database.ref('notifications/' + id).update({ read: true })
+            .catch(error => console.error('خطأ في تحديث الإشعار:', error));
+    }
+
+    function markAllNotificationsRead() {
+        notifications.forEach(n => {
+            if (!n.read) markNotificationRead(n.id);
+        });
+    }
+
+    // ==================== دوال لوحة الشرف ====================
+    function loadLeaderboard() {
+        database.ref('users').orderByChild('points').limitToLast(20).on('value', (snapshot) => {
+            const users = [];
+            snapshot.forEach(child => users.push({ id: child.key, ...child.val() }));
+            users.sort((a, b) => (b.points || 0) - (a.points || 0));
+            
+            const container = document.getElementById('leaderboard-container');
+            if (!container) return;
+            
+            if (users.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا يوجد متطوعون بعد</p>';
+                return;
+            }
+            
+            container.innerHTML = users.map((user, i) => `
+                <div class="leaderboard-item">
+                    <div class="rank ${i < 3 ? ['gold','silver','bronze'][i] : 'default'}">
+                        ${i < 3 ? ['🥇','🥈','🥉'][i] : i+1}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">${user.name}</div>
+                        <div class="user-points">${user.points || 0} نقطة</div>
+                    </div>
+                </div>
+            `).join('');
+        }, error => showToast('❌ خطأ في تحميل لوحة الشرف: ' + error.message, 'error'));
+    }
+
+    // ==================== دوال النقاط ====================
+    function updateUserPoints() {
+        database.ref('events').once('value', (snapshot) => {
+            let points = 0;
+            let events = 0;
+            let hours = 0;
+            
+            snapshot.forEach(event => {
+                if (event.val().participants?.[currentUser.uid]) {
+                    events++;
+                    hours += 2;
+                    points += 10;
+                }
+            });
+            
+            database.ref('users/' + currentUser.uid).update({ points, events, hours })
+                .catch(error => console.error('خطأ في تحديث النقاط:', error));
+            
+            document.getElementById('stat-points').textContent = points;
+            document.getElementById('stat-events').textContent = events;
+            document.getElementById('stat-hours').textContent = hours;
+        });
+    }
+
+    // ==================== دوال الإعدادات ====================
+    function showSettings() {
+        switchTab('settings');
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('light-mode');
+        const isDark = !document.body.classList.contains('light-mode');
+        showToast(isDark ? '🌙 تم تفعيل الوضع الليلي' : '☀️ تم إلغاء الوضع الليلي');
+    }
+
+    function changeFontSize(size) {
+        const sizes = { small: '14px', medium: '16px', large: '18px' };
+        document.documentElement.style.fontSize = sizes[size] || '16px';
+    }
+
+    function toggleLocationSharing() {
+        if (document.getElementById('location-sharing').checked) {
+            getUserLocation();
+        }
+    }
+
+    function saveAllSettings() {
+        const settings = {
+            darkMode: document.getElementById('dark-mode').checked,
+            language: document.getElementById('settings-language').value,
+            fontSize: document.getElementById('font-size').value,
+            notifEvents: document.getElementById('notif-events').checked,
+            notifPlaces: document.getElementById('notif-places').checked,
+            notifSound: document.getElementById('notif-sound').checked,
+            profilePublic: document.getElementById('profile-public').checked,
+            locationSharing: document.getElementById('location-sharing').checked,
+            showInLeaderboard: document.getElementById('show-in-leaderboard').checked,
+            imageQuality: document.getElementById('image-quality').value,
+            offlineMode: document.getElementById('offline-mode').checked
+        };
+        
+        localStorage.setItem('appSettings', JSON.stringify(settings));
+        
+        if (settings.language !== currentLang) changeLanguage(settings.language);
+        if (settings.fontSize) changeFontSize(settings.fontSize);
+        
+        showToast('✅ تم حفظ الإعدادات');
+    }
+
+    function loadSettings() {
+        const saved = localStorage.getItem('appSettings');
+        if (!saved) return;
+        
+        try {
+            const s = JSON.parse(saved);
+            document.getElementById('dark-mode').checked = s.darkMode || false;
+            document.getElementById('settings-language').value = s.language || 'ar';
+            document.getElementById('font-size').value = s.fontSize || 'medium';
+            document.getElementById('notif-events').checked = s.notifEvents !== false;
+            document.getElementById('notif-places').checked = s.notifPlaces !== false;
+            document.getElementById('notif-sound').checked = s.notifSound !== false;
+            document.getElementById('profile-public').checked = s.profilePublic !== false;
+            document.getElementById('location-sharing').checked = s.locationSharing || false;
+            document.getElementById('show-in-leaderboard').checked = s.showInLeaderboard !== false;
+            document.getElementById('image-quality').value = s.imageQuality || 'medium';
+            document.getElementById('offline-mode').checked = s.offlineMode || false;
+            
+            if (s.darkMode) document.body.classList.add('light-mode');
+            if (s.language) changeLanguage(s.language);
+            if (s.fontSize) changeFontSize(s.fontSize);
+        } catch (e) {
+            console.error('خطأ في تحميل الإعدادات', e);
+        }
+    }
+
+    function exportUserData() {
+        if (!currentUser) return;
+        database.ref('users/' + currentUser.uid).once('value', snap => {
+            const data = snap.val();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `user_data_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }).catch(error => showToast('❌ ' + error.message, 'error'));
+    }
+
+    function exportAllData() {
+        if (selectedRole !== 'admin') return;
+        showLoading();
+        Promise.all([
+            database.ref('users').once('value'),
+            database.ref('events').once('value'),
+            database.ref('places').once('value'),
+            database.ref('photos').once('value'),
+            database.ref('notifications').once('value')
+        ]).then(([users, events, places, photos, notifications]) => {
+            const data = {
+                users: users.val(),
+                events: events.val(),
+                places: places.val(),
+                photos: photos.val(),
+                notifications: notifications.val(),
+                exportedAt: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mawaheb_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            hideLoading();
+        }).catch(error => {
+            hideLoading();
+            showToast('❌ ' + error.message, 'error');
+        });
+    }
+
+    function resetAllData() {
+        if (selectedRole !== 'admin') return;
+        if (!confirm('⚠️ هل أنت متأكد؟ هذا سيحذف جميع البيانات!')) return;
+        if (!confirm('❗ تأكيد نهائي؟ لا يمكن التراجع!')) return;
+        
+        showLoading();
+        Promise.all([
+            database.ref('users').remove(),
+            database.ref('events').remove(),
+            database.ref('places').remove(),
+            database.ref('photos').remove(),
+            database.ref('notifications').remove()
+        ]).then(() => {
+            hideLoading();
+            showToast('✅ تم إعادة تعيين جميع البيانات');
+        }).catch(error => {
+            hideLoading();
+            showToast('❌ ' + error.message, 'error');
+        });
+    }
+
+    function manageUsers() {
+        showToast('👥 إدارة المستخدمين قيد التطوير', 'info');
+    }
+
+    // ==================== دوال مساعدة ====================
+    function switchTab(tabId) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if (event?.currentTarget) event.currentTarget.classList.add('active');
+        
+        if (tabId === 'leaderboard') loadLeaderboard();
+        else if (tabId === 'home') updatePlacesList();
+    }
+
+    function filterContent(filter) {
+        document.querySelectorAll('#home .filter-tab').forEach(t => t.classList.remove('active'));
+        if (event?.currentTarget) event.currentTarget.classList.add('active');
+        
+        const container = document.getElementById('events-container');
+        if (!container) return;
+        
+        const today = new Date().toISOString().split('T')[0];
+        let filtered = allEvents.filter(e => e.status === 'approved');
+        
+        if (filter === 'today') {
+            filtered = filtered.filter(e => e.date === today);
+            showToast(`📅 اليوم: ${filtered.length} فعالية`);
+        } else if (filter === 'places') {
+            document.getElementById('places-list').scrollIntoView({ behavior: 'smooth' });
+            return;
+        } else if (filter === 'nearby') {
+            if (!currentLocation) {
+                showToast('📍 حدد موقعك أولاً', 'info');
+                return;
+            }
+            filtered = filtered.filter(e => {
+                if (!e.lat) return false;
+                const dist = calculateDistance(currentLocation.lat, currentLocation.lng, e.lat, e.lng);
+                return dist <= 20;
+            });
+            showToast(`📍 قريب منك: ${filtered.length} فعالية`);
+        } else {
+            // all events
+        }
+        
+        if (filtered.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد فعاليات</p>';
+        } else {
+            container.innerHTML = filtered.map(event => `
+                <div class="event-card">
+                    <div class="event-header">
+                        <span class="event-icon">${getPlaceIcon(event.placeType)}</span>
+                        <h4 class="event-title">${event.title}</h4>
+                    </div>
+                    <div class="event-organizer">
+                        <div class="organizer-avatar">${event.createdByName?.[0] || '?'}</div>
+                        <span>${event.createdByName}</span>
+                    </div>
+                    <div class="event-meta">
+                        <span><i class="fas fa-calendar"></i> ${event.date}</span>
+                        <span><i class="fas fa-clock"></i> ${event.time}</span>
+                    </div>
+                    <div class="event-meta">
+                        <span><i class="fas fa-map-pin"></i> ${event.address}</span>
+                    </div>
+                    <div class="event-meta">
+                        <span><i class="fas fa-users"></i> ${event.volunteers} متطوع</span>
+                    </div>
+                    <div class="event-buttons">
+                        <button class="btn btn-primary" onclick="volunteerForEvent('${event.id}')">تطوع</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function changeLanguage(lang) {
+        currentLang = lang;
+        document.getElementById('lang-select').value = lang;
+        document.getElementById('settings-language').value = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+        localStorage.setItem('preferredLang', lang);
+    }
+
+    function searchContent() {
+        const query = document.getElementById('search-input').value.toLowerCase().trim();
+        if (query.length < 2) {
+            showToast('❌ أدخل كلمتين على الأقل', 'error');
+            return;
+        }
+        
+        const placeResults = allPlaces.filter(p => 
+            p.name.toLowerCase().includes(query) || 
+            (p.address && p.address.toLowerCase().includes(query))
+        );
+        
+        const eventResults = allEvents.filter(e => 
+            e.status === 'approved' && (
+                e.title.toLowerCase().includes(query) || 
+                (e.address && e.address.toLowerCase().includes(query)) ||
+                (e.description && e.description.toLowerCase().includes(query))
+            )
+        );
+        
+        showSearchResults(placeResults, eventResults);
+    }
+
+    function showSearchResults(places, events) {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 400px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">نتائج البحث</h3>
+                    <button class="close-modal" onclick="this.closest('.modal').remove()"><i class="fas fa-times"></i></button>
+                </div>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${places.length > 0 ? `
+                        <h4 style="color: var(--accent);">📍 أماكن (${places.length})</h4>
+                        ${places.map(p => `
+                            <div class="place-item" onclick="flyToPlace(${p.lat}, ${p.lng}); this.closest('.modal').remove()">
+                                <span class="place-icon">${getPlaceIcon(p.type)}</span>
+                                <div class="place-info">
+                                    <div class="place-name">${p.name}</div>
+                                    <div class="place-address">${p.address}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    ` : ''}
+                    ${events.length > 0 ? `
+                        <h4 style="color: var(--accent); margin-top: 15px;">📅 فعاليات (${events.length})</h4>
+                        ${events.map(e => `
+                            <div class="place-item" onclick="flyToPlace(${e.lat}, ${e.lng}); this.closest('.modal').remove()">
+                                <span class="place-icon">${getPlaceIcon(e.placeType)}</span>
+                                <div class="place-info">
+                                    <div class="place-name">${e.title}</div>
+                                    <div class="place-address">${e.address} - ${e.date}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    ` : ''}
+                    ${places.length === 0 && events.length === 0 ? '<p style="text-align: center;">لا توجد نتائج</p>' : ''}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // ربط البحث بزر الإدخال
+    document.getElementById('search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') searchContent();
     });
-}
-
-// ==================== دوال مساعدة ====================
-function showToast(msg, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
-
-function closeModal(id) {
-    document.getElementById(id).classList.remove('active');
-    if (tempEventMarker) map.removeLayer(tempEventMarker);
-    if (tempPlaceMarker) map.removeLayer(tempPlaceMarker);
-}
-
-function switchTab(tabId) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    if (event?.currentTarget) event.currentTarget.classList.add('active');
-}
-
-function filterContent(filter) {
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    if (event?.currentTarget) event.currentTarget.classList.add('active');
-}
-
-function changeLanguage(lang) {
-    currentLang = lang;
-    document.getElementById('lang-select').value = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    localStorage.setItem('preferredLang', lang);
-}
-
-// تحميل اللغة المحفوظة
-const savedLang = localStorage.getItem('preferredLang');
-if (savedLang) changeLanguage(savedLang);
 </script>
 
 </body>
